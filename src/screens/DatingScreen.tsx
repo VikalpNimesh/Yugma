@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { handleLogout } from "../utils/firebaseConfig";
 
 export const DatingScreen: React.FC = () => {
     return (
@@ -8,6 +9,21 @@ export const DatingScreen: React.FC = () => {
             <Text style={styles.desc}>
                 Discover and connect with people who share your vibe.
             </Text>
+
+            <TouchableOpacity onPress={handleLogout} style={{
+                width: 200,
+                height: 60,
+                backgroundColor: "#dadada",
+                justifyContent: "center",
+                alignItems: "center",
+                borderRadius: 12,
+                marginTop: 20
+            }}>
+                <Text>
+                    Logout
+                </Text>
+            </TouchableOpacity>
+
         </View>
     );
 };

@@ -1,13 +1,41 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import auth from "@react-native-firebase/auth";
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
 const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
+
+
+    useEffect(() => {
+        GoogleSignin.configure({
+            webClientId: "740740268985-l0u2tug9pq87r4bms19bjj2tihfc81o4.apps.googleusercontent.com",
+            offlineAccess: false,
+        });
+
+
+        const unsubscribe = auth().onAuthStateChanged(user => {
+            if (user) {
+                navigation.replace("BottomTabs");
+            }
+        });
+
+        return unsubscribe;
+    }, []);
+
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            navigation.replace("GoogleLogin");
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [navigation]);
 
     return (
         <View style={styles.container}>

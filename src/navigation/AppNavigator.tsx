@@ -9,9 +9,17 @@ import BottomTabs from "./BottomTabs";
 import SplashScreen from "../screens/SplashScreen";
 import { BasicInfoScreen } from "../screens/BasicInfoScreen";
 import { AboutYouStep } from "../screens/AboutYouStep";
+import GoogleLoginScreen from "../screens/GoogleLoginScreen";
 
 export type RootStackParamList = {
-    MainTabs: undefined;
+    Splash: undefined;
+    GoogleLogin: undefined;
+    BottomTabs: undefined;
+    MultiStepForm: undefined;
+    FamilyDetailsStep: undefined;
+    PreferencesStep: undefined;
+    DiscoverScreen: undefined;
+    BasicInfo: undefined;
     ProfileDetails: { userId: string };
 };
 
@@ -27,6 +35,7 @@ const AppNavigator = () => {
                 }}
             >
                 <Stack.Screen name="Splash" component={SplashScreen} />
+                <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} />
                 <Stack.Screen name="BottomTabs" component={BottomTabs} />
                 <Stack.Screen name="MultiStepForm" component={MultiStepForm} />
                 <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} />
