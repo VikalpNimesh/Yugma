@@ -8,6 +8,7 @@ import DiscoverScreen from "../screens/DiscoverScreen";
 import BottomTabs from "./BottomTabs";
 import SplashScreen from "../screens/SplashScreen";
 import { BasicInfoScreen } from "../screens/BasicInfoScreen";
+import { AboutYouStep } from "../screens/AboutYouStep";
 
 export type RootStackParamList = {
     MainTabs: undefined;
@@ -32,6 +33,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="PreferencesStep" component={PreferencesStep} />
                 <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} />
                 <Stack.Screen name="BasicInfo" component={BasicInfoScreen} />
+                <Stack.Screen name="AboutYouStep" component={AboutYouStep} />
 
             </Stack.Navigator>
         </NavigationContainer>

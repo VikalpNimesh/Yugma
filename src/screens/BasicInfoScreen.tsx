@@ -4,12 +4,12 @@ import {
     Text,
     StyleSheet,
     TouchableOpacity,
-    SafeAreaView,
     ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Menu, Button, Provider, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const BasicInfoScreen: React.FC = () => {
     const navigation = useNavigation();
@@ -194,7 +194,7 @@ export const BasicInfoScreen: React.FC = () => {
 
                         <TouchableOpacity
                             style={styles.nextBtn}
-                            onPress={() => navigation.navigate("MultiStepForm")}
+                            onPress={() => navigation.navigate("AboutYouStep")}
                         >
                             <Text style={styles.nextText}>Next →</Text>
                         </TouchableOpacity>
@@ -238,12 +238,17 @@ const InputField: React.FC<InputFieldProps> = ({
             activeOutlineColor="#dadada"
             style={[
                 styles.paperInput,
-                { color: "red" },
                 isFocused && { borderColor: "#E94057" },
             ]}
+            textColor='#000'
             theme={{
                 roundness: 10,
-                colors: { text: "#000", placeholder: "#999" },
+                colors: {
+                    text: "#000",            // 👈 Text color stays black
+                    placeholder: "#999",     // 👈 Placeholder color
+                    primary: "#E94057",      // 👈 Border color on focus
+                    background: "#fff",      // 👈 Input background
+                },
             }}
         />
     </View>
@@ -351,7 +356,7 @@ const styles = StyleSheet.create({
         height: 50,
     },
     dropdownFilled: {
-        borderColor: "#E94057",
+        borderColor: "#dadada",
     },
     placeholderStyle: {
         color: "#999",
