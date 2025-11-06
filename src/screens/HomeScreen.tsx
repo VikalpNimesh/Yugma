@@ -97,7 +97,8 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                         <Feather
                             name="arrow-right"
                             size={18}
-                            color={"black"}
+                            color={"#E94057"}
+
                         />
                     </TouchableOpacity>
                 </View>
@@ -262,6 +263,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         justifyContent: "center",
         alignItems: "center",
+        flexDirection: "row"
 
     },
     profileBtnText: {
