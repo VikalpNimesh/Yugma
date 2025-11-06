@@ -17,7 +17,7 @@ const MultiStepForm = ({ navigation }: any) => {
         if (step < totalSteps) {
             setStep((prev) => prev + 1);
         } else {
-            navigation.replace("BottomTabs");
+            navigation.replace("DiscoverScreen");
         }
     };
 
