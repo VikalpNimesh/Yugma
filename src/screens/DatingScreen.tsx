@@ -1,10 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { handleLogout } from "../utils/firebaseConfig";
 import { useSelector } from "react-redux";
 
 export const DatingScreen: React.FC = () => {
-    const { email, name } = useSelector(state => state.user?.user);
+    const { email, name, photo } = useSelector(state => state.user?.user);
+    const data = useSelector(state => state.user?.user);
+    console.log('data: ', data);
 
     return (
         <View style={styles.container}>
@@ -33,6 +35,9 @@ export const DatingScreen: React.FC = () => {
             <Text>
                 {name}
             </Text>
+            <Image source={{
+                uri: photo
+            }} style={{ width: 100, height: 100, marginTop: 20, borderRadius: 50 }} />
 
         </View>
     );
