@@ -64,6 +64,57 @@ export const profiles = [
             siblings: "2 brothers",
         },
     },
+    {
+        id: 1,
+        name: "Priya Sharma",
+        age: 26,
+        location: "Mumbai, Maharashtra",
+        profession: "Software Engineer",
+        education: "Master's in Computer Science",
+        image:
+            "https://images.pexels.com/photos/33402174/pexels-photo-33402174.jpeg",
+        isVerified: true,
+        isPremium: true,
+        familyDetails: {
+            father: "Business Owner",
+            mother: "Teacher",
+            siblings: "1 sister",
+        },
+    },
+    {
+        id: 2,
+        name: "Riya Patel",
+        age: 24,
+        location: "Delhi, India",
+        profession: "Fashion Designer",
+        education: "Bachelor's in Arts",
+        image:
+            "https://images.pexels.com/photos/2100063/pexels-photo-2100063.jpeg",
+        isVerified: true,
+        isPremium: false,
+        familyDetails: {
+            father: "Doctor",
+            mother: "Homemaker",
+            siblings: "1 brother",
+        },
+    },
+    {
+        id: 3,
+        name: "Sneha Verma",
+        age: 27,
+        location: "Bangalore, Karnataka",
+        profession: "Product Manager",
+        education: "MBA",
+        image:
+            "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
+        isVerified: false,
+        isPremium: true,
+        familyDetails: {
+            father: "Retired Army Officer",
+            mother: "Teacher",
+            siblings: "2 brothers",
+        },
+    },
 ];
 
 const DiscoverScreen = () => {
