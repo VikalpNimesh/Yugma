@@ -1,13 +1,15 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
+import Entypo from "react-native-vector-icons/Entypo";
 
 
 const Header = () => {
     return (
         <View style={styles.header}>
             <Text style={styles.logo}>
-                ❤️ <Text style={{ color: "#E64A8B" }}>Vivah</Text>Setu
+                <Entypo name="heart" size={22} color="red" />
+                <Text style={{ color: "#E64A8B" }}>Vivah</Text>Setu
             </Text>
 
 
@@ -31,13 +33,18 @@ const Header = () => {
 export default Header
 
 const styles = StyleSheet.create({
-    logo: { fontSize: 20, fontWeight: "700" },
+    logo: {
+        fontSize: 20,
+        fontWeight: "700",
+        paddingHorizontal: 16
+    },
     segmentContainer: {
         flexDirection: "row",
         backgroundColor: "#fff",
         borderRadius: 25,
         marginTop: 12,
         alignSelf: "flex-start",
+        paddingHorizontal: 16
     },
     segmentButton: {
         flexDirection: "row",
