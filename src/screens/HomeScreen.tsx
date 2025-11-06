@@ -30,7 +30,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                         contemporary connection
                     </Text>
 
-                    <TouchableOpacity onPress={() => navigation.navigate('MultiStepForm')} style={styles.getStartedBtn}>
+                    <TouchableOpacity onPress={() => navigation.navigate('BasicInfo')} style={styles.getStartedBtn}>
                         <Text style={styles.getStartedText}>Get Started </Text>
                         <Feather
                             name="arrow-right"
