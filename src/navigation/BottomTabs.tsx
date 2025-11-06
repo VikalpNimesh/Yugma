@@ -27,8 +27,8 @@ export default function BottomTabs() {
 
                 },
                 tabBarIcon: ({ focused, color, size }) => {
-                    let iconName = "home-outline";
-                    let label = "Home";
+                    let iconName = "heart-outline";
+                    let label = "Discover";
 
                     if (route.name === "Discover") {
                         iconName = "heart-outline";

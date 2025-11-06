@@ -3,6 +3,8 @@ import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
 import Octicons from "react-native-vector-icons/Octicons";
+import Icon from "react-native-vector-icons/Ionicons";
+
 
 const LikeList = ({ data }: any) => {
 
@@ -27,24 +29,21 @@ const LikeList = ({ data }: any) => {
                 <Text style={styles.subText}>{item.job}</Text>
                 <View style={styles.dateMsg}>
 
-                    <Text style={styles.matchDate}><Ionicons name="calendar-clear-outline" size={12} /> Matched {item.matchedDays}</Text>
+                    <Text style={styles.matchDate}><Ionicons name="calendar-clear-outline" size={14} />  Liked {item.matchedDays}</Text>
                     <Pressable style={styles.messageBtn}>
-                        <Feather name="message-circle" size={24} color={"white"} />
+                        <Icon
+                            name={"heart-outline"}
+                            size={24}
+                            color={"black"}
+                        />
                         <Text style={styles.messageText}>
-                            {item.verified ? "Message" : "Reply"}
+                            Like Back
                         </Text>
                     </Pressable>
                 </View>
 
-                <Pressable style={styles.verifyBtn}>
-                    <Octicons name="shield-check" size={18} color={"black"} />
-                    <Text style={styles.verifyBtnText}> Request Verification</Text>
-                </Pressable>
-                {item.verified && (
-                    <View style={styles.verifiedTag}>
-                        <Text style={styles.verifiedText}>Verified Profile</Text>
-                    </View>
-                )}
+
+
 
             </View>
 
@@ -52,9 +51,6 @@ const LikeList = ({ data }: any) => {
     );
     return (
         <View style={{ flex: 1 }}>
-
-
-
             <FlatList
                 ListHeaderComponent={() => (
                     <View style={styles.headerCon}>
@@ -86,7 +82,7 @@ const styles = StyleSheet.create({
         marginBottom: 16
     },
     header: {
-        fontSize: 20,
+        fontSize: 18,
         fontWeight: "700",
         color: "#1a1a1a",
         marginBottom: 4
@@ -131,6 +127,9 @@ const styles = StyleSheet.create({
         color: "#999",
         fontSize: 12,
         marginTop: 2,
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center"
     },
     verifiedTag: {
         backgroundColor: "#d8f5dc",
@@ -181,16 +180,18 @@ const styles = StyleSheet.create({
         color: "#333",
     },
     messageBtn: {
-        backgroundColor: "black",
-        paddingVertical: 8,
+        backgroundColor: "white",
+        paddingVertical: 6,
         borderRadius: 10,
         alignItems: "center",
         flexDirection: "row",
         paddingHorizontal: 14,
-        gap: 6
+        gap: 6,
+        borderWidth: 1,
+        borderColor: "#dadada"
     },
     messageText: {
-        color: "#fff",
+        color: "black",
         fontWeight: "600",
     },
     dateMsg: {

@@ -74,7 +74,7 @@ const PreferencesStep = ({ navigation }) => {
                     <Text style={styles.previousText}>Previous</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.navigate("DiscoverScreen")}>
+                <TouchableOpacity onPress={() => navigation.navigate("BottomTabs")}>
                     <LinearGradient
                         colors={["#FF512F", "#DD2476"]}
                         style={styles.nextButton}

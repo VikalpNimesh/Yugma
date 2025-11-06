@@ -10,10 +10,76 @@ import {
 
 import MatchList from "./MatchList";
 import LikeList from "./LikeList";
+import Icon from "react-native-vector-icons/Ionicons";
+
 
 
 const matchesData = [
     {
+        id: "1",
+        name: "Priya Sharma",
+        age: 26,
+        location: "Mumbai, Maharashtra",
+        job: "Software Engineer",
+        matchedDays: "2 days ago",
+        verified: true,
+        matchPercent: "94%",
+        image: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+        id: "2",
+        name: "Arjun Patel",
+        age: 29,
+        location: "Bangalore, Karnataka",
+        job: "Product Manager",
+        matchedDays: "1 week ago",
+        verified: true,
+        matchPercent: "87%",
+        image: "https://randomuser.me/api/portraits/men/32.jpg",
+    },
+    {
+        id: "1",
+        name: "Priya Sharma",
+        age: 26,
+        location: "Mumbai, Maharashtra",
+        job: "Software Engineer",
+        matchedDays: "2 days ago",
+        verified: true,
+        matchPercent: "94%",
+        image: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+        id: "2",
+        name: "Arjun Patel",
+        age: 29,
+        location: "Bangalore, Karnataka",
+        job: "Product Manager",
+        matchedDays: "1 week ago",
+        verified: true,
+        matchPercent: "87%",
+        image: "https://randomuser.me/api/portraits/men/32.jpg",
+    }, {
+        id: "1",
+        name: "Priya Sharma",
+        age: 26,
+        location: "Mumbai, Maharashtra",
+        job: "Software Engineer",
+        matchedDays: "2 days ago",
+        verified: true,
+        matchPercent: "94%",
+        image: "https://randomuser.me/api/portraits/women/44.jpg",
+    },
+    {
+        id: "2",
+        name: "Arjun Patel",
+        age: 29,
+        location: "Bangalore, Karnataka",
+        job: "Product Manager",
+        matchedDays: "1 week ago",
+        verified: true,
+        matchPercent: "87%",
+        image: "https://randomuser.me/api/portraits/men/32.jpg",
+    }, {
         id: "1",
         name: "Priya Sharma",
         age: 26,
@@ -40,8 +106,6 @@ const matchesData = [
 const MatchesScreen = () => {
     const [selectedTab, setSelectedTab] = useState("Matches");
 
-
-
     return (
         <View style={styles.container}>
             <Text style={styles.header}>Your Matches</Text>
@@ -60,6 +124,16 @@ const MatchesScreen = () => {
                         ]}
                         onPress={() => setSelectedTab(tab)}
                     >
+                        {tab === "Matches" ? <Icon
+                            name={"heart-outline"}
+                            size={20}
+                            color={"black"}
+                        /> : <Icon
+                            name={"star-outline"}
+                            size={20}
+                            color={"black"}
+                        />}
+
                         <Text
                             style={[
                                 styles.tabText,
@@ -113,6 +187,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 8,
         borderRadius: 16,
+        flexDirection: "row",
+        justifyContent: "center",
+        gap: 6
     },
     activeTab: {
         backgroundColor: "#fff",
