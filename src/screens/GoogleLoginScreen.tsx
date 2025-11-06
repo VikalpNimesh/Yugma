@@ -3,8 +3,11 @@ import { View, Text, Button, StyleSheet, Image, Alert } from "react-native";
 import auth from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { setUser } from "../redux/slices/userSlice";
+import { useDispatch } from "react-redux";
 
 const GoogleLoginScreen = ({ navigation }: any) => {
+
+    const dispatch = useDispatch()
     const handleGoogleSignIn = async () => {
         try {
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
@@ -12,7 +15,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
 
             const userInfo = await GoogleSignin.signIn();
 
-            setUser(userInfo?.data)
+            dispatch(setUser(userInfo?.data))
 
             const { idToken }: any = userInfo?.data;
 
