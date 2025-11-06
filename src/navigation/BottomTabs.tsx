@@ -78,9 +78,9 @@ export default function BottomTabs() {
             })}
         >
             <Tab.Screen name="Discover" component={DiscoverScreen} />
-            <Tab.Screen name="Dating" component={DatingScreen} />
+            <Tab.Screen name="Dating" component={BasicInfoScreen} />
             <Tab.Screen name="Messages" component={HomeScreen} />
-            <Tab.Screen name="Settings" component={BasicInfoScreen} />
+            <Tab.Screen name="Settings" component={DatingScreen} />
         </Tab.Navigator>
     );
 }
