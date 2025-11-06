@@ -1,18 +1,34 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
+import React, { useEffect } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { HomeScreen } from "../screens/HomeScreen";
 import { DatingScreen } from "../screens/DatingScreen";
 import { BasicInfoScreen } from "../screens/BasicInfoScreen";
-import MultiStepForm from "../screens/MultiStepForm";
-import FamilyDetailsStep from "../screens/FamilyDetailsStep";
-import PreferencesStep from "../screens/PreferencesStep";
-import DiscoverScreen from "../screens/DiscoverScreen";
 import Icon from "react-native-vector-icons/Ionicons";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
+
+    useEffect(() => {
+
+
+        const handleGoogleSignIn = async () => {
+            try {
+                await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+
+                const userInfo = await GoogleSignin.signIn();
+                console.log('userInfo: ', userInfo?.data);
+
+            } catch (error: any) {
+
+            }
+        }
+
+        handleGoogleSignIn()
+    }, [])
+
     return (
         <Tab.Navigator
             // screenOptions={{

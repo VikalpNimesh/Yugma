@@ -2,29 +2,27 @@ import React from "react";
 import { View, Text, Button, StyleSheet, Image, Alert } from "react-native";
 import auth from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { setUser } from "../redux/slices/userSlice";
 
 const GoogleLoginScreen = ({ navigation }: any) => {
     const handleGoogleSignIn = async () => {
         try {
-            // Make sure Google Play Services are available
             await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
 
-            // Get the user's ID token
+
             const userInfo = await GoogleSignin.signIn();
-            console.log('userInfo: ', userInfo);
+
+            setUser(userInfo?.data)
 
             const { idToken }: any = userInfo?.data;
 
             if (!idToken) throw new Error("Google Sign-In failed: no idToken returned");
 
-            // Create a Firebase credential with the token
+
             const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-
-            // Sign in to Firebase with the credential
             await auth().signInWithCredential(googleCredential);
+            navigation.replace("HomeScreen");
 
-            // Navigate to your app
-            navigation.replace("BottomTabs");
         } catch (error: any) {
             console.error("Google Sign-In error:::::::", error);
             Alert.alert(error.message || JSON.stringify(error));

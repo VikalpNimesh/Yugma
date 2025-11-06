@@ -10,6 +10,7 @@ import SplashScreen from "../screens/SplashScreen";
 import { BasicInfoScreen } from "../screens/BasicInfoScreen";
 import { AboutYouStep } from "../screens/AboutYouStep";
 import GoogleLoginScreen from "../screens/GoogleLoginScreen";
+import { HomeScreen } from "../screens/HomeScreen";
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -20,6 +21,8 @@ export type RootStackParamList = {
     PreferencesStep: undefined;
     DiscoverScreen: undefined;
     BasicInfo: undefined;
+    AboutYouStep: undefined;
+    HomeScreen: undefined;
     ProfileDetails: { userId: string };
 };
 
@@ -31,9 +34,8 @@ const AppNavigator = () => {
             <Stack.Navigator
                 initialRouteName="Splash"
                 screenOptions={{
-                    headerShown: false,
-                }}
-            >
+                    headerShown: false
+                }}>
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} />
                 <Stack.Screen name="BottomTabs" component={BottomTabs} />
@@ -43,7 +45,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} />
                 <Stack.Screen name="BasicInfo" component={BasicInfoScreen} />
                 <Stack.Screen name="AboutYouStep" component={AboutYouStep} />
-
+                <Stack.Screen name="HomeScreen" component={HomeScreen} />
             </Stack.Navigator>
         </NavigationContainer>
     );

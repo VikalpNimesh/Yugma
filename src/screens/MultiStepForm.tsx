@@ -9,21 +9,25 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-const MultiStepForm = ({ navigation }) => {
+const MultiStepForm = ({ navigation }: any) => {
     const [step, setStep] = useState(1);
     const totalSteps = 4;
 
-    const nextStep = () => navigation.navigate("FamilyDetailsStep");;
-    // const nextStep = () => setStep((prev) => Math.min(prev + 1, totalSteps));
-    // const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
-    const prevStep = () => navigation.goBack();
+    const nextStep = () => {
+        if (step < totalSteps) {
+            setStep((prev) => prev + 1);
+        } else {
+            navigation.replace("BottomTabs");
+        }
+    };
+
+    const prevStep = () => {
+        if (step > 1) setStep((prev) => prev - 1);
+        else navigation.goBack();
+    };
 
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={{ paddingBottom: 60 }}
-            showsVerticalScrollIndicator={false}
-        >
+        <ScrollView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity
@@ -48,14 +52,15 @@ const MultiStepForm = ({ navigation }) => {
                 />
             </View>
 
-            {/* Form Content */}
+            {/* Dynamic Form Content */}
             <View style={styles.card}>
                 {step === 1 && <StepOne />}
                 {step === 2 && <StepTwo />}
-                {/* Future steps (3 & 4) can be added here */}
+                {step === 3 && <StepThree />}
+                {step === 4 && <StepFour />}
             </View>
 
-            {/* Navigation */}
+            {/* Navigation buttons */}
             <View style={styles.navButtons}>
                 <TouchableOpacity
                     style={[styles.prevBtn, step === 1 && { opacity: 0.5 }]}
@@ -67,13 +72,20 @@ const MultiStepForm = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.nextBtn} onPress={nextStep}>
-                    <Text style={styles.nextText}>Next</Text>
-                    <Ionicons name="arrow-forward" size={18} color="#fff" />
+                    <Text style={styles.nextText}>
+                        {step === totalSteps ? "Complete Profile" : "Next"}
+                    </Text>
+                    <Ionicons
+                        name={step === totalSteps ? "checkmark" : "arrow-forward"}
+                        size={18}
+                        color="#fff"
+                    />
                 </TouchableOpacity>
             </View>
         </ScrollView>
     );
 };
+
 
 export default MultiStepForm;
 
@@ -146,6 +158,47 @@ const StepTwo = () => (
         </View>
     </View>
 );
+
+const StepThree = () => (
+    <View>
+        <Text style={styles.title}>Family Details</Text>
+
+        <View style={styles.inputRow}>
+            <InputField label="Father's Occupation" placeholder="Father's profession" />
+            <InputField label="Mother's Occupation" placeholder="Mother's profession" />
+        </View>
+
+        <View style={styles.inputRow}>
+            <InputField label="Siblings" placeholder="e.g., 1 brother, 1 sister" />
+            <InputField label="Family Type" placeholder="Select family type" />
+        </View>
+    </View>
+);
+
+
+const StepFour = () => (
+    <View>
+        <Text style={styles.title}>Your Preferences</Text>
+
+        <Text style={styles.label}>Preferred Age Range</Text>
+        <View style={[styles.inputRow, { alignItems: "center" }]}>
+            <TextInput style={[styles.input, { flex: 0.4 }]} placeholder="25" />
+            <Text style={{ color: "#444", fontSize: 14 }}>to</Text>
+            <TextInput style={[styles.input, { flex: 0.4 }]} placeholder="35" />
+            <Text style={{ color: "#444", fontSize: 14 }}>years</Text>
+        </View>
+
+        <InputField
+            label="Preferred Locations"
+            placeholder="e.g., Mumbai, Delhi, Bangalore"
+        />
+        <InputField
+            label="Preferred Education"
+            placeholder="e.g., Bachelor's, Master's, PhD"
+        />
+    </View>
+);
+
 
 const InputField = ({
     label,
