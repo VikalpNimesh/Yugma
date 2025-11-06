@@ -1,8 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { handleLogout } from "../utils/firebaseConfig";
+import { useSelector } from "react-redux";
 
 export const DatingScreen: React.FC = () => {
+    const { email, name } = useSelector(state => state.user?.user);
+
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Dating Mode</Text>
@@ -22,7 +25,14 @@ export const DatingScreen: React.FC = () => {
                 <Text>
                     Logout
                 </Text>
+
             </TouchableOpacity>
+            <Text>
+                {email}
+            </Text>
+            <Text>
+                {name}
+            </Text>
 
         </View>
     );
