@@ -11,6 +11,7 @@ import { BasicInfoScreen } from "../screens/BasicInfoScreen";
 import { AboutYouStep } from "../screens/AboutYouStep";
 import GoogleLoginScreen from "../screens/GoogleLoginScreen";
 import { HomeScreen } from "../screens/HomeScreen";
+import Header from "../components/Header";
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -31,6 +32,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigator = () => {
     return (
         <NavigationContainer>
+            <Header />
             <Stack.Navigator
                 initialRouteName="Splash"
                 screenOptions={{

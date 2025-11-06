@@ -5,113 +5,71 @@ import {
     Image,
     TouchableOpacity,
     StyleSheet,
+    ScrollView,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ProfileCard from "../components/ProfileCard";
 
 const DiscoverScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <Text style={styles.logo}>
-                    ❤️ <Text style={{ color: "#E64A8B" }}>Vivah</Text>Setu
+            <ScrollView>
+
+
+
+
+
+
+                {/* Discover Title + Filters */}
+                <View style={styles.titleContainer}>
+                    <Text style={styles.title}>Discover Partners</Text>
+                    <TouchableOpacity style={styles.filterButton}>
+                        <Ionicons name="filter-outline" size={18} color="#000" />
+                        <Text style={styles.filterText}>Filters</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {/* Profile Card */}
+                <ProfileCard
+                    name="Priya Sharma"
+                    age={26}
+                    location="Mumbai, Maharashtra"
+                    profession="Software Engineer"
+                    education="Master's in Computer Science"
+                    image="https://images.pexels.com/photos/33402174/pexels-photo-33402174.jpeg?_gl=1*m9qoq7*_ga*MjAxNDg2NzI3NC4xNzYyNDI4MzM5*_ga_8JE65Q40S6*czE3NjI0MjgzMzgkbzEkZzEkdDE3NjI0MjgzNjMkajM1JGwwJGg"
+                    isVerified
+                    isPremium
+                    familyDetails={{
+                        father: "Business Owner",
+                        mother: "Teacher",
+                        siblings: "1 sister",
+                    }}
+                />
+
+                {/* Action Buttons */}
+                <View style={styles.actions}>
+                    <TouchableOpacity style={styles.passButton}>
+                        <Ionicons name="close" size={28} color="#E64A8B" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity>
+                        <LinearGradient
+                            colors={["#FF512F", "#DD2476"]}
+                            style={styles.likeButton}
+                        >
+                            <Ionicons name="heart" size={28} color="#fff" />
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+
+                <Text style={styles.swipeText}>
+                    Swipe right to like • Swipe left to pass
                 </Text>
 
-                {/* Segmented Buttons */}
-                <View style={styles.segmentContainer}>
-                    <TouchableOpacity style={[styles.segmentButton, styles.activeSegment]}>
-                        <Text style={styles.segmentActiveText}>Matrimonial</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.segmentButton}>
-                        <Ionicons name="heart-outline" size={14} color="#000" />
-                        <Text style={styles.segmentText}>Dating</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={styles.segmentButton}>
-                        <Ionicons name="crown-outline" size={14} color="#000" />
-                        <Text style={styles.segmentText}>Premium</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
-
-            {/* Discover Title + Filters */}
-            <View style={styles.titleContainer}>
-                <Text style={styles.title}>Discover Partners</Text>
-                <TouchableOpacity style={styles.filterButton}>
-                    <Ionicons name="filter-outline" size={18} color="#000" />
-                    <Text style={styles.filterText}>Filters</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Profile Card */}
-            <View style={styles.card}>
-                <View>
-                    <Image
-                        source={{
-                            uri: "https://i.ibb.co/4tYcx7W/sample-lady.jpg",
-                        }}
-                        style={styles.profileImage}
-                    />
-
-                    {/* Verified Badge */}
-                    <View style={styles.verifiedBadge}>
-                        <Text style={styles.verifiedText}>Verified</Text>
-                    </View>
-
-                    {/* Premium Badge */}
-                    <View style={styles.premiumBadge}>
-                        <Ionicons name="star" color="#fff" size={12} />
-                        <Text style={styles.premiumText}>Premium</Text>
-                    </View>
-                </View>
-
-                <View style={styles.details}>
-                    <Text style={styles.name}>Priya Sharma, 26</Text>
-                    <View style={styles.row}>
-                        <Ionicons name="location-outline" size={16} color="#555" />
-                        <Text style={styles.text}>Mumbai, Maharashtra</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Ionicons name="briefcase-outline" size={16} color="#555" />
-                        <Text style={styles.text}>Software Engineer</Text>
-                    </View>
-                    <View style={styles.row}>
-                        <Ionicons name="school-outline" size={16} color="#555" />
-                        <Text style={styles.text}>Master's in Computer Science</Text>
-                    </View>
-
-                    <View style={styles.familyBox}>
-                        <Text style={styles.familyTitle}>Family Details</Text>
-                        <Text style={styles.familyText}>Father: Business Owner</Text>
-                        <Text style={styles.familyText}>Mother: Teacher</Text>
-                        <Text style={styles.familyText}>Siblings: 1 sister</Text>
-                    </View>
-                </View>
-            </View>
-
-            {/* Action Buttons */}
-            <View style={styles.actions}>
-                <TouchableOpacity style={styles.passButton}>
-                    <Ionicons name="close" size={28} color="#E64A8B" />
-                </TouchableOpacity>
-
-                <TouchableOpacity>
-                    <LinearGradient
-                        colors={["#FF512F", "#DD2476"]}
-                        style={styles.likeButton}
-                    >
-                        <Ionicons name="heart" size={28} color="#fff" />
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-
-            <Text style={styles.swipeText}>
-                Swipe right to like • Swipe left to pass
-            </Text>
-
-            {/* Bottom Tabs */}
-            <View style={styles.bottomTabs}>
+                {/* Bottom Tabs */}
+                {/* <View style={styles.bottomTabs}>
                 <TouchableOpacity style={styles.tab}>
                     <Ionicons name="heart" size={22} color="#000" />
                     <Text style={styles.activeTabText}>Discover</Text>
@@ -128,7 +86,8 @@ const DiscoverScreen = () => {
                     <Ionicons name="settings-outline" size={22} color="#777" />
                     <Text style={styles.tabText}>Settings</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -137,27 +96,7 @@ export default DiscoverScreen;
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#FFF9F6", paddingHorizontal: 16 },
-    header: { marginTop: 10 },
-    logo: { fontSize: 20, fontWeight: "700" },
-    segmentContainer: {
-        flexDirection: "row",
-        backgroundColor: "#fff",
-        borderRadius: 25,
-        marginTop: 12,
-        alignSelf: "flex-start",
-    },
-    segmentButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingHorizontal: 14,
-        paddingVertical: 6,
-    },
-    activeSegment: {
-        backgroundColor: "#FFE5EC",
-        borderRadius: 25,
-    },
-    segmentActiveText: { color: "#E64A8B", fontWeight: "600", fontSize: 13 },
-    segmentText: { marginLeft: 4, color: "#000", fontSize: 13 },
+
     titleContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
