@@ -6,6 +6,7 @@ import DiscoverScreen from "../screens/DiscoverScreen";
 import { DatingScreen } from "../screens/DatingScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import { BasicInfoScreen } from "../screens/BasicInfoScreen";
+import MatchesScreen from "../screens/MatchesScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -32,7 +33,7 @@ export default function BottomTabs() {
                     if (route.name === "Discover") {
                         iconName = "heart-outline";
                         label = "Discover";
-                    } else if (route.name === "Dating") {
+                    } else if (route.name === "MatchesScreen") {
                         iconName = "people-outline";
                         label = "Matches";
                     } else if (route.name === "Messages") {
@@ -78,7 +79,8 @@ export default function BottomTabs() {
             })}
         >
             <Tab.Screen name="Discover" component={DiscoverScreen} />
-            <Tab.Screen name="Dating" component={BasicInfoScreen} />
+            {/* <Tab.Screen name="Dating" component={BasicInfoScreen} /> */}
+            <Tab.Screen name="MatchesScreen" component={MatchesScreen} />
             <Tab.Screen name="Messages" component={HomeScreen} />
             <Tab.Screen name="Settings" component={DatingScreen} />
         </Tab.Navigator>
