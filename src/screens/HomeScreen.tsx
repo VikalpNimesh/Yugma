@@ -8,8 +8,12 @@ import {
     ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Entypo from 'react-native-vector-icons/Entypo';
+import Feather from 'react-native-vector-icons/Feather';
 
-export const HomeScreen: React.FC = ({ navigation }) => {
+
+export const HomeScreen: React.FC = ({ navigation }: any) => {
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
             <ScrollView showsVerticalScrollIndicator={false}>
@@ -27,7 +31,12 @@ export const HomeScreen: React.FC = ({ navigation }) => {
                     </Text>
 
                     <TouchableOpacity onPress={() => navigation.navigate('MultiStepForm')} style={styles.getStartedBtn}>
-                        <Text style={styles.getStartedText}>Get Started →</Text>
+                        <Text style={styles.getStartedText}>Get Started </Text>
+                        <Feather
+                            name="arrow-right"
+                            size={18}
+                            color={"white"}
+                        />
                     </TouchableOpacity>
                 </View>
 
@@ -42,10 +51,12 @@ export const HomeScreen: React.FC = ({ navigation }) => {
                         <FeatureCard
                             title="Dual Profiles"
                             desc="Switch between matrimonial and dating modes"
+                            id="1"
                         />
                         <FeatureCard
                             title="Smart Matching"
                             desc="Cultural preferences and compatibility"
+                            id="2"
                         />
                     </View>
 
@@ -53,10 +64,12 @@ export const HomeScreen: React.FC = ({ navigation }) => {
                         <FeatureCard
                             title="Verified Profiles"
                             desc="Enhanced security and privacy"
+                            id="3"
                         />
                         <FeatureCard
                             title="Premium Experience"
                             desc="Enhanced visibility and priority matching"
+                            id="4"
                         />
                     </View>
                 </View>
@@ -80,7 +93,12 @@ export const HomeScreen: React.FC = ({ navigation }) => {
                         Join thousands who have found meaningful connections
                     </Text>
                     <TouchableOpacity style={styles.profileBtn}>
-                        <Text style={styles.profileBtnText}>Create Your Profile →</Text>
+                        <Text style={styles.profileBtnText}>Create Your Profile </Text>
+                        <Feather
+                            name="arrow-right"
+                            size={18}
+                            color={"black"}
+                        />
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -91,10 +109,34 @@ export const HomeScreen: React.FC = ({ navigation }) => {
 type FeatureCardProps = {
     title: string;
     desc: string;
+    id: string;
 };
 
-const FeatureCard: React.FC<FeatureCardProps> = ({ title, desc }) => (
+const FeatureCard: React.FC<FeatureCardProps> = ({ title, desc, id }) => (
+
+
     <View style={styles.card}>
+
+        <View style={styles.icon}>
+            {
+                id == "1" ?
+                    <MaterialIcons
+                        name="people"
+                        size={24} /> :
+                    id == "2" ?
+                        <Entypo
+                            name="heart-outlined"
+                            size={24} /> : id == "3" ?
+                            <MaterialIcons
+                                name="verified-user"
+                                size={24} /> : id == "4" ?
+                                <MaterialIcons
+                                    name="star"
+                                    size={24} /> : null
+            }
+
+        </View>
+
         <Text style={styles.cardTitle}>{title}</Text>
         <Text style={styles.cardDesc}>{desc}</Text>
     </View>
@@ -129,6 +171,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         borderRadius: 30,
         marginTop: 10,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center"
     },
     getStartedText: {
         color: "#fff",
@@ -164,6 +209,14 @@ const styles = StyleSheet.create({
         borderRadius: 14,
         marginHorizontal: 6,
         elevation: 2,
+        justifyContent: "center",
+        alignItems: "center"
+    },
+    icon: {
+        backgroundColor: "white",
+        padding: 8,
+        borderRadius: 50
+
     },
     cardTitle: {
         fontWeight: "700",
@@ -207,6 +260,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 28,
         borderRadius: 30,
         marginTop: 10,
+        justifyContent: "center",
+        alignItems: "center",
+
     },
     profileBtnText: {
         color: "#E94057",
