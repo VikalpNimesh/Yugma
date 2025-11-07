@@ -44,7 +44,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} options={{ headerShown: false }}
                 />
                 <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ headerShown: true }} />
-                <Stack.Screen name="MultiStepForm" component={MultiStepForm} options={{ headerShown: true }} />
+                <Stack.Screen name="MultiStepForm" component={MultiStepForm} options={{ headerShown: false }} />
                 <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ headerShown: true }} />
                 <Stack.Screen name="PreferencesStep" component={PreferencesStep} options={{ headerShown: true }} />
                 <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} options={{ headerShown: true }} />
