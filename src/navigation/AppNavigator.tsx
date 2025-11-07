@@ -34,23 +34,24 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigator = () => {
     return (
         <NavigationContainer>
-            <Header />
+            {/* <Header /> */}
             <Stack.Navigator
                 initialRouteName="Splash"
                 screenOptions={{
-                    headerShown: false
+                    header: () => <Header />,
                 }}>
                 <Stack.Screen name="Splash" component={SplashScreen} />
-                <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} />
-                <Stack.Screen name="BottomTabs" component={BottomTabs} />
-                <Stack.Screen name="MultiStepForm" component={MultiStepForm} />
-                <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} />
-                <Stack.Screen name="PreferencesStep" component={PreferencesStep} />
-                <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} />
-                <Stack.Screen name="BasicInfo" component={BasicInfoScreen} />
-                <Stack.Screen name="AboutYouStep" component={AboutYouStep} />
-                <Stack.Screen name="HomeScreen" component={HomeScreen} />
-                <Stack.Screen name="MatchesScreen" component={MatchesScreen} />
+                <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} options={{ headerShown: false }}
+                />
+                <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ headerShown: true }} />
+                <Stack.Screen name="MultiStepForm" component={MultiStepForm} options={{ headerShown: true }} />
+                <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ headerShown: true }} />
+                <Stack.Screen name="PreferencesStep" component={PreferencesStep} options={{ headerShown: true }} />
+                <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="BasicInfo" component={BasicInfoScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="AboutYouStep" component={AboutYouStep} options={{ headerShown: true }} />
+                <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ headerShown: true }} />
             </Stack.Navigator>
         </NavigationContainer>
     );
