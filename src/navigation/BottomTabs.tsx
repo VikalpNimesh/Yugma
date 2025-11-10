@@ -8,6 +8,7 @@ import { HomeScreen } from "../screens/HomeScreen";
 import { BasicInfoScreen } from "../screens/BasicInfoScreen";
 import MatchesScreen from "../screens/MatchesScreen";
 import MessagesScreen from "../screens/MessagesScreen";
+import SettingsScreen from "../screens/SettingScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -79,7 +80,7 @@ export default function BottomTabs() {
                 },
             })}
         >
-            <Tab.Screen name="Discover" component={DiscoverScreen} />
+            <Tab.Screen name="Discover" component={SettingsScreen} />
             {/* <Tab.Screen name="Dating" component={BasicInfoScreen} /> */}
             <Tab.Screen name="MatchesScreen" component={MatchesScreen} />
             <Tab.Screen name="Messages" component={MessagesScreen} />

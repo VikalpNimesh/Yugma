@@ -10,18 +10,15 @@ import {
 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// import { auth } from '../services/firebase/firebaseConfig';
-// import { auth } from '../utils/firebaseConfig';
 import auth from '@react-native-firebase/auth';
 
 
-export default function SignupScreen() {
+export default function SignupScreen({ navigation }: any) {
 
 
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    console.log('emailwedfds: ', email, password);
 
     async function registerUser() {
         if (!email || !password) {
@@ -31,11 +28,12 @@ export default function SignupScreen() {
         try {
             const userCredential = await auth().createUserWithEmailAndPassword(email, password);
             console.log('User registered:', userCredential.user);
+            navigation.navigate("SettingsScreen")
+
         } catch (error) {
-            console.error('Signup error:', error.message);
+            console.error('Signup error:', error?.message);
         }
     }
-
 
     return (
         <SafeAreaView style={styles.container}>

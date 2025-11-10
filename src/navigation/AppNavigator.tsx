@@ -15,6 +15,7 @@ import Header from "../components/Header";
 import MatchesScreen from "../screens/MatchesScreen";
 import SignupScreen from '../sample/SignupScreen';
 import LoginScreen from '../screens/LoginScreen';
+import SettingsScreen from '../screens/SettingScreen';
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -29,6 +30,7 @@ export type RootStackParamList = {
     HomeScreen: undefined;
     MatchesScreen: undefined;
     LoginScreen: undefined;
+    SettingsScreen: undefined;
     ProfileDetails: { userId: string };
 };
 
@@ -56,6 +58,7 @@ const AppNavigator = () => {
                 <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: true }} />
                 <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ headerShown: true }} />
                 <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ headerShown: true }} />
 
                 {/* sample */}
 
