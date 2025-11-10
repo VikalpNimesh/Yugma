@@ -12,11 +12,11 @@ const Header = () => {
 
                 <Entypo name="heart-outlined" size={20} color="#E64A8B" />
                 <Text style={styles.logo}>
-                    <Text style={{ color: "#E64A8B" }}>Vivah</Text> Setu
+                    <Text style={{ color: "#E64A8B" }}>Yugma</Text>
                 </Text>
             </View>
 
-            <View style={styles.segmentContainer}>
+            {/* <View style={styles.segmentContainer}>
                 <TouchableOpacity style={[styles.segmentButton, styles.activeSegment]}>
                     <Text style={styles.segmentActiveText}>Matrimonial</Text>
                 </TouchableOpacity>
@@ -24,7 +24,7 @@ const Header = () => {
                     <Ionicons name="heart-outline" size={14} color="#000" />
                     <Text style={styles.segmentText}>Dating</Text>
                 </TouchableOpacity>
-            </View>
+            </View> */}
             <TouchableOpacity style={[styles.segmentButton]}>
 
                 <FontAwesome5 name="crown" size={14} color="#000" />
@@ -77,12 +77,13 @@ const styles = StyleSheet.create({
         { marginLeft: 4, color: "#000", fontSize: 13 },
     header: {
 
-        justifyContent: "space-around",
+        justifyContent: "space-between",
         alignItems: "center",
         flexDirection: "row",
         backgroundColor: "white",
         paddingVertical: 12,
-        elevation: 10
+        elevation: 10,
+        paddingHorizontal: 8
     },
 
 })
