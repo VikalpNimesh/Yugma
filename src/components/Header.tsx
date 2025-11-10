@@ -3,6 +3,7 @@ import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Entypo from "react-native-vector-icons/Entypo";
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
+import LinearGradient from 'react-native-linear-gradient';
 
 
 const Header = () => {
@@ -12,7 +13,7 @@ const Header = () => {
 
                 <Entypo name="heart-outlined" size={20} color="#E64A8B" />
                 <Text style={styles.logo}>
-                    <Text style={{ color: "#E64A8B" }}>Vivah</Text> Setu
+                    <Text style={{ color: "#E64A8B" }}>Yugma</Text>
                 </Text>
             </View>
 
@@ -25,11 +26,19 @@ const Header = () => {
                     <Text style={styles.segmentText}>Dating</Text>
                 </TouchableOpacity>
             </View> */}
-            <TouchableOpacity style={[styles.segmentButton]}>
+            <LinearGradient
+                colors={['#FEC001', '#FF6E00']}
+                start={{ x: 0, y: 1 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.gradientContainer}
+            >
 
-                <FontAwesome5 name="crown" size={14} color="#000" />
-                <Text style={styles.segmentText}>Premium</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={[styles.segmentButton]}>
+
+                    <FontAwesome5 name="crown" size={14} color="#fff" />
+                    <Text style={styles.segmentText}>Premium</Text>
+                </TouchableOpacity>
+            </LinearGradient>
         </View>
     )
 }
@@ -64,8 +73,11 @@ const styles = StyleSheet.create({
     segmentButton: {
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: 8,
+        paddingHorizontal: 12,
         paddingVertical: 6,
+        gap: 4
+
+
     },
     activeSegment: {
         backgroundColor: "#FFE5EC",
@@ -74,7 +86,7 @@ const styles = StyleSheet.create({
     segmentActiveText:
         { color: "#E64A8B", fontWeight: "600", fontSize: 13 },
     segmentText:
-        { marginLeft: 4, color: "#000", fontSize: 13 },
+        { marginLeft: 4, color: "#fff", fontSize: 13 },
     header: {
 
         justifyContent: "space-between",
@@ -83,7 +95,13 @@ const styles = StyleSheet.create({
         backgroundColor: "white",
         paddingVertical: 12,
         elevation: 10,
-        paddingHorizontal: 12
+        paddingHorizontal: 8
+    },
+    gradientContainer: {
+        borderRadius: 8,
+
+
+
     },
 
 })
