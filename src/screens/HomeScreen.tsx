@@ -92,7 +92,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                     <Text style={styles.footerDesc}>
                         Join thousands who have found meaningful connections
                     </Text>
-                    <TouchableOpacity style={styles.profileBtn}>
+                    <TouchableOpacity style={styles.profileBtn} onPress={() => navigation.navigate('BasicInfo')}>
                         <Text style={styles.profileBtnText}>Create Your Profile </Text>
                         <Feather
                             name="arrow-right"

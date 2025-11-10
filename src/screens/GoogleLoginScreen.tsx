@@ -50,7 +50,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
             <View style={styles.content}>
                 <Text style={styles.newText}>New to VivhaSetu ?</Text>
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("SignupScreen")}>
                     <Icon name="email" size={20} color="#ff3b3b" />
                     <Text style={styles.buttonText}>Sign Up with Email</Text>
                 </TouchableOpacity>
