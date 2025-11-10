@@ -11,7 +11,6 @@ type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
 
-
     useEffect(() => {
         GoogleSignin.configure({
             webClientId: "740740268985-l0u2tug9pq87r4bms19bjj2tihfc81o4.apps.googleusercontent.com",
@@ -27,7 +26,6 @@ const SplashScreen = () => {
 
         return unsubscribe;
     }, []);
-
 
     useEffect(() => {
         const timer = setTimeout(() => {

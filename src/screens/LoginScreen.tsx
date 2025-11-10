@@ -1,3 +1,4 @@
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import {
     View,
@@ -9,10 +10,19 @@ import {
 } from 'react-native';
 
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { signInWithEmailPassword } from '../utils/firebaseConfig';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState("")
+
+
+    const handleLogin = async () => {
+        const userData = await signInWithEmailPassword(email, password)
+        console.log('userData: ', userData);
+
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -46,19 +56,21 @@ export default function LoginScreen() {
                     placeholderTextColor="#999"
                 />
 
-                <View style={styles.row}>
+                {/* <View style={styles.row}>
                     <TouchableOpacity>
                         <Text style={styles.link}>Login with OTP</Text>
                     </TouchableOpacity>
                     <TouchableOpacity>
                         <Text style={styles.link}>Forgot Password?</Text>
                     </TouchableOpacity>
-                </View>
+                </View> */}
 
                 {/* Login Button */}
-                <TouchableOpacity style={styles.loginBtn}>
+                <TouchableOpacity style={styles.loginBtn} onPress={handleLogin}>
                     <Text style={styles.loginText}>Login</Text>
                 </TouchableOpacity>
+
+                {error && <Text style={{ color: "red" }}>{error}</Text>}
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Don’t have an account?</Text>
