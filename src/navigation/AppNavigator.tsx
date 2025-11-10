@@ -13,6 +13,8 @@ import GoogleLoginScreen from "../screens/GoogleLoginScreen";
 import { HomeScreen } from "../screens/HomeScreen";
 import Header from "../components/Header";
 import MatchesScreen from "../screens/MatchesScreen";
+import SignupScreen from '../sample/SignupScreen';
+import LoginScreen from '../screens/LoginScreen';
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -26,6 +28,7 @@ export type RootStackParamList = {
     AboutYouStep: undefined;
     HomeScreen: undefined;
     MatchesScreen: undefined;
+    LoginScreen: undefined;
     ProfileDetails: { userId: string };
 };
 
@@ -52,6 +55,11 @@ const AppNavigator = () => {
                 <Stack.Screen name="AboutYouStep" component={AboutYouStep} options={{ headerShown: true }} />
                 <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: true }} />
                 <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: true }} />
+
+                {/* sample */}
+
+                <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ headerShown: false }} />
             </Stack.Navigator>
         </NavigationContainer>
     );

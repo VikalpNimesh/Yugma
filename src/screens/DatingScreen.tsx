@@ -5,8 +5,6 @@ import { useSelector } from "react-redux";
 
 export const DatingScreen: React.FC = () => {
     const { email, name, photo } = useSelector(state => state.user?.user);
-    const data = useSelector(state => state.user?.user);
-    console.log('data: ', data);
 
     return (
         <View style={styles.container}>
