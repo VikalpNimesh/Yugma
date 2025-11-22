@@ -1,10 +1,22 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { handleLogout } from "../utils/firebaseConfig";
-import { useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { handleLogout } from "../../api/firebase/auth";
+import { useSelector, useDispatch } from "react-redux";
 
 export const DatingScreen: React.FC = () => {
-    const { email, name, photo } = useSelector(state => state.user?.user);
+    const navigation = useNavigation<any>();
+    const dispatch = useDispatch();
+    const { email, name, photo } = useSelector((state: any) => state.user?.user || {});
+    console.log('email: ', email);
+
+    const handleLogoutPress = async () => {
+        try {
+            await handleLogout(navigation, dispatch);
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+    };
 
     return (
         <View style={styles.container}>
@@ -13,7 +25,7 @@ export const DatingScreen: React.FC = () => {
                 Discover and connect with people who share your vibe.
             </Text>
 
-            <TouchableOpacity onPress={handleLogout} style={{
+            <TouchableOpacity onPress={handleLogoutPress} style={{
                 width: 200,
                 height: 60,
                 backgroundColor: "#dadada",

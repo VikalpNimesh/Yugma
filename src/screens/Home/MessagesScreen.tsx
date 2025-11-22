@@ -1,8 +1,9 @@
 // screens/MessagesScreen.tsx
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, FlatList } from 'react-native';
-import MessageCard from '../components/MessageCard';
+// import MessageCard from '../components/MessageCard';
 import LinearGradient from 'react-native-linear-gradient';
+import MessageCard from '../../components/MessageCard';
 // import MessageItem from '../components/MessageItem';
 
 const MessagesScreen = () => {

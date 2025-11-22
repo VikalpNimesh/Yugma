@@ -1,74 +1,91 @@
 // GoogleLoginScreen.tsx
-import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import auth from "@react-native-firebase/auth";
 import { useDispatch } from "react-redux";
-import { setUser } from "../redux/slices/userSlice";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import { signInWithGoogle } from "../../api/firebase/auth";
 
 const GoogleLoginScreen = ({ navigation }: any) => {
     const dispatch = useDispatch();
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const handleGoogleSignIn = async () => {
+        if (loading) return;
+
+        setError("");
+        setLoading(true);
+
         try {
-
-            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            const userInfo = await GoogleSignin.signIn();
-
-            const { idToken }: any = userInfo?.data;
-            if (!idToken) throw new Error("Google Sign-In failed: no idToken returned");
-            dispatch(setUser(userInfo?.data));
-
-            const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-            await auth().signInWithCredential(googleCredential);
+            await signInWithGoogle(dispatch);
             navigation.replace("HomeScreen");
-        } catch (error: any) {
-            console.error("Google Sign-In error:::::::", error);
+        } catch (err: any) {
+            setError(err.message || "Google Sign-In failed. Please try again.");
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
         <LinearGradient
-            colors={['#FFDAB9', 'white',]}
+            colors={['#FFDAB9', 'white']}
             start={{ x: 1, y: 1 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradientContainer}
         >
-
             <View style={styles.logoContainer}>
-                {/* <Image
-                    source={{
-                        uri: "https://images.pexels.com/photos/7359158/pexels-photo-7359158.jpeg?_gl=1*1457uc6*_ga*MjAxNDg2NzI3NC4xNzYyNDI4MzM5*_ga_8JE65Q40S6*czE3NjI1MDU0MjMkbzMkZzEkdDE3NjI1MDU0NDQkajM5JGwwJGgw",
-                    }}
-                    style={styles.logo}
-                    resizeMode="contain"
-                /> */}
+                {/* Logo placeholder */}
             </View>
 
             <View style={styles.content}>
                 <Text style={styles.newText}>New to VivhaSetu ?</Text>
 
-                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate("SignupScreen")}>
+                <TouchableOpacity
+                    style={[styles.button, loading && styles.buttonDisabled]}
+                    onPress={() => navigation.navigate("SignupScreen")}
+                    disabled={loading}
+                >
                     <Icon name="email" size={20} color="#ff3b3b" />
                     <Text style={styles.buttonText}>Sign Up with Email</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                    style={[styles.button, styles.buttonDisabled]}
+                    disabled
+                >
                     <Icon name="phone" size={20} color="#ff3b3b" />
                     <Text style={styles.buttonText}>Sign Up with Mobile</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.button} onPress={handleGoogleSignIn}>
-                    <AntDesign name="google" size={20} color="#ff3b3b" />
-                    <Text style={styles.buttonText}>Sign Up with Google</Text>
+                <TouchableOpacity
+                    style={[styles.button, loading && styles.buttonDisabled]}
+                    onPress={handleGoogleSignIn}
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <ActivityIndicator color="#ff3b3b" />
+                    ) : (
+                        <>
+                            <AntDesign name="google" size={20} color="#ff3b3b" />
+                            <Text style={styles.buttonText}>Sign Up with Google</Text>
+                        </>
+                    )}
                 </TouchableOpacity>
+
+                {error ? (
+                    <View style={styles.errorContainer}>
+                        <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                ) : null}
 
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Already have an account?</Text>
-                    <TouchableOpacity onPress={() => navigation.navigate("LoginScreen")}>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate("LoginScreen")}
+                        disabled={loading}
+                    >
                         <Text style={styles.loginLink}>Login</Text>
                     </TouchableOpacity>
                 </View>
@@ -90,15 +107,11 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
-    logo: {
-        width: 200,
-        height: 200,
-        borderRadius: 50
-    },
     content: {
         flex: 1,
         alignItems: "center",
         width: "100%",
+        justifyContent: "center",
     },
     newText: {
         color: "#ff3b3b",
@@ -117,11 +130,23 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         elevation: 3,
     },
+    buttonDisabled: {
+        opacity: 0.6,
+    },
     buttonText: {
         color: "#ff3b3b",
         fontWeight: "600",
         fontSize: 15,
         marginLeft: 10,
+    },
+    errorContainer: {
+        marginTop: 10,
+        paddingHorizontal: 20,
+    },
+    errorText: {
+        color: "#ff3b3b",
+        fontSize: 13,
+        textAlign: "center",
     },
     footer: {
         flexDirection: "row",

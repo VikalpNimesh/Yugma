@@ -9,8 +9,9 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ProfileCard from "../components/ProfileCard";
+// import ProfileCard from "../components/ProfileCard";
 import Swiper from "react-native-deck-swiper";
+import ProfileCard from "../../components/ProfileCard";
 
 export const profiles = [
     {

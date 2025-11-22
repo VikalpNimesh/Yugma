@@ -1,21 +1,21 @@
 import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import MultiStepForm from "../screens/MultiStepForm";
-import FamilyDetailsStep from "../screens/FamilyDetailsStep";
-import PreferencesStep from "../screens/PreferencesStep";
-import DiscoverScreen from "../screens/DiscoverScreen";
+import MultiStepForm from "../screens/Profile/MultiStepForm";
+import FamilyDetailsStep from "../screens/Profile/FamilyDetailsStep";
+import PreferencesStep from "../screens/Profile/PreferencesStep";
+import DiscoverScreen from "../screens/Home/DiscoverScreen";
 import BottomTabs from "./BottomTabs";
 import SplashScreen from "../screens/SplashScreen";
-import { BasicInfoScreen } from "../screens/BasicInfoScreen";
-import { AboutYouStep } from "../screens/AboutYouStep";
-import GoogleLoginScreen from "../screens/GoogleLoginScreen";
-import { HomeScreen } from "../screens/HomeScreen";
+import { BasicInfoScreen } from "../screens/Profile/BasicInfoScreen";
+import { AboutYouStep } from "../screens/Profile/AboutYouStep";
+import GoogleLoginScreen from "../screens/Auth/GoogleLoginScreen";
+import { HomeScreen } from "../screens/Home/HomeScreen";
 import Header from "../components/Header";
-import MatchesScreen from "../screens/MatchesScreen";
-import SignupScreen from '../sample/SignupScreen';
-import LoginScreen from '../screens/LoginScreen';
-import SettingsScreen from '../screens/SettingScreen';
+import MatchesScreen from "../screens/Home/MatchesScreen";
+import SignupScreen from "../screens/Auth/SignupScreen";
+import LoginScreen from "../screens/Auth/LoginScreen";
+import SettingsScreen from "../screens/Settings/SettingsScreen";
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -39,26 +39,25 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const AppNavigator = () => {
     return (
         <NavigationContainer>
-            {/* <Header /> */}
             <Stack.Navigator
                 initialRouteName="Splash"
                 screenOptions={{
-                    header: () => <Header />,
+                    headerShown: false,
                 }}>
                 <Stack.Screen name="Splash" component={SplashScreen} />
                 <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} options={{ headerShown: false }}
                 />
-                <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ headerShown: true }} />
+                <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ header: () => <Header />, headerShown: true }} />
                 <Stack.Screen name="MultiStepForm" component={MultiStepForm} options={{ headerShown: false }} />
-                <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ headerShown: true }} />
-                <Stack.Screen name="PreferencesStep" component={PreferencesStep} options={{ headerShown: true }} />
-                <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} options={{ headerShown: true }} />
-                <Stack.Screen name="BasicInfo" component={BasicInfoScreen} options={{ headerShown: true }} />
-                <Stack.Screen name="AboutYouStep" component={AboutYouStep} options={{ headerShown: true }} />
-                <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ headerShown: true }} />
-                <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ headerShown: true }} />
-                <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: true }} />
-                <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ headerShown: true }} />
+                <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="PreferencesStep" component={PreferencesStep} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="BasicInfo" component={BasicInfoScreen} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="AboutYouStep" component={AboutYouStep} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ header: () => <Header />, headerShown: true }} />
+                <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ header: () => <Header />, headerShown: true }} />
 
                 {/* sample */}
 
