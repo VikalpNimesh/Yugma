@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,47 +11,68 @@ import {
     ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { signInWithEmailPassword, signInWithGoogle } from '../../api/firebase/auth';
-import { useDispatch } from 'react-redux';
+import { signInWithGoogle } from '../../api/firebase/auth';
+import { useAppDispatch, useAppSelector } from '../../redux/hooks';
+import { loginUser, clearError } from '../../redux/slices/authSlice';
 
 export default function LoginScreen({ navigation }: any) {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
+    const { isLoading, error: authError, isAuthenticated } = useAppSelector((state) => state.auth);
+
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [localError, setLocalError] = useState('');
     const [googleLoading, setGoogleLoading] = useState(false);
 
-    const handleLogin = async () => {
-        if (loading) return;
+    // Clear error when component mounts or when authError changes
+    useEffect(() => {
+        if (authError) {
+            setLocalError(authError);
+            dispatch(clearError());
+        }
+    }, [authError, dispatch]);
 
-        setError('');
-        setLoading(true);
+    // Navigate to home screen when authenticated
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigation.replace('HomeScreen');
+        }
+    }, [isAuthenticated, navigation]);
+
+    const handleLogin = async () => {
+        if (isLoading) return;
+
+        // Basic validation
+        if (!email.trim() || !password.trim()) {
+            setLocalError('Please enter both email and password');
+            return;
+        }
+
+        setLocalError('');
 
         try {
-            const user = await signInWithEmailPassword(email, password);
-            console.log('✅ Login successful:', user.email);
-
-            // Navigate to home screen
-            navigation.replace('HomeScreen');
+            await dispatch(loginUser({ email: email.trim(), password })).unwrap();
+            // Navigation will happen automatically via useEffect when isAuthenticated becomes true
+            console.log('✅ Login successful');
         } catch (err: any) {
-            setError(err.message || 'Unable to login. Please try again.');
-        } finally {
-            setLoading(false);
+            console.log('err: ', err);
+            setLocalError(err || 'Unable to login. Please try again.');
         }
     };
 
     const handleGoogleLogin = async () => {
         if (googleLoading) return;
 
-        setError('');
+        setLocalError('');
         setGoogleLoading(true);
 
         try {
-            await signInWithGoogle(dispatch);
-            navigation.replace('BottomScreen');
+            const googleResponse = await signInWithGoogle(dispatch);
+            console.log('googleResponse: ', googleResponse);
+            handleLogin()
+            navigation.replace('HomeScreen');
         } catch (err: any) {
-            setError(err.message || 'Google Sign-In failed. Please try again.');
+            setLocalError(err.message || 'Google Sign-In failed. Please try again.');
         } finally {
             setGoogleLoading(false);
         }
@@ -79,7 +100,7 @@ export default function LoginScreen({ navigation }: any) {
                         <TouchableOpacity
                             style={[styles.googleBtn, googleLoading && styles.buttonDisabled]}
                             onPress={handleGoogleLogin}
-                            disabled={googleLoading || loading}
+                            disabled={googleLoading || isLoading}
                         >
                             {googleLoading ? (
                                 <ActivityIndicator color="#000" />
@@ -96,49 +117,49 @@ export default function LoginScreen({ navigation }: any) {
 
                         {/* Email Input */}
                         <TextInput
-                            style={[styles.input, error && styles.inputError]}
+                            style={[styles.input, (localError || authError) && styles.inputError]}
                             placeholder="Email ID"
                             placeholderTextColor="#999"
                             value={email}
                             onChangeText={(text) => {
                                 setEmail(text);
-                                setError('');
+                                setLocalError('');
                             }}
                             keyboardType="email-address"
                             autoCapitalize="none"
                             autoCorrect={false}
-                            editable={!loading && !googleLoading}
+                            editable={!isLoading && !googleLoading}
                         />
 
                         {/* Password Input */}
                         <TextInput
-                            style={[styles.input, error && styles.inputError]}
+                            style={[styles.input, (localError || authError) && styles.inputError]}
                             placeholder="Password"
                             placeholderTextColor="#999"
                             value={password}
                             onChangeText={(text) => {
                                 setPassword(text);
-                                setError('');
+                                setLocalError('');
                             }}
                             secureTextEntry
                             autoCapitalize="none"
-                            editable={!loading && !googleLoading}
+                            editable={!isLoading && !googleLoading}
                         />
 
                         {/* Error Message */}
-                        {error ? (
+                        {(localError || authError) ? (
                             <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>{error}</Text>
+                                <Text style={styles.errorText}>{localError || authError}</Text>
                             </View>
                         ) : null}
 
                         {/* Login Button */}
                         <TouchableOpacity
-                            style={[styles.loginBtn, (loading || !email || !password) && styles.buttonDisabled]}
-                            onPress={handleLogin}
-                            disabled={loading || googleLoading || !email || !password}
+                            style={[styles.loginBtn, (isLoading || !email || !password) && styles.buttonDisabled]}
+                            // onPress={handleLogin}
+                            disabled={isLoading || googleLoading || !email || !password}
                         >
-                            {loading ? (
+                            {isLoading ? (
                                 <ActivityIndicator color="#fff" />
                             ) : (
                                 <Text style={styles.loginText}>Login</Text>
@@ -148,7 +169,7 @@ export default function LoginScreen({ navigation }: any) {
                         {/* Footer */}
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>Don't have an account?</Text>
-                            <TouchableOpacity onPress={handleSignup} disabled={loading || googleLoading}>
+                            <TouchableOpacity onPress={handleSignup} disabled={isLoading || googleLoading}>
                                 <Text style={styles.signupText}> Sign Up Free</Text>
                             </TouchableOpacity>
                         </View>

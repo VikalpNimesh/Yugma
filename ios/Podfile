@@ -6,6 +6,8 @@ require Pod::Executable.execute_command('node', ['-p',
   )', __dir__]).strip
 
 platform :ios, min_ios_version_supported
+use_modular_headers!     # REQUIRED for Firebase + Google Sign-In
+
 prepare_react_native_project!
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -15,20 +17,31 @@ if linkage != nil
 end
 
 target 'VivahSetu' do
+  # Auto-linking native modules
   config = use_native_modules!
 
   use_react_native!(
     :path => config[:reactNativePath],
-    # An absolute path to your application root.
+    :fabric_enabled => true,
+    :hermes_enabled => true,
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
+
+  # All RN pods, Firebase, Google Sign-In, AsyncStorage, Screens,
+  # ImagePicker, VectorIcons etc. are auto-linked by RN 0.82.
 
   post_install do |installer|
     react_native_post_install(
       installer,
       config[:reactNativePath],
-      :mac_catalyst_enabled => false,
-      # :ccache_enabled => true
+      :mac_catalyst_enabled => false
     )
+
+    # Fix for Xcode 15 / iOS 17 warnings (optional)
+    installer.pods_project.targets.each do |t|
+      t.build_configurations.each do |config|
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = min_ios_version_supported
+      end
+    end
   end
 end
