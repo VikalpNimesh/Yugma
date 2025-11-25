@@ -3,12 +3,15 @@
  */
 
 if (__DEV__) {
-    import('./src/ReactotronConfig').then(() =>
-        console.log("Reactotron Loaded")
-    );
+    import('./src/ReactotronConfig')
+        .then(() => {
+            console.tron?.log("Reactotron Loaded");
+            console.tron?.log({ user: 'vaibhav', role: 'developer' });
+        })
+        .catch(error => {
+            console.warn('Failed to load Reactotron', error);
+        });
 }
-console.tron.log("Hello from Reactotron");
-console.tron.log({ user: 'vaibhav', role: 'developer' });
 
 import { AppRegistry } from 'react-native';
 import App from './App';
