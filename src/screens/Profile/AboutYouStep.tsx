@@ -11,6 +11,7 @@ import { TextInput, Chip } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from 'react-native-toast-message';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -22,6 +23,11 @@ export const AboutYouStep: React.FC = () => {
     const { bio, interests, photos } = useAppSelector(
         (state) => state.profileForm.aboutYou
     );
+
+    const handleDeletePhoto = (index: number) => {
+        const newPhotos = photos.filter((_, i) => i !== index);
+        dispatch(updateAboutYou({ photos: newPhotos }));
+    };
 
     React.useEffect(() => {
         dispatch(setCurrentScreen('AboutYouStep'));
@@ -55,11 +61,20 @@ export const AboutYouStep: React.FC = () => {
     const handleAddPhotos = async () => {
         const result = await launchImageLibrary({
             mediaType: "photo",
-            selectionLimit: 5,
+            selectionLimit: 6,
         });
 
         if (result.assets) {
             const uris = result.assets.map((a) => a.uri!) as string[];
+            // Check if adding these exceeds the limit of 6 photos
+            if (photos.length + uris.length > 6) {
+                // Show toast notification
+                Toast.show({
+                    type: 'error',
+                    text1: 'Maximum 6 photos allowed',
+                });
+                return;
+            }
             dispatch(updateAboutYou({ photos: [...photos, ...uris] }));
         }
     };
@@ -148,18 +163,22 @@ export const AboutYouStep: React.FC = () => {
                         ) : (
                             <View style={styles.photoGrid}>
                                 {photos.map((uri, index) => (
-                                    <Image
-                                        key={index}
-                                        source={{ uri }}
-                                        style={styles.photoPreview}
-                                    />
-                                ))}
-                                <TouchableOpacity
-                                    style={[styles.addPhotoBtn, { alignSelf: "center" }]}
-                                    onPress={handleAddPhotos}
-                                >
-                                    <Text style={styles.addPhotoText}>+ Add More</Text>
-                                </TouchableOpacity>
+                        <View key={index} style={styles.photoContainer}>
+                            <Image source={{ uri }} style={styles.photoPreview} />
+                            <TouchableOpacity
+                                style={styles.deleteIcon}
+                                onPress={() => handleDeletePhoto(index)}
+                            >
+                                <Ionicons name="trash" size={20} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+                    <TouchableOpacity
+                        style={[styles.addPhotoBtn, { alignSelf: "center" }]}
+                        onPress={handleAddPhotos}
+                    >
+                        <Text style={styles.addPhotoText}>+ Add More</Text>
+                    </TouchableOpacity>
                             </View>
                         )}
                     </View>
@@ -302,6 +321,17 @@ const styles = StyleSheet.create({
         width: 90,
         height: 90,
         borderRadius: 10,
+    },
+    photoContainer: {
+        position: 'relative',
+    },
+    deleteIcon: {
+        position: 'absolute',
+        top: 4,
+        right: 4,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        borderRadius: 12,
+        padding: 2,
     },
     footer: {
         flexDirection: "row",

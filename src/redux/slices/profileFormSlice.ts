@@ -1,4 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import profileService from '../../api/services/profileService';
 
 type BasicInfoForm = {
   fullName: string;
@@ -36,6 +37,9 @@ export type ProfileFormState = {
   familyDetails: FamilyDetailsForm;
   preferences: PreferencesForm;
   currentScreen: string | null;
+  // async profile update status
+  updateStatus: 'idle' | 'loading' | 'succeeded' | 'failed';
+  updateError?: string;
 };
 
 const initialState: ProfileFormState = {
@@ -66,7 +70,46 @@ const initialState: ProfileFormState = {
     preferredEducation: '',
   },
   currentScreen: null,
+  updateStatus: 'idle',
+  updateError: undefined,
 };
+
+// Async Thunk for completing profile
+export const completeProfile = createAsyncThunk(
+  'profileForm/completeProfile',
+  async (_, { getState, rejectWithValue }) => {
+    try {
+      const state: any = getState();
+      const profile = state.profileForm;
+      
+      const payload = {
+        userId: profile.basicInfo.fullName, // placeholder, replace with actual user ID
+        fullName: profile.basicInfo.fullName,
+        age: Number(profile.basicInfo.age),
+        location: profile.basicInfo.location,
+        profession: profile.basicInfo.profession,
+        education: profile.basicInfo.education,
+        religion: profile.basicInfo.religion,
+        community: profile.basicInfo.community,
+        bio: profile.aboutYou.bio,
+        interests: profile.aboutYou.interests.map((i: any) => ({ interest: i })),
+        photos: profile.aboutYou.photos.map((url: any, idx: number) => ({ url, order: idx })),
+        familyDetails: profile.familyDetails,
+        preferences: {
+            ageMin: Number(profile.preferences.preferredAgeMin),
+            ageMax: Number(profile.preferences.preferredAgeMax),
+            preferredLocations: profile.preferences.preferredLocations.split(',').map((l: string) => ({ location: l.trim() })),
+            preferredEducation: profile.preferences.preferredEducation.split(',').map((e: string) => ({ education: e.trim() })),
+        }
+      };
+
+      const response = await profileService.updateProfile(payload);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Profile update failed');
+    }
+  }
+);
 
 const profileFormSlice = createSlice({
   name: 'profileForm',
@@ -94,6 +137,20 @@ const profileFormSlice = createSlice({
       state.currentScreen = action.payload;
     },
     resetProfileForm: () => initialState,
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(completeProfile.pending, (state) => {
+        state.updateStatus = 'loading';
+        state.updateError = undefined;
+      })
+      .addCase(completeProfile.fulfilled, (state) => {
+        state.updateStatus = 'succeeded';
+      })
+      .addCase(completeProfile.rejected, (state, action) => {
+        state.updateStatus = 'failed';
+        state.updateError = action.payload as string;
+      });
   },
 });
 

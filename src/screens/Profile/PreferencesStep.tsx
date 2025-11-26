@@ -10,15 +10,24 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-import { updatePreferences, setCurrentScreen } from "../../redux/slices/profileFormSlice";
+import { updatePreferences, setCurrentScreen, completeProfile } from "../../redux/slices/profileFormSlice";
+import { useNavigation } from "@react-navigation/native";
 
-const PreferencesStep = ({ navigation }) => {
+const PreferencesStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.preferences);
-
+    const { updateStatus } = useAppSelector(state => state.profileForm);
+    const nav = useNavigation();
     React.useEffect(() => {
         dispatch(setCurrentScreen('PreferencesStep'));
     }, [dispatch]);
+    // Navigate to next screen after successful profile update
+    React.useEffect(() => {
+        if (updateStatus === 'succeeded') {
+            // navigate to bottom tabs or home screen
+            nav.navigate('BottomTabs' as never);
+        }
+    }, [updateStatus, nav]);
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updatePreferences({ [field]: value }));
@@ -95,7 +104,9 @@ const PreferencesStep = ({ navigation }) => {
                     <Text style={styles.previousText}>Previous</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => navigation.navigate("BottomTabs")}>
+                <TouchableOpacity onPress={() => {
+                    dispatch(completeProfile());
+                }}>
                     <LinearGradient
                         colors={["#FF512F", "#DD2476"]}
                         style={styles.nextButton}

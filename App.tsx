@@ -1,4 +1,5 @@
 import React from "react";
+import Toast from 'react-native-toast-message';
 import AppNavigator from "./src/navigation/AppNavigator";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -13,6 +14,7 @@ export default function App() {
     <Provider store={store}>
       <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
         <AppNavigator />
+        <Toast />
       </PersistGate>
     </Provider>
   );

@@ -3,7 +3,7 @@
  * Centralized endpoint definitions for the application
  */
 
-const API_BASE = '/api'; // Adjust based on your API structure
+const API_BASE = ''; // Adjust based on your API structure
 
 export const API_ENDPOINTS = {
     // Auth endpoints
@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
     // User endpoints
     USER: {
         PROFILE: `${API_BASE}/user/profile`,
-        UPDATE_PROFILE: `${API_BASE}/user/profile`,
+        UPDATE_PROFILE: `${API_BASE}/users/profile`,
         UPLOAD_AVATAR: `${API_BASE}/user/avatar`,
     },
 
