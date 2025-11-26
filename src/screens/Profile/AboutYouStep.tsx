@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
     View,
     Text,
@@ -11,15 +11,23 @@ import { TextInput, Chip } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import LinearGradient from "react-native-linear-gradient";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { updateAboutYou, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 
 export const AboutYouStep: React.FC = () => {
     const navigation = useNavigation();
+    const dispatch = useAppDispatch();
+    const { bio, interests, photos } = useAppSelector(
+        (state) => state.profileForm.aboutYou
+    );
 
-    const [bio, setBio] = useState("");
-    const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-    const [photos, setPhotos] = useState<string[]>([]);
+    React.useEffect(() => {
+        dispatch(setCurrentScreen('AboutYouStep'));
+    }, [dispatch]);
 
-    const interests = [
+    const interestOptions = [
         "Travel",
         "Music",
         "Reading",
@@ -37,10 +45,10 @@ export const AboutYouStep: React.FC = () => {
     ];
 
     const toggleInterest = (interest: string) => {
-        if (selectedInterests.includes(interest)) {
-            setSelectedInterests(selectedInterests.filter((i) => i !== interest));
+        if (interests.includes(interest)) {
+            dispatch(updateAboutYou({ interests: interests.filter((i) => i !== interest) }));
         } else {
-            setSelectedInterests([...selectedInterests, interest]);
+            dispatch(updateAboutYou({ interests: [...interests, interest] }));
         }
     };
 
@@ -52,7 +60,7 @@ export const AboutYouStep: React.FC = () => {
 
         if (result.assets) {
             const uris = result.assets.map((a) => a.uri!) as string[];
-            setPhotos([...photos, ...uris]);
+            dispatch(updateAboutYou({ photos: [...photos, ...uris] }));
         }
     };
 
@@ -61,8 +69,9 @@ export const AboutYouStep: React.FC = () => {
             <ScrollView contentContainerStyle={styles.container}>
                 {/* Header */}
                 <View style={styles.headerRow}>
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                        <Text style={styles.backText}>← Back</Text>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={20} color="#000" />
+                        <Text style={styles.backText}>Back</Text>
                     </TouchableOpacity>
                     <Text style={styles.stepText}>Step 2 of 4</Text>
                 </View>
@@ -84,7 +93,7 @@ export const AboutYouStep: React.FC = () => {
                         multiline
                         numberOfLines={5}
                         value={bio}
-                        onChangeText={setBio}
+                        onChangeText={(text) => dispatch(updateAboutYou({ bio: text }))}
                         style={styles.textArea}
                         theme={{
                             roundness: 10,
@@ -99,19 +108,19 @@ export const AboutYouStep: React.FC = () => {
                     <Text style={styles.subText}>Select interests that describe you</Text>
 
                     <View style={styles.chipContainer}>
-                        {interests.map((interest) => (
+                        {interestOptions.map((interest) => (
                             <Chip
                                 key={interest}
                                 mode="flat"
-                                selected={selectedInterests.includes(interest)}
+                                selected={interests.includes(interest)}
                                 onPress={() => toggleInterest(interest)}
                                 style={[
                                     styles.chip,
-                                    selectedInterests.includes(interest) && styles.selectedChip,
+                                    interests.includes(interest) && styles.selectedChip,
                                 ]}
                                 textStyle={[
                                     styles.chipText,
-                                    selectedInterests.includes(interest) && styles.selectedChipText,
+                                    interests.includes(interest) && styles.selectedChipText,
                                 ]}
                             >
                                 {interest}
@@ -158,15 +167,19 @@ export const AboutYouStep: React.FC = () => {
 
                 {/* Footer */}
                 <View style={styles.footer}>
-                    <TouchableOpacity style={styles.prevBtn} onPress={() => navigation.goBack()}>
-                        <Text style={styles.prevText}>← Previous</Text>
+                    <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                        <Ionicons name="arrow-back" size={18} color="#000" />
+                        <Text style={styles.previousText}>Previous</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity
-                        style={styles.nextBtn}
-                        onPress={() => navigation.navigate("FamilyDetailsStep" as never)}
-                    >
-                        <Text style={styles.nextText}>Next →</Text>
+                    <TouchableOpacity onPress={() => navigation.navigate("FamilyDetailsStep" as never)}>
+                        <LinearGradient
+                            colors={["#FF512F", "#DD2476"]}
+                            style={styles.nextButton}
+                        >
+                            <Text style={styles.nextText}>Next</Text>
+                            <Ionicons name="arrow-forward" size={18} color="#fff" />
+                        </LinearGradient>
                     </TouchableOpacity>
                 </View>
             </ScrollView>
@@ -181,7 +194,16 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginBottom: 12,
     },
-    backText: { color: "#333", fontSize: 16 },
+    backButton: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    backText: {
+        fontSize: 16,
+        fontWeight: "500",
+        marginLeft: 4,
+        color: "#000",
+    },
     stepText: { color: "#555", fontSize: 14 },
     progressBarContainer: {
         height: 6,
@@ -284,21 +306,35 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 30,
+        marginTop: 24,
     },
-    prevBtn: {
+    previousButton: {
+        flexDirection: "row",
+        alignItems: "center",
         borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 12,
+        borderColor: "#E6E6E6",
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        backgroundColor: "#fff",
+    },
+    previousText: {
+        fontSize: 15,
+        fontWeight: "500",
+        color: "#000",
+        marginLeft: 6,
+    },
+    nextButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderRadius: 8,
         paddingVertical: 10,
         paddingHorizontal: 20,
     },
-    prevText: { color: "#333" },
-    nextBtn: {
-        backgroundColor: "#E94057",
-        paddingVertical: 12,
-        paddingHorizontal: 28,
-        borderRadius: 12,
+    nextText: {
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: "500",
+        marginRight: 6,
     },
-    nextText: { color: "#fff", fontWeight: "700" },
 });

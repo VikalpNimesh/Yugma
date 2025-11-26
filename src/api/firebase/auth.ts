@@ -1,9 +1,15 @@
-import { Alert } from "react-native";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import auth from "@react-native-firebase/auth";
-import type { NavigationProp } from "@react-navigation/native";
-import { validateEmail, validatePassword, getFirebaseErrorMessage } from "../../utils/validators";
-import { setUser, logout } from "../../redux/slices/userSlice";
+import { Alert } from 'react-native';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import auth from '@react-native-firebase/auth';
+import type { NavigationProp } from '@react-navigation/native';
+import {
+  validateEmail,
+  validatePassword,
+  getFirebaseErrorMessage,
+} from '../../utils/validators';
+import { setUser, logout } from '../../redux/slices/userSlice';
+import { resetProfileForm } from '../../redux/slices/profileFormSlice';
+import { resetAuth } from '../../redux/slices/authSlice';
 
 /**
  * Sign in with email and password
@@ -12,7 +18,10 @@ import { setUser, logout } from "../../redux/slices/userSlice";
  * @returns User object on success
  * @throws Error with user-friendly message
  */
-export const signInWithEmailPassword = async (email: string, password: string) => {
+export const signInWithEmailPassword = async (
+  email: string,
+  password: string,
+) => {
   // Validate inputs
   const emailValidation = validateEmail(email);
   if (!emailValidation.isValid) {
@@ -25,12 +34,15 @@ export const signInWithEmailPassword = async (email: string, password: string) =
   }
 
   try {
-    const userCredential = await auth().signInWithEmailAndPassword(email.trim(), password);
+    const userCredential = await auth().signInWithEmailAndPassword(
+      email.trim(),
+      password,
+    );
     return userCredential.user;
   } catch (error: any) {
-    const errorCode = error?.code || "unknown";
+    const errorCode = error?.code || 'unknown';
     const userFriendlyMessage = getFirebaseErrorMessage(errorCode);
-    console.error("Login error:", errorCode, error.message);
+    console.error('Login error:', errorCode, error.message);
     throw new Error(userFriendlyMessage);
   }
 };
@@ -60,7 +72,10 @@ export const createUserWithEmailPassword = async (
   }
 
   try {
-    const userCredential = await auth().createUserWithEmailAndPassword(email.trim(), password);
+    const userCredential = await auth().createUserWithEmailAndPassword(
+      email.trim(),
+      password,
+    );
     const user = userCredential.user;
 
     // Update profile if display name provided
@@ -70,12 +85,12 @@ export const createUserWithEmailPassword = async (
 
     // Send email verification
     await user.sendEmailVerification();
-    console.log("✅ User signed up:", user.email);
+    console.log('✅ User signed up:', user.email);
     return user;
   } catch (error: any) {
-    const errorCode = error?.code || "unknown";
+    const errorCode = error?.code || 'unknown';
     const userFriendlyMessage = getFirebaseErrorMessage(errorCode);
-    console.error("❌ Signup error:", errorCode, error.message);
+    console.error('❌ Signup error:', errorCode, error.message);
     throw new Error(userFriendlyMessage);
   }
 };
@@ -96,12 +111,12 @@ export const signInWithGoogle = async (dispatch?: any) => {
     const userInfo = await GoogleSignin.signIn();
 
     if (!userInfo?.data) {
-      throw new Error("Google Sign-In failed: No user data returned");
+      throw new Error('Google Sign-In failed: No user data returned');
     }
 
     const { idToken } = userInfo.data;
     if (!idToken) {
-      throw new Error("Google Sign-In failed: No ID token returned");
+      throw new Error('Google Sign-In failed: No ID token returned');
     }
 
     // Update Redux state if dispatch provided
@@ -113,17 +128,19 @@ export const signInWithGoogle = async (dispatch?: any) => {
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
     await auth().signInWithCredential(googleCredential);
 
-    console.log("✅ Google Sign-In successful");
+    console.log('✅ Google Sign-In successful');
     return userInfo.data;
   } catch (error: any) {
-    console.error("❌ Google Sign-In error:", error);
+    console.error('❌ Google Sign-In error:', error);
 
     // Handle user cancellation
-    if (error?.code === "SIGN_IN_CANCELLED") {
-      throw new Error("Sign in was cancelled");
+    if (error?.code === 'SIGN_IN_CANCELLED') {
+      throw new Error('Sign in was cancelled');
     }
 
-    throw new Error(error?.message || "Google Sign-In failed. Please try again.");
+    throw new Error(
+      error?.message || 'Google Sign-In failed. Please try again.',
+    );
   }
 };
 
@@ -151,7 +168,7 @@ export const handleLogout = async (
     try {
       await GoogleSignin.signOut();
     } catch (error) {
-      console.warn("Google sign-out failed:", error);
+      console.warn('Google sign-out failed:', error);
     }
 
     // Sign out from Firebase
@@ -160,20 +177,22 @@ export const handleLogout = async (
     // Clear Redux state if dispatch provided
     if (dispatch) {
       dispatch(logout());
+      dispatch(resetProfileForm());
+      dispatch(resetAuth());
     }
 
     // Navigate to login screen
     if (navigation) {
       navigation.reset({
         index: 0,
-        routes: [{ name: "GoogleLogin" }],
+        routes: [{ name: 'GoogleLogin' }],
       });
     }
 
-    Alert.alert("Success", "You have been logged out successfully");
+    Alert.alert('Success', 'You have been logged out successfully');
   } catch (error) {
-    console.error("Logout error:", error);
-    throw new Error("Failed to logout. Please try again.");
+    console.error('Logout error:', error);
+    throw new Error('Failed to logout. Please try again.');
   }
 };
 
@@ -190,11 +209,11 @@ export const sendPasswordResetEmail = async (email: string) => {
 
   try {
     await auth().sendPasswordResetEmail(email.trim());
-    console.log("✅ Password reset email sent");
+    console.log('✅ Password reset email sent');
   } catch (error: any) {
-    const errorCode = error?.code || "unknown";
+    const errorCode = error?.code || 'unknown';
     const userFriendlyMessage = getFirebaseErrorMessage(errorCode);
-    console.error("❌ Password reset error:", errorCode, error.message);
+    console.error('❌ Password reset error:', errorCode, error.message);
     throw new Error(userFriendlyMessage);
   }
 };

@@ -20,10 +20,11 @@ const userSlice = createSlice({
         },
         updateUser(state, action) {
             return { ...state, ...action.payload };
-        }
+        },
+        resetUser: () => initialState
     }
 
 })
 
-export const { setUser, logout, updateUser } = userSlice.actions
+export const { setUser, logout, updateUser, resetUser } = userSlice.actions
 export default userSlice.reducer;

@@ -1,15 +1,42 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
+import { useAppSelector } from "../redux/hooks";
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
 const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
+    const currentScreen = useAppSelector((state) => state.profileForm.currentScreen);
+
+    // Helper function to get the navigation stack based on current screen
+    const getNavigationStack = (screen: string) => {
+        const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+        const currentIndex = screenOrder.indexOf(screen);
+
+        if (currentIndex === -1) return [{ name: screen as keyof RootStackParamList, key: screen }];
+
+        // Build stack up to current screen
+        const stack = [];
+        for (let i = 0; i <= currentIndex; i++) {
+            stack.push({
+                name: screenOrder[i] as keyof RootStackParamList,
+                key: screenOrder[i] + '_' + i
+            });
+        }
+        return stack;
+    };
+
+    // Helper function to get the index of current screen in stack
+    const getScreenIndex = (screen: string) => {
+        const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+        const index = screenOrder.indexOf(screen);
+        return index === -1 ? 0 : index;
+    };
 
     useEffect(() => {
         GoogleSignin.configure({
@@ -17,23 +44,42 @@ const SplashScreen = () => {
             offlineAccess: false,
         });
 
-
         const unsubscribe = auth().onAuthStateChanged(user => {
             if (user) {
-                navigation.replace("BottomTabs");
+                // If user is authenticated and has a saved screen, navigate to it
+                const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+                if (currentScreen && validScreens.includes(currentScreen)) {
+                    // Build the navigation stack properly
+                    navigation.reset({
+                        index: getScreenIndex(currentScreen),
+                        routes: getNavigationStack(currentScreen),
+                    });
+                } else {
+                    navigation.replace("BottomTabs");
+                }
             }
         });
 
         return unsubscribe;
-    }, []);
+    }, [currentScreen, navigation]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
-            navigation.replace("GoogleLogin");
+            // If no user is authenticated, check if there's a saved screen to resume
+            const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+            if (currentScreen && validScreens.includes(currentScreen)) {
+                // Build the navigation stack properly
+                navigation.reset({
+                    index: getScreenIndex(currentScreen),
+                    routes: getNavigationStack(currentScreen),
+                });
+            } else {
+                navigation.replace("GoogleLogin");
+            }
         }, 2000);
 
         return () => clearTimeout(timer);
-    }, [navigation]);
+    }, [navigation, currentScreen]);
 
     return (
         <View style={styles.container}>

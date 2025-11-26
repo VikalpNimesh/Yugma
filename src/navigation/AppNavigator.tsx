@@ -32,6 +32,7 @@ export type RootStackParamList = {
     LoginScreen: undefined;
     SettingsScreen: undefined;
     ProfileDetails: { userId: string };
+    Matrimonial: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();

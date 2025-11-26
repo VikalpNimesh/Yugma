@@ -7,33 +7,27 @@ import {
     ScrollView,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Menu, Button, Provider, TextInput } from "react-native-paper";
+import { Provider, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Ionicons from "react-native-vector-icons/Ionicons";
+import LinearGradient from "react-native-linear-gradient";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { updateBasicInfo, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 
 export const BasicInfoScreen: React.FC = () => {
     const navigation = useNavigation();
-
-    const [form, setForm] = useState({
-        fullName: "",
-        age: "",
-        location: "",
-        profession: "",
-        education: "",
-        religion: "",
-        community: "",
-    });
-
-    const [menuVisible, setMenuVisible] = useState(false);
+    const dispatch = useAppDispatch();
+    const form = useAppSelector((state) => state.profileForm.basicInfo);
     const [focusedField, setFocusedField] = useState<string | null>(null);
 
-    const educationOptions = [
-        { label: "High School", value: "High School" },
-        { label: "Bachelor's", value: "Bachelor's" },
-        { label: "Master's", value: "Master's" },
-        { label: "PhD", value: "PhD" },
-        { label: "Professional Degree", value: "Professional Degree" },
-    ];
+    React.useEffect(() => {
+        dispatch(setCurrentScreen('BasicInfo'));
+    }, [dispatch]);
+
+    const handleChange = (field: keyof typeof form, value: string) => {
+        dispatch(updateBasicInfo({ [field]: value }));
+    };
 
     return (
         <Provider>
@@ -41,8 +35,9 @@ export const BasicInfoScreen: React.FC = () => {
                 <ScrollView contentContainerStyle={styles.container}>
                     {/* Header */}
                     <View style={styles.headerRow}>
-                        <TouchableOpacity onPress={() => navigation.goBack()}>
-                            <Text style={styles.backText}>← Back</Text>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={20} color="#000" />
+                            <Text style={styles.backText}>Back</Text>
                         </TouchableOpacity>
                         <Text style={styles.stepText}>Step 1 of 4</Text>
                     </View>
@@ -60,7 +55,7 @@ export const BasicInfoScreen: React.FC = () => {
                                 label="Full Name"
                                 placeholder="Enter your full name"
                                 value={form.fullName}
-                                onChangeText={(text) => setForm({ ...form, fullName: text })}
+                                onChangeText={(text) => handleChange("fullName", text)}
                                 onFocus={() => setFocusedField("fullName")}
                                 onBlur={() => setFocusedField(null)}
                                 isFocused={focusedField === "fullName"}
@@ -70,7 +65,7 @@ export const BasicInfoScreen: React.FC = () => {
                                 label="Age"
                                 placeholder="Your age"
                                 value={form.age}
-                                onChangeText={(text) => setForm({ ...form, age: text })}
+                                onChangeText={(text) => handleChange("age", text)}
                                 onFocus={() => setFocusedField("age")}
                                 onBlur={() => setFocusedField(null)}
                                 isFocused={focusedField === "age"}
@@ -82,7 +77,7 @@ export const BasicInfoScreen: React.FC = () => {
                                 label="Location"
                                 placeholder="City, State"
                                 value={form.location}
-                                onChangeText={(text) => setForm({ ...form, location: text })}
+                                onChangeText={(text) => handleChange("location", text)}
                                 onFocus={() => setFocusedField("location")}
                                 onBlur={() => setFocusedField(null)}
                                 isFocused={focusedField === "location"}
@@ -91,7 +86,7 @@ export const BasicInfoScreen: React.FC = () => {
                                 label="Profession"
                                 placeholder="Your profession"
                                 value={form.profession}
-                                onChangeText={(text) => setForm({ ...form, profession: text })}
+                                onChangeText={(text) => handleChange("profession", text)}
                                 onFocus={() => setFocusedField("profession")}
                                 onBlur={() => setFocusedField(null)}
                                 isFocused={focusedField === "profession"}
@@ -114,7 +109,7 @@ export const BasicInfoScreen: React.FC = () => {
                                     valueField="value"
                                     placeholder="Select education level"
                                     value={form.education}
-                                    onChange={(item) => setForm({ ...form, education: item.value })}
+                                    onChange={(item) => handleChange("education", item.value)}
                                     style={[
                                         styles.dropdown,
                                         form.education ? styles.dropdownFilled : {},
@@ -144,7 +139,7 @@ export const BasicInfoScreen: React.FC = () => {
                                     valueField="value"
                                     placeholder="Select religion"
                                     value={form.religion}
-                                    onChange={(item) => setForm({ ...form, religion: item.value })}
+                                    onChange={(item) => handleChange("religion", item.value)}
                                     style={[
                                         styles.dropdown,
                                         form.religion ? styles.dropdownFilled : {},
@@ -169,7 +164,7 @@ export const BasicInfoScreen: React.FC = () => {
                                 valueField="value"
                                 placeholder="Select community"
                                 value={form.community}
-                                onChange={(item) => setForm({ ...form, community: item.value })}
+                                onChange={(item) => handleChange("community", item.value)}
                                 style={[
                                     styles.dropdown,
                                     form.community ? styles.dropdownFilled : {},
@@ -188,15 +183,19 @@ export const BasicInfoScreen: React.FC = () => {
 
                     {/* Footer Buttons */}
                     <View style={styles.footer}>
-                        <TouchableOpacity style={styles.prevBtn}>
-                            <Text style={styles.prevText}>← Previous</Text>
+                        <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                            <Ionicons name="arrow-back" size={18} color="#000" />
+                            <Text style={styles.previousText}>Previous</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
-                            style={styles.nextBtn}
-                            onPress={() => navigation.navigate("AboutYouStep")}
-                        >
-                            <Text style={styles.nextText}>Next →</Text>
+                        <TouchableOpacity onPress={() => navigation.navigate("AboutYouStep" as never)}>
+                            <LinearGradient
+                                colors={["#FF512F", "#DD2476"]}
+                                style={styles.nextButton}
+                            >
+                                <Text style={styles.nextText}>Next</Text>
+                                <Ionicons name="arrow-forward" size={18} color="#fff" />
+                            </LinearGradient>
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -263,9 +262,15 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         marginBottom: 12,
     },
+    backButton: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
     backText: {
-        color: "#333",
         fontSize: 16,
+        fontWeight: "500",
+        marginLeft: 4,
+        color: "#000",
     },
     stepText: {
         color: "#555",
@@ -325,27 +330,36 @@ const styles = StyleSheet.create({
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 30,
+        marginTop: 24,
     },
-    prevBtn: {
+    previousButton: {
+        flexDirection: "row",
+        alignItems: "center",
         borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 12,
+        borderColor: "#E6E6E6",
+        borderRadius: 8,
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        backgroundColor: "#fff",
+    },
+    previousText: {
+        fontSize: 15,
+        fontWeight: "500",
+        color: "#000",
+        marginLeft: 6,
+    },
+    nextButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        borderRadius: 8,
         paddingVertical: 10,
         paddingHorizontal: 20,
     },
-    prevText: {
-        color: "#333",
-    },
-    nextBtn: {
-        backgroundColor: "#E94057",
-        paddingVertical: 12,
-        paddingHorizontal: 28,
-        borderRadius: 12,
-    },
     nextText: {
         color: "#fff",
-        fontWeight: "700",
+        fontSize: 15,
+        fontWeight: "500",
+        marginRight: 6,
     },
     dropdown: {
         borderWidth: 1,

@@ -9,13 +9,26 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { updatePreferences, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 
 const PreferencesStep = ({ navigation }) => {
+    const dispatch = useAppDispatch();
+    const form = useAppSelector((state) => state.profileForm.preferences);
+
+    React.useEffect(() => {
+        dispatch(setCurrentScreen('PreferencesStep'));
+    }, [dispatch]);
+
+    const handleChange = (field: keyof typeof form, value: string) => {
+        dispatch(updatePreferences({ [field]: value }));
+    };
+
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <Ionicons name="arrow-back" size={20} color="#000" />
                     <Text style={styles.backText}>Back</Text>
                 </TouchableOpacity>
@@ -39,6 +52,8 @@ const PreferencesStep = ({ navigation }) => {
                         placeholderTextColor="#A0A0A0"
                         style={[styles.input, styles.ageInput]}
                         keyboardType="numeric"
+                        value={form.preferredAgeMin}
+                        onChangeText={(text) => handleChange("preferredAgeMin", text)}
                     />
                     <Text style={styles.toText}>to</Text>
                     <TextInput
@@ -46,6 +61,8 @@ const PreferencesStep = ({ navigation }) => {
                         placeholderTextColor="#A0A0A0"
                         style={[styles.input, styles.ageInput]}
                         keyboardType="numeric"
+                        value={form.preferredAgeMax}
+                        onChangeText={(text) => handleChange("preferredAgeMax", text)}
                     />
                     <Text style={styles.yearsText}>years</Text>
                 </View>
@@ -56,6 +73,8 @@ const PreferencesStep = ({ navigation }) => {
                     placeholder="e.g., Mumbai, Delhi, Bangalore"
                     placeholderTextColor="#A0A0A0"
                     style={styles.input}
+                    value={form.preferredLocations}
+                    onChangeText={(text) => handleChange("preferredLocations", text)}
                 />
 
                 {/* Preferred Education */}
@@ -64,12 +83,14 @@ const PreferencesStep = ({ navigation }) => {
                     placeholder="e.g., Bachelor's, Master's, PhD"
                     placeholderTextColor="#A0A0A0"
                     style={styles.input}
+                    value={form.preferredEducation}
+                    onChangeText={(text) => handleChange("preferredEducation", text)}
                 />
             </View>
 
             {/* Footer Buttons */}
             <View style={styles.footer}>
-                <TouchableOpacity style={styles.previousButton}>
+                <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={18} color="#000" />
                     <Text style={styles.previousText}>Previous</Text>
                 </TouchableOpacity>

@@ -70,7 +70,7 @@ export default function LoginScreen({ navigation }: any) {
             const googleResponse = await signInWithGoogle(dispatch);
             console.log('googleResponse: ', googleResponse);
             handleLogin()
-            navigation.replace('HomeScreen');
+            navigation.replace('BasicInfo');
         } catch (err: any) {
             setLocalError(err.message || 'Google Sign-In failed. Please try again.');
         } finally {

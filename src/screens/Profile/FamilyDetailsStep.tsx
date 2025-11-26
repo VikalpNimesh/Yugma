@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
     View,
     Text,
@@ -10,15 +10,20 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
+import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+import { updateFamilyDetails, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 
 const FamilyDetailsStep = ({ navigation }) => {
-    const [form, setForm] = useState({
-        fatherOccupation: "",
-        motherOccupation: "",
-        siblings: "",
-        familyType: "",
-        religion: "",
-    });
+    const dispatch = useAppDispatch();
+    const form = useAppSelector((state) => state.profileForm.familyDetails);
+
+    React.useEffect(() => {
+        dispatch(setCurrentScreen('FamilyDetailsStep'));
+    }, [dispatch]);
+
+    const handleChange = (field: keyof typeof form, value: string) => {
+        dispatch(updateFamilyDetails({ [field]: value }));
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -51,9 +56,7 @@ const FamilyDetailsStep = ({ navigation }) => {
                             placeholderTextColor="#A0A0A0"
                             style={styles.input}
                             value={form.fatherOccupation}
-                            onChangeText={(text) =>
-                                setForm({ ...form, fatherOccupation: text })
-                            }
+                            onChangeText={(text) => handleChange("fatherOccupation", text)}
                         />
                     </View>
 
@@ -64,9 +67,7 @@ const FamilyDetailsStep = ({ navigation }) => {
                             placeholderTextColor="#A0A0A0"
                             style={styles.input}
                             value={form.motherOccupation}
-                            onChangeText={(text) =>
-                                setForm({ ...form, motherOccupation: text })
-                            }
+                            onChangeText={(text) => handleChange("motherOccupation", text)}
                         />
                     </View>
                 </View>
@@ -79,9 +80,7 @@ const FamilyDetailsStep = ({ navigation }) => {
                             placeholderTextColor="#A0A0A0"
                             style={styles.input}
                             value={form.siblings}
-                            onChangeText={(text) =>
-                                setForm({ ...form, siblings: text })
-                            }
+                            onChangeText={(text) => handleChange("siblings", text)}
                         />
                     </View>
 
@@ -97,9 +96,7 @@ const FamilyDetailsStep = ({ navigation }) => {
                             valueField="value"
                             placeholder="Select family type"
                             value={form.familyType}
-                            onChange={(item) =>
-                                setForm({ ...form, familyType: item.value })
-                            }
+                            onChange={(item) => handleChange("familyType", item.value)}
                             style={[
                                 styles.dropdown,
                                 form.familyType ? styles.dropdownFilled : {},
