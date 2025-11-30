@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     ScrollView,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
 import { Provider, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
@@ -27,6 +28,39 @@ export const BasicInfoScreen: React.FC = () => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updateBasicInfo({ [field]: value }));
+    };
+
+    const handleNext = () => {
+        const { fullName, age, location, profession, education, religion, community } = form;
+
+        if (!fullName || !age || !location || !profession || !education || !religion || !community) {
+            Toast.show({
+                type: 'error',
+                text1: 'Missing Information',
+                text2: 'Please fill in all fields to proceed.',
+            });
+            return;
+        }
+
+        if (fullName.trim().length < 3) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Name',
+                text2: 'Full Name must be at least 3 characters long.',
+            });
+            return;
+        }
+
+        if (isNaN(Number(age))) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Age',
+                text2: 'Age must be a valid number.',
+            });
+            return;
+        }
+
+        navigation.navigate("AboutYouStep" as never);
     };
 
     return (
@@ -69,6 +103,7 @@ export const BasicInfoScreen: React.FC = () => {
                                 onFocus={() => setFocusedField("age")}
                                 onBlur={() => setFocusedField(null)}
                                 isFocused={focusedField === "age"}
+                                keyboardType="numeric"
                             />
                         </View>
 
@@ -188,7 +223,7 @@ export const BasicInfoScreen: React.FC = () => {
                             <Text style={styles.previousText}>Previous</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={() => navigation.navigate("AboutYouStep" as never)}>
+                        <TouchableOpacity onPress={handleNext}>
                             <LinearGradient
                                 colors={["#FF512F", "#DD2476"]}
                                 style={styles.nextButton}
@@ -212,6 +247,7 @@ type InputFieldProps = {
     onFocus: () => void;
     onBlur: () => void;
     isFocused: boolean;
+    keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -222,6 +258,7 @@ const InputField: React.FC<InputFieldProps> = ({
     onFocus,
     onBlur,
     isFocused,
+    keyboardType = "default",
 }) => (
     <View style={styles.inputContainer}>
         <Text style={styles.label}>{label}</Text>
@@ -249,6 +286,7 @@ const InputField: React.FC<InputFieldProps> = ({
                     background: "#fff",      // 👈 Input background
                 },
             }}
+            keyboardType={keyboardType}
         />
     </View>
 );

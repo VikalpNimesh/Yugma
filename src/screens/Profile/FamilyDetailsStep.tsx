@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     StyleSheet,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,7 +14,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateFamilyDetails, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 
-const FamilyDetailsStep = ({ navigation }) => {
+const FamilyDetailsStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.familyDetails);
 
@@ -23,6 +24,22 @@ const FamilyDetailsStep = ({ navigation }) => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updateFamilyDetails({ [field]: value }));
+    };
+
+    const handleNext = () => {
+        const { fatherOccupation, motherOccupation, siblings, familyType } = form;
+
+        if (!fatherOccupation || !motherOccupation || !siblings || !familyType) {
+            Toast.show({
+                type: 'error',
+                text1: 'Missing Information',
+                text2: 'Please fill in all fields to proceed.',
+            });
+            return;
+        }
+
+        console.log("📝 Family Form Data:", form);
+        navigation.navigate("PreferencesStep");
     };
 
     return (
@@ -123,10 +140,7 @@ const FamilyDetailsStep = ({ navigation }) => {
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={() => {
-                        console.log("📝 Family Form Data:", form);
-                        navigation.navigate("PreferencesStep");
-                    }}
+                    onPress={handleNext}
                 >
                     <LinearGradient
                         colors={["#FF512F", "#DD2476"]}

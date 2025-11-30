@@ -5,6 +5,7 @@ import authReducer from './slices/authSlice';
 import profileFormReducer from './slices/profileFormSlice';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { rozeniteDevToolsEnhancer } from '@rozenite/redux-devtools-plugin';
 
 const persistConfig = {
   key: 'root',
@@ -26,6 +27,8 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: false,
     }),
+      enhancers: (getDefaultEnhancers) =>
+    getDefaultEnhancers().concat(rozeniteDevToolsEnhancer()),
 });
 
 export const persistor = persistStore(store);

@@ -7,6 +7,7 @@ import {
     SafeAreaView,
     StyleSheet,
 } from "react-native";
+import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -31,6 +32,43 @@ const PreferencesStep = ({ navigation }: any) => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updatePreferences({ [field]: value }));
+    };
+
+    const handleComplete = () => {
+        const { preferredAgeMin, preferredAgeMax, preferredLocations, preferredEducation } = form;
+
+        if (!preferredAgeMin || !preferredAgeMax || !preferredLocations || !preferredEducation) {
+            Toast.show({
+                type: 'error',
+                text1: 'Missing Information',
+                text2: 'Please fill in all fields to proceed.',
+            });
+            return;
+        }
+
+        const minAge = parseInt(preferredAgeMin, 10);
+        const maxAge = parseInt(preferredAgeMax, 10);
+
+        if (isNaN(minAge) || isNaN(maxAge)) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Age',
+                text2: 'Please enter valid numbers for age range.',
+            });
+            return;
+        }
+
+        if (minAge >= maxAge) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Age Range',
+                text2: 'Minimum age must be less than maximum age.',
+            });
+            return;
+        }
+
+        dispatch(completeProfile());
+        navigation.navigate('BottomTabs' as never);
     };
 
     return (
@@ -104,9 +142,7 @@ const PreferencesStep = ({ navigation }: any) => {
                     <Text style={styles.previousText}>Previous</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity onPress={() => {
-                    dispatch(completeProfile());
-                }}>
+                <TouchableOpacity onPress={handleComplete}>
                     <LinearGradient
                         colors={["#FF512F", "#DD2476"]}
                         style={styles.nextButton}

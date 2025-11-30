@@ -6,6 +6,7 @@ import { RootStackParamList } from "../navigation/AppNavigator";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import auth from "@react-native-firebase/auth";
 import { useAppSelector } from "../redux/hooks";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
@@ -64,18 +65,34 @@ const SplashScreen = () => {
     }, [currentScreen, navigation]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            // If no user is authenticated, check if there's a saved screen to resume
-            const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
-            if (currentScreen && validScreens.includes(currentScreen)) {
-                // Build the navigation stack properly
-                navigation.reset({
-                    index: getScreenIndex(currentScreen),
-                    routes: getNavigationStack(currentScreen),
-                });
-            } else {
-                navigation.replace("GoogleLogin");
+        const checkFirstLaunch = async () => {
+            try {
+                const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+
+                // If no user is authenticated, check if there's a saved screen to resume
+                const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+
+                if (currentScreen && validScreens.includes(currentScreen)) {
+                    // Build the navigation stack properly
+                    navigation.reset({
+                        index: getScreenIndex(currentScreen),
+                        routes: getNavigationStack(currentScreen),
+                    });
+                } else if (hasLaunched === null) {
+                    // First time launch
+                    navigation.replace("AppTypeSelection");
+                } else {
+                    // Not first time, go to Login
+                    navigation.replace("AppTypeSelection");
+                }
+            } catch (error) {
+                console.error('Error checking first launch:', error);
+                navigation.replace("LoginScreen");
             }
+        };
+
+        const timer = setTimeout(() => {
+            checkFirstLaunch();
         }, 2000);
 
         return () => clearTimeout(timer);
@@ -91,21 +108,6 @@ const SplashScreen = () => {
             <Text style={styles.title}>Welcome to VivahSetu</Text>
             <Text style={styles.subtitle}>Find your perfect match</Text>
 
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                    style={[styles.button, styles.matrimonyButton]}
-                    onPress={() => navigation.navigate("Matrimonial")}
-                >
-                    <Text style={styles.buttonText}>💍 Matrimonial</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.button, styles.datingButton]}
-                    onPress={() => navigation.navigate("BasicInfo")}
-                >
-                    <Text style={styles.buttonText}>💘 Dating</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 };

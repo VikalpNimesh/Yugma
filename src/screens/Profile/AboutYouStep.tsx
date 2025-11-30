@@ -79,6 +79,37 @@ export const AboutYouStep: React.FC = () => {
         }
     };
 
+    const handleNext = () => {
+        if (!bio || bio.trim().length < 10) {
+            Toast.show({
+                type: 'error',
+                text1: 'Invalid Bio',
+                text2: 'Please write at least 10 characters about yourself.',
+            });
+            return;
+        }
+
+        if (interests.length === 0) {
+            Toast.show({
+                type: 'error',
+                text1: 'Select Interests',
+                text2: 'Please select at least one interest.',
+            });
+            return;
+        }
+
+        if (photos.length < 2) {
+            Toast.show({
+                type: 'error',
+                text1: 'Upload Photos',
+                text2: 'Please upload at least 2 photos.',
+            });
+            return;
+        }
+
+        navigation.navigate("FamilyDetailsStep" as never);
+    };
+
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
             <ScrollView contentContainerStyle={styles.container}>
@@ -163,22 +194,22 @@ export const AboutYouStep: React.FC = () => {
                         ) : (
                             <View style={styles.photoGrid}>
                                 {photos.map((uri, index) => (
-                        <View key={index} style={styles.photoContainer}>
-                            <Image source={{ uri }} style={styles.photoPreview} />
-                            <TouchableOpacity
-                                style={styles.deleteIcon}
-                                onPress={() => handleDeletePhoto(index)}
-                            >
-                                <Ionicons name="trash" size={20} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                    <TouchableOpacity
-                        style={[styles.addPhotoBtn, { alignSelf: "center" }]}
-                        onPress={handleAddPhotos}
-                    >
-                        <Text style={styles.addPhotoText}>+ Add More</Text>
-                    </TouchableOpacity>
+                                    <View key={index} style={styles.photoContainer}>
+                                        <Image source={{ uri }} style={styles.photoPreview} />
+                                        <TouchableOpacity
+                                            style={styles.deleteIcon}
+                                            onPress={() => handleDeletePhoto(index)}
+                                        >
+                                            <Ionicons name="trash" size={20} color="#fff" />
+                                        </TouchableOpacity>
+                                    </View>
+                                ))}
+                                <TouchableOpacity
+                                    style={[styles.addPhotoBtn, { alignSelf: "center" }]}
+                                    onPress={handleAddPhotos}
+                                >
+                                    <Text style={styles.addPhotoText}>+ Add More</Text>
+                                </TouchableOpacity>
                             </View>
                         )}
                     </View>
@@ -191,7 +222,7 @@ export const AboutYouStep: React.FC = () => {
                         <Text style={styles.previousText}>Previous</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => navigation.navigate("FamilyDetailsStep" as never)}>
+                    <TouchableOpacity onPress={handleNext}>
                         <LinearGradient
                             colors={["#FF512F", "#DD2476"]}
                             style={styles.nextButton}
@@ -262,6 +293,7 @@ const styles = StyleSheet.create({
     textArea: {
         backgroundColor: "#F9F9F9",
         borderRadius: 10,
+        paddingTop: 10, // Add padding for multiline input
     },
     chipContainer: {
         flexDirection: "row",

@@ -9,6 +9,8 @@ import {
     ScrollView,
     Switch,
 } from "react-native";
+import { useSelector, useDispatch } from 'react-redux';
+import { updateUser } from '../../redux/slices/userSlice';
 
 type TabType = "Profile" | "Notifications" | "Privacy" | "Premium" | "Verification";
 
@@ -46,7 +48,13 @@ export default function SettingsScreen() {
 
 function ProfileTab() {
     const [isEditing, setIsEditing] = useState(false);
-    const [mode, setMode] = useState<"Matrimonial" | "Dating">("Matrimonial");
+    const dispatch = useDispatch();
+    const user = useSelector((state: any) => state.user);
+    const mode = user.appType || "Matrimonial";
+
+    const setMode = (newMode: "Matrimonial" | "Dating") => {
+        dispatch(updateUser({ appType: newMode }));
+    };
 
     return (
         <View>

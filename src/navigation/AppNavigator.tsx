@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MultiStepForm from "../screens/Profile/MultiStepForm";
@@ -16,6 +16,8 @@ import MatchesScreen from "../screens/Home/MatchesScreen";
 import SignupScreen from "../screens/Auth/SignupScreen";
 import LoginScreen from "../screens/Auth/LoginScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
+import AppTypeSelectionScreen from "../screens/Auth/AppTypeSelectionScreen";
+import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -33,19 +35,26 @@ export type RootStackParamList = {
     SettingsScreen: undefined;
     ProfileDetails: { userId: string };
     Matrimonial: undefined;
+    AppTypeSelection: undefined;
+    SignupScreen: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const AppNavigator = () => {
+    const navigationRef = useRef(null);
+    useReactNavigationDevTools({ ref: navigationRef });
+
+
     return (
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
             <Stack.Navigator
                 initialRouteName="Splash"
                 screenOptions={{
                     headerShown: false,
                 }}>
                 <Stack.Screen name="Splash" component={SplashScreen} />
+                <Stack.Screen name="AppTypeSelection" component={AppTypeSelectionScreen} options={{ headerShown: false }} />
                 <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} options={{ headerShown: false }}
                 />
                 <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ header: () => <Header />, headerShown: true }} />
