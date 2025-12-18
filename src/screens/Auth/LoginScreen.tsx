@@ -156,7 +156,7 @@ export default function LoginScreen({ navigation }: any) {
                         {/* Login Button */}
                         <TouchableOpacity
                             style={[styles.loginBtn, (isLoading || !email || !password) && styles.buttonDisabled]}
-                            // onPress={handleLogin}
+                            onPress={handleLogin}
                             disabled={isLoading || googleLoading || !email || !password}
                         >
                             {isLoading ? (

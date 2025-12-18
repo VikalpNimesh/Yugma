@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { useSelector, useDispatch } from 'react-redux';
 import { updateUser } from '../../redux/slices/userSlice';
+import { handleLogout } from "../../api/firebase/auth";
+import { useNavigation } from "@react-navigation/native";
 
 type TabType = "Profile" | "Notifications" | "Privacy" | "Premium" | "Verification";
 
@@ -49,12 +51,22 @@ export default function SettingsScreen() {
 function ProfileTab() {
     const [isEditing, setIsEditing] = useState(false);
     const dispatch = useDispatch();
+    const navigation = useNavigation<any>();
     const user = useSelector((state: any) => state.user);
     const mode = user.appType || "Matrimonial";
 
     const setMode = (newMode: "Matrimonial" | "Dating") => {
         dispatch(updateUser({ appType: newMode }));
     };
+    const handleLogoutPress = async () => {
+        try {
+            await handleLogout(navigation, dispatch);
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+    };
+    const { email, name, photo } = useSelector((state: any) => state.user?.user || {});
+
 
     return (
         <View>
@@ -62,17 +74,15 @@ function ProfileTab() {
 
             {!isEditing ? (
                 <View style={styles.profileCard}>
-                    <Image
-                        source={{ uri: "https://via.placeholder.com/80" }}
-                        style={styles.profilePic}
-                    />
-                    <Text style={styles.text}>NaN years old</Text>
-                    <Text style={styles.verified}>✔ Verified</Text>
-                    <Text style={styles.text}>Location: —</Text>
-                    <Text style={styles.text}>Profession: —</Text>
+                    <Image source={{
+                        uri: photo
+                    }} style={{ width: 100, height: 100, marginTop: 20, borderRadius: 50 }} />
 
-                    <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.editBtn}>
-                        <Text style={styles.editText}>Edit</Text>
+                    <Text style={styles.text}>{name}</Text>
+                    <Text style={styles.verified}> {email}</Text>
+
+                    <TouchableOpacity onPress={handleLogoutPress} style={styles.editBtn}>
+                        <Text style={styles.editText}>Log Out</Text>
                     </TouchableOpacity>
                 </View>
             ) : (
@@ -164,7 +174,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
     },
     activeTab: {
-        backgroundColor: "#ff8e53",
+        backgroundColor: "#DD2476",
         borderRadius: 8,
     },
     tabText: {
@@ -203,14 +213,15 @@ const styles = StyleSheet.create({
     verified: {
         color: "green",
         marginBottom: 8,
+        fontSize: 14,
     },
     text: {
-        fontSize: 14,
+        fontSize: 18,
         color: "#555",
     },
     editBtn: {
         marginTop: 10,
-        backgroundColor: "#ff8e53",
+        backgroundColor: "#DD2476",
         borderRadius: 6,
         paddingVertical: 8,
         paddingHorizontal: 16,
@@ -246,7 +257,7 @@ const styles = StyleSheet.create({
         color: "#999",
     },
     saveBtn: {
-        backgroundColor: "#ff8e53",
+        backgroundColor: "#DD2476",
         borderRadius: 8,
         padding: 10,
     },
@@ -277,7 +288,7 @@ const styles = StyleSheet.create({
         color: "#555",
     },
     activeMode: {
-        backgroundColor: "#ff8e53",
+        backgroundColor: "#DD2476",
     },
     activeModeText: {
         color: "#fff",

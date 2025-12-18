@@ -45,11 +45,11 @@ export default function SignupScreen({ navigation }: any) {
                 password,
                 displayName || undefined
             );
-            
+
             console.log('✅ User registered:', user.email);
-            
+
             // Show success message and navigate
-            navigation.replace('SettingsScreen');
+            navigation.replace('BasicInfo');
         } catch (err: any) {
             setError(err.message || 'Unable to create account. Please try again.');
         } finally {

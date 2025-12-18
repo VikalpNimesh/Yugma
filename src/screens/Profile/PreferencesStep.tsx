@@ -68,6 +68,7 @@ const PreferencesStep = ({ navigation }: any) => {
         }
 
         dispatch(completeProfile());
+        dispatch(setCurrentScreen('BottomTabs'));
         navigation.navigate('BottomTabs' as never);
     };
 

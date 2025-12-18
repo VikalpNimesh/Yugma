@@ -26,7 +26,7 @@ const Header = () => {
                     <Text style={styles.segmentText}>Dating</Text>
                 </TouchableOpacity>
             </View> */}
-            <LinearGradient
+            {/* <LinearGradient
                 colors={['#FEC001', '#FF6E00']}
                 start={{ x: 0, y: 1 }}
                 end={{ x: 1, y: 0 }}
@@ -38,7 +38,7 @@ const Header = () => {
                     <FontAwesome5 name="crown" size={14} color="#fff" />
                     <Text style={styles.segmentText}>Premium</Text>
                 </TouchableOpacity>
-            </LinearGradient>
+            </LinearGradient> */}
         </View>
     )
 }

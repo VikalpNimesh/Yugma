@@ -1,6 +1,6 @@
 // GoogleLoginScreen.tsx
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { useDispatch } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -30,17 +30,22 @@ const GoogleLoginScreen = ({ navigation }: any) => {
 
     return (
         <LinearGradient
-            colors={['#FFDAB9', 'white']}
+            colors={["#6f1478ff", "#dd2477ff"]}
             start={{ x: 1, y: 1 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradientContainer}
         >
             <View style={styles.logoContainer}>
                 {/* Logo placeholder */}
+                <Image
+                    source={require("../../assets/yugma.png")}
+                    style={styles.logo}
+                    resizeMode="contain"
+                />
             </View>
 
             <View style={styles.content}>
-                <Text style={styles.newText}>New to VivhaSetu ?</Text>
+                <Text style={styles.newText}>New to Yugma ?</Text>
 
                 <TouchableOpacity
                     style={[styles.button, loading && styles.buttonDisabled]}
@@ -51,13 +56,13 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                     <Text style={styles.buttonText}>Sign Up with Email</Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={[styles.button, styles.buttonDisabled]}
                     disabled
                 >
                     <Icon name="phone" size={20} color="#ff3b3b" />
                     <Text style={styles.buttonText}>Sign Up with Mobile</Text>
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 <TouchableOpacity
                     style={[styles.button, loading && styles.buttonDisabled]}
@@ -103,12 +108,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     logoContainer: {
-        flex: 1,
+        // flex: 1,
         justifyContent: "center",
         alignItems: "center",
     },
     content: {
-        flex: 1,
+        // flex: 1,
         alignItems: "center",
         width: "100%",
         justifyContent: "center",
@@ -161,5 +166,10 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         marginLeft: 5,
         textDecorationLine: "underline",
+    },
+    logo: {
+        width: 400,
+        height: 400,
+        // marginBottom: 30,
     },
 });

@@ -19,8 +19,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.headerContainer}>
                     <Text style={styles.logoText}>
-                        <Text style={{ color: "#FF7A00" }}>♥ </Text>Vivah
-                        <Text style={{ color: "#E94057" }}>Setu</Text>
+                        <Text style={{ color: "hsla(333, 73%, 50%, 1.00)" }}>♥ </Text>Yugma
                     </Text>
                     <Text style={styles.subHeading}>
                         Where Tradition Meets Modern Love
@@ -41,7 +40,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                 </View>
 
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Why Choose VivahSetu?</Text>
+                    <Text style={styles.sectionTitle}>Why Choose Yugma?</Text>
                     <Text style={styles.sectionDesc}>
                         Experience the perfect blend of traditional matchmaking with modern
                         technology
@@ -79,12 +78,12 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                     <Text style={styles.sectionDesc}>
                         Connect with compatible partners for meaningful relationships
                     </Text>
-                    <Image
+                    {/* <Image
                         source={{
                             uri: "https://images.unsplash.com/photo-1601612628452-3c21666774e3?q=80&w=800",
                         }}
                         style={styles.image}
-                    />
+                    /> */}
                 </View>
 
                 <View style={styles.footer}>
@@ -97,7 +96,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                         <Feather
                             name="arrow-right"
                             size={18}
-                            color={"#E94057"}
+                            color={"#DD2476"}
 
                         />
                     </TouchableOpacity>
@@ -152,7 +151,7 @@ const styles = StyleSheet.create({
     logoText: {
         fontSize: 28,
         fontWeight: "700",
-        color: "#E94057",
+        color: "#DD2476",
     },
     subHeading: {
         fontSize: 16,
@@ -167,7 +166,7 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     getStartedBtn: {
-        backgroundColor: "#E94057",
+        backgroundColor: "#DD2476",
         paddingVertical: 12,
         paddingHorizontal: 32,
         borderRadius: 30,
@@ -221,7 +220,7 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontWeight: "700",
-        color: "#E94057",
+        color: "#DD2476",
         marginBottom: 6,
         fontSize: 14,
     },
@@ -240,7 +239,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     footer: {
-        backgroundColor: "#E94057",
+        backgroundColor: "#DD2476",
         paddingVertical: 32,
         paddingHorizontal: 24,
         alignItems: "center",
@@ -267,7 +266,7 @@ const styles = StyleSheet.create({
 
     },
     profileBtnText: {
-        color: "#E94057",
+        color: "#DD2476",
         fontWeight: "700",
     },
 });

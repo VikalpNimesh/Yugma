@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
@@ -100,12 +100,12 @@ const SplashScreen = () => {
 
     return (
         <View style={styles.container}>
-            {/* <Image
-                source={require("../../assets/logo.png")}
+            <Image
+                source={require("../assets/yugma.png")}
                 style={styles.logo}
                 resizeMode="contain"
-            /> */}
-            <Text style={styles.title}>Welcome to VivahSetu</Text>
+            />
+            <Text style={styles.title}>Welcome to Yugma</Text>
             <Text style={styles.subtitle}>Find your perfect match</Text>
 
         </View>

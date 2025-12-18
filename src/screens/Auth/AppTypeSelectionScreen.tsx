@@ -40,7 +40,7 @@ const AppTypeSelectionScreen = () => {
                 style={styles.background}
             >
                 <View style={styles.content}>
-                    <Text style={styles.title}>Welcome to VivahSetu</Text>
+                    <Text style={styles.title}>Welcome to Yugma</Text>
                     <Text style={styles.subtitle}>Choose your journey</Text>
 
                     <View style={styles.cardsContainer}>

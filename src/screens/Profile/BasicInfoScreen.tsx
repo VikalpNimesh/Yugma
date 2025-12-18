@@ -163,12 +163,12 @@ export const BasicInfoScreen: React.FC = () => {
                                 <Dropdown
                                     data={[
                                         { label: "Hindu", value: "Hindu" },
-                                        { label: "Muslim", value: "Muslim" },
-                                        { label: "Christian", value: "Christian" },
-                                        { label: "Sikh", value: "Sikh" },
-                                        { label: "Buddhist", value: "Buddhist" },
-                                        { label: "Jain", value: "Jain" },
-                                        { label: "Other", value: "Other" },
+                                        // { label: "Muslim", value: "Muslim" },
+                                        // { label: "Christian", value: "Christian" },
+                                        // { label: "Sikh", value: "Sikh" },
+                                        // { label: "Buddhist", value: "Buddhist" },
+                                        // { label: "Jain", value: "Jain" },
+                                        // { label: "Other", value: "Other" },
                                     ]}
                                     labelField="label"
                                     valueField="value"

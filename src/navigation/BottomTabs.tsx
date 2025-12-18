@@ -19,7 +19,7 @@ export default function BottomTabs() {
                 headerShown: false,
                 tabBarShowLabel: false,
                 tabBarActiveTintColor: "#fff",
-                tabBarInactiveTintColor: "#000",
+                tabBarInactiveTintColor: "#DD2476",
                 tabBarStyle: {
                     // backgroundColor: "#fff",
                     // borderTopColor: "#eee",
@@ -49,7 +49,7 @@ export default function BottomTabs() {
                     return (
                         <View
                             style={{
-                                backgroundColor: focused ? "black" : "transparent",
+                                backgroundColor: focused ? "#DD2476" : "transparent",
                                 // paddingVertical: 8,
                                 // paddingHorizontal: 20,
                                 borderRadius: 8,
@@ -84,7 +84,7 @@ export default function BottomTabs() {
             {/* <Tab.Screen name="Dating" component={BasicInfoScreen} /> */}
             <Tab.Screen name="MatchesScreen" component={MatchesScreen} />
             <Tab.Screen name="Messages" component={MessagesScreen} />
-            <Tab.Screen name="Settings" component={DatingScreen} />
+            <Tab.Screen name="Settings" component={SettingsScreen} />
         </Tab.Navigator>
     );
 }
