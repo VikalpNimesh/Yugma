@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
 import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Entypo from "react-native-vector-icons/Entypo";
@@ -10,11 +10,10 @@ const Header = () => {
     return (
         <View style={styles.header}>
             <View style={styles.logoCon}>
-
-                <Entypo name="heart-outlined" size={20} color="#E64A8B" />
-                <Text style={styles.logo}>
-                    <Text style={{ color: "#E64A8B" }}>Yugma</Text>
-                </Text>
+                <Image
+                    source={require("../assets/yugmaNew.jpg")}
+                    style={{ width: 120, height: 40, resizeMode: "contain" }}
+                />
             </View>
 
             {/* <View style={styles.segmentContainer}>

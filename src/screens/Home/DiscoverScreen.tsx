@@ -6,7 +6,11 @@ import {
     StyleSheet,
     ScrollView,
     ActivityIndicator,
+    Modal,
+    Image,
+    Dimensions,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -16,9 +20,29 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
 import { fetchDiscoveryFeed, likeDiscoveryProfile, passDiscoveryProfile } from "../../redux/slices/discoverySlice";
 
+const { width, height } = Dimensions.get("window");
+
 const DiscoverScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
     const { profiles, loading, error } = useSelector((state: RootState) => state.discovery);
+    const [showFilter, setShowFilter] = React.useState(false);
+    const [showSwipeTutorial, setShowSwipeTutorial] = React.useState(false);
+
+    useEffect(() => {
+        checkTutorial();
+    }, []);
+
+    const checkTutorial = async () => {
+        const hasSeen = await AsyncStorage.getItem("hasSeenSwipeTutorial");
+        if (!hasSeen) {
+            setShowSwipeTutorial(true);
+        }
+    };
+
+    const closeTutorial = async () => {
+        setShowSwipeTutorial(false);
+        await AsyncStorage.setItem("hasSeenSwipeTutorial", "true");
+    };
 
     useEffect(() => {
         dispatch(fetchDiscoveryFeed());
@@ -54,13 +78,16 @@ const DiscoverScreen = () => {
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
-                contentContainerStyle={{ flexGrow: 1, paddingBottom: 50 }}
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header */}
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>Discover Partners</Text>
-                    <TouchableOpacity style={styles.filterButton}>
+                    <TouchableOpacity
+                        style={styles.filterButton}
+                        onPress={() => setShowFilter(true)}
+                    >
                         <Ionicons name="filter-outline" size={18} color="#000" />
                         <Text style={styles.filterText}>Filters</Text>
                     </TouchableOpacity>
@@ -118,6 +145,39 @@ const DiscoverScreen = () => {
                     </View>
                 )}
             </ScrollView>
+
+            {/* Filter Modal Stub */}
+            <Modal visible={showFilter} animationType="slide" transparent>
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>Filters</Text>
+                        <Text>Filter options coming soon...</Text>
+                        <TouchableOpacity
+                            style={styles.closeButton}
+                            onPress={() => setShowFilter(false)}
+                        >
+                            <Text style={styles.closeButtonText}>Close</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+
+            {/* Swipe Tutorial Overlay */}
+            <Modal visible={showSwipeTutorial} transparent animationType="fade">
+                <TouchableOpacity style={styles.tutorialOverlay} activeOpacity={1} onPress={closeTutorial}>
+                    <View style={styles.tutorialContent}>
+                        <View style={styles.handRow}>
+                            <Ionicons name="hand-left-outline" size={50} color="#fff" />
+                            <Text style={styles.tutorialText}>Swipe Left to Pass</Text>
+                        </View>
+                        <View style={styles.handRow}>
+                            <Text style={styles.tutorialText}>Swipe Right to Like</Text>
+                            <Ionicons name="hand-right-outline" size={50} color="#fff" />
+                        </View>
+                        <Text style={styles.tapText}>Tap to start</Text>
+                    </View>
+                </TouchableOpacity>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -215,4 +275,30 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
     },
+    modalContainer: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    modalContent: {
+        width: "80%",
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 20,
+        alignItems: "center",
+    },
+    modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
+    closeButton: { marginTop: 20, padding: 10, backgroundColor: "#E64A8B", borderRadius: 8 },
+    closeButtonText: { color: "#fff" },
+    tutorialOverlay: {
+        flex: 1,
+        backgroundColor: "rgba(0,0,0,0.8)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    tutorialContent: { alignItems: "center", gap: 40 },
+    handRow: { flexDirection: "row", alignItems: "center", gap: 20 },
+    tutorialText: { color: "#fff", fontSize: 20, fontWeight: "bold" },
+    tapText: { color: "#ddd", marginTop: 40, fontSize: 14 },
 });

@@ -47,13 +47,13 @@ export const BasicInfoScreen: React.FC = () => {
     };
 
     const handleNext = () => {
-        const { fullName, email, age, location, profession, education, religion, community } = form;
+        const { fullName, email, age, location, profession, education, region, areaCover } = form;
 
-        if (!fullName || !email || !age || !location || !profession || !education || !religion || !community) {
+        if (!fullName || !email || !age || !location || !profession || !education || !region) {
             Toast.show({
                 type: 'error',
                 text1: 'Missing Information',
-                text2: 'Please fill in all fields to proceed.',
+                text2: 'Please fill in all required fields to proceed.',
             });
             return;
         }
@@ -187,62 +187,54 @@ export const BasicInfoScreen: React.FC = () => {
                                     renderRightIcon={() => null}
                                 />
                             </View>
+                        </View>
 
-                            {/* Religion Dropdown */}
-                            <View style={[styles.inputContainer, { flex: 1, margin: 6 }]}>
-                                <Text style={styles.label}>Religion</Text>
-                                <Dropdown
-                                    data={[
-                                        { label: "Hindu", value: "Hindu" },
-                                        // { label: "Muslim", value: "Muslim" },
-                                        // { label: "Christian", value: "Christian" },
-                                        // { label: "Sikh", value: "Sikh" },
-                                        // { label: "Buddhist", value: "Buddhist" },
-                                        // { label: "Jain", value: "Jain" },
-                                        // { label: "Other", value: "Other" },
-                                    ]}
-                                    labelField="label"
-                                    valueField="value"
-                                    placeholder="Select religion"
-                                    value={form.religion}
-                                    onChange={(item) => handleChange("religion", item.value)}
+                        <View style={styles.row}>
+                            <InputField
+                                label="Region"
+                                placeholder="Your region"
+                                value={form.region}
+                                onChangeText={(text) => handleChange("region", text)}
+                                onFocus={() => setFocusedField("region")}
+                                onBlur={() => setFocusedField(null)}
+                                isFocused={focusedField === "region"}
+                            />
+
+                            <View style={styles.inputContainer}>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <Text style={styles.label}>Area Cover</Text>
+                                    <View style={styles.premiumBadge}>
+                                        <Ionicons name="star" size={12} color="#FFD700" />
+                                        <Text style={styles.premiumText}>Premium</Text>
+                                    </View>
+                                </View>
+                                <TextInput
+                                    mode="outlined"
+                                    placeholder="Coverage area (Premium)"
+                                    placeholderTextColor={"#999"}
+                                    value={form.areaCover}
+                                    onChangeText={(text) => handleChange("areaCover", text)}
+                                    onFocus={() => setFocusedField("areaCover")}
+                                    onBlur={() => setFocusedField(null)}
+                                    outlineColor="#ddd"
+                                    activeOutlineColor="#dadada"
                                     style={[
-                                        styles.dropdown,
-                                        form.religion ? styles.dropdownFilled : {},
+                                        styles.paperInput,
+                                        focusedField === "areaCover" && { borderColor: "#E94057" },
                                     ]}
-                                    placeholderStyle={styles.placeholderStyle}
-                                    selectedTextStyle={styles.selectedTextStyle}
-                                    itemTextStyle={{ color: "#333" }}
-                                    activeColor="#f4f4f4"
-                                    renderRightIcon={() => null}
+                                    textColor='#000'
+                                    theme={{
+                                        roundness: 10,
+                                        colors: {
+                                            text: "#000",
+                                            placeholder: "#999",
+                                            primary: "#E94057",
+                                            background: "#fff",
+                                        },
+                                    }}
                                 />
                             </View>
                         </View>
-
-                        {/* Community Dropdown */}
-                        <View style={[styles.inputContainer, { marginHorizontal: 6, marginTop: 10 }]}>
-                            <Text style={styles.label}>Community</Text>
-                            <Dropdown
-                                data={[
-                                    { label: "Brahmin", value: "Brahmin" },
-                                ]}
-                                labelField="label"
-                                valueField="value"
-                                placeholder="Select community"
-                                value={form.community}
-                                onChange={(item) => handleChange("community", item.value)}
-                                style={[
-                                    styles.dropdown,
-                                    form.community ? styles.dropdownFilled : {},
-                                ]}
-                                placeholderStyle={styles.placeholderStyle}
-                                selectedTextStyle={styles.selectedTextStyle}
-                                itemTextStyle={{ color: "#333" }}
-                                activeColor="#f4f4f4"
-                                renderRightIcon={() => null}
-                            />
-                        </View>
-
 
 
                     </View>
@@ -452,5 +444,20 @@ const styles = StyleSheet.create({
     selectedTextStyle: {
         color: "#000",
         fontSize: 14,
+    },
+    premiumBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#FFF9E6",
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        marginLeft: 6,
+    },
+    premiumText: {
+        fontSize: 10,
+        fontWeight: "600",
+        color: "#FFB800",
+        marginLeft: 2,
     },
 });

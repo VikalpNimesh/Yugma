@@ -54,7 +54,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
             <View style={styles.logoContainer}>
                 {/* Logo placeholder */}
                 <Image
-                    source={require("../../assets/yugma.png")}
+                    source={require("../../assets/yugmaNew.jpg")}
                     style={styles.logo}
                     resizeMode="contain"
                 />
@@ -80,7 +80,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                     <Text style={styles.buttonText}>Sign Up with Mobile</Text>
                 </TouchableOpacity> */}
 
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={[styles.button, loading && styles.buttonDisabled]}
                     onPress={handleGoogleSignIn}
                     disabled={loading}
@@ -93,7 +93,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                             <Text style={styles.buttonText}>Sign Up with Google</Text>
                         </>
                     )}
-                </TouchableOpacity>
+                </TouchableOpacity> */}
 
                 {error ? (
                     <View style={styles.errorContainer}>

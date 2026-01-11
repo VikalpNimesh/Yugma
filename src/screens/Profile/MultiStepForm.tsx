@@ -9,7 +9,11 @@ import {
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
+import { useSelector } from "react-redux";
+import { RootState } from "../../redux/store";
+
 const MultiStepForm = ({ navigation }: any) => {
+    const { appType } = useSelector((state: any) => state.user); // Assuming user slice has appType
     const [step, setStep] = useState(1);
     const totalSteps = 4;
 
@@ -56,7 +60,7 @@ const MultiStepForm = ({ navigation }: any) => {
             <View style={styles.card}>
                 {step === 1 && <StepOne />}
                 {step === 2 && <StepTwo />}
-                {step === 3 && <StepThree />}
+                {step === 3 && <StepThree appType={appType} />}
                 {step === 4 && <StepFour />}
             </View>
 
@@ -104,10 +108,10 @@ const StepOne = () => (
 
         <View style={styles.inputRow}>
             <InputField label="Education" placeholder="Select education level" />
-            <InputField label="Religion" placeholder="Select religion" />
+            <InputField label="Region" placeholder="Select region" />
         </View>
 
-        <InputField label="Community" placeholder="Select community" />
+        <InputField label="Area Cover (Premium)" placeholder="Enter area details" />
     </View>
 );
 
@@ -159,21 +163,37 @@ const StepTwo = () => (
     </View>
 );
 
-const StepThree = () => (
-    <View>
-        <Text style={styles.title}>Family Details</Text>
+const StepThree = ({ appType }: { appType: string }) => {
+    return (
+        <View>
+            <Text style={styles.title}>Family Details</Text>
 
-        <View style={styles.inputRow}>
-            <InputField label="Father's Occupation" placeholder="Father's profession" />
-            <InputField label="Mother's Occupation" placeholder="Mother's profession" />
-        </View>
+            {appType === "matrimonial" && (
+                <>
+                    <View style={styles.inputRow}>
+                        <InputField label="Father's Occupation" placeholder="Father's profession" />
+                        <InputField label="Mother's Occupation" placeholder="Mother's profession" />
+                    </View>
+                </>
+            )}
 
-        <View style={styles.inputRow}>
-            <InputField label="Siblings" placeholder="e.g., 1 brother, 1 sister" />
-            <InputField label="Family Type" placeholder="Select family type" />
+            <View style={styles.inputRow}>
+                {appType === "matrimonial" ? (
+                    <View style={{ flex: 1, gap: 12 }}>
+                        <View style={styles.inputRow}>
+                            <InputField label="Brothers" placeholder="No. of brothers" />
+                            <InputField label="Sisters" placeholder="No. of sisters" />
+                        </View>
+                        <InputField label="Sibling Marital Status" placeholder="e.g. 1 married brother" />
+                    </View>
+                ) : (
+                    <InputField label="Siblings" placeholder="e.g., 1 brother, 1 sister" />
+                )}
+                <InputField label="Family Type" placeholder="Select family type" />
+            </View>
         </View>
-    </View>
-);
+    );
+};
 
 
 const StepFour = () => (

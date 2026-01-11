@@ -8,8 +8,8 @@ type BasicInfoForm = {
   location: string;
   profession: string;
   education: string;
-  religion: string;
-  community: string;
+  region: string;
+  areaCover: string; // Premium feature
 };
 
 type AboutYouForm = {
@@ -23,6 +23,9 @@ type FamilyDetailsForm = {
   motherOccupation: string;
   siblings: string;
   familyType: string;
+  numberOfBrothers: string;
+  numberOfSisters: string;
+  siblingsMaritalStatus: string;
 };
 
 type PreferencesForm = {
@@ -51,8 +54,8 @@ const initialState: ProfileFormState = {
     location: '',
     profession: '',
     education: '',
-    religion: '',
-    community: '',
+    region: '',
+    areaCover: '',
   },
   aboutYou: {
     bio: '',
@@ -64,6 +67,9 @@ const initialState: ProfileFormState = {
     motherOccupation: '',
     siblings: '',
     familyType: '',
+    numberOfBrothers: '',
+    numberOfSisters: '',
+    siblingsMaritalStatus: '',
   },
   preferences: {
     preferredAgeMin: '',
@@ -91,8 +97,8 @@ export const completeProfile = createAsyncThunk(
         location: profile.basicInfo.location,
         profession: profile.basicInfo.profession,
         education: profile.basicInfo.education,
-        religion: profile.basicInfo.religion,
-        community: profile.basicInfo.community,
+        religion: profile.basicInfo.region, // Mapping region to religion/community based on backend need or new fields
+        community: profile.basicInfo.areaCover,
         bio: profile.aboutYou.bio,
         interests: profile.aboutYou.interests.map((i: any) => ({ interest: i })),
         photos: profile.aboutYou.photos.map((url: any, idx: number) => ({ url, order: idx })),

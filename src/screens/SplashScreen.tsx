@@ -91,7 +91,7 @@ const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <Image
-                source={require("../assets/yugma.png")}
+                source={require("../assets/yugmaNew.jpg")}
                 style={styles.logo}
                 resizeMode="contain"
             />

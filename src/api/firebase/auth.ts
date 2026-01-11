@@ -193,7 +193,21 @@ export const handleLogout = async (
       dispatch(resetAuth()); // from authSlice
     }
 
-    Alert.alert('Success', 'You have been logged out successfully');
+    Alert.alert('Success', 'You have been logged out successfully', [
+      {
+        text: 'OK',
+        onPress: () => {
+          if (navigation) {
+            // Explicitly navigate to AppTypeSelection
+            // We use reset to clear history so they can't go back to Settings
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'AppTypeSelection' }],
+            });
+          }
+        }
+      }
+    ]);
   } catch (error) {
     console.error('Logout error:', error);
     throw new Error('Failed to logout. Please try again.');
