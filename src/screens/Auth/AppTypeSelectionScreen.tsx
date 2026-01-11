@@ -19,7 +19,7 @@ const AppTypeSelectionScreen = () => {
     const navigation = useNavigation();
     const dispatch = useDispatch();
 
-    const handleSelection = async (type: 'Dating' | 'Matrimonial') => {
+    const handleSelection = async (type: 'dating' | 'matrimonial') => {
         try {
             await AsyncStorage.setItem('hasLaunched', 'true');
             // Store the selected type in Redux
@@ -47,7 +47,7 @@ const AppTypeSelectionScreen = () => {
                         {/* Dating Option */}
                         <TouchableOpacity
                             style={styles.card}
-                            onPress={() => handleSelection('Dating')}
+                            onPress={() => handleSelection('dating')}
                             activeOpacity={0.9}
                         >
                             <LinearGradient
@@ -65,7 +65,7 @@ const AppTypeSelectionScreen = () => {
                         {/* Matrimony Option */}
                         <TouchableOpacity
                             style={styles.card}
-                            onPress={() => handleSelection('Matrimonial')}
+                            onPress={() => handleSelection('matrimonial')}
                             activeOpacity={0.9}
                         >
                             <LinearGradient

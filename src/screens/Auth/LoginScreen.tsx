@@ -10,12 +10,16 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { signInWithGoogle } from '../../api/firebase/auth';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
+import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
+import { useNavigation } from '@react-navigation/native';
 
-export default function LoginScreen({ navigation }: any) {
+export default function LoginScreen() {
+    const navigation = useNavigation();
     const dispatch = useAppDispatch();
     const { isLoading, error: authError, isAuthenticated } = useAppSelector((state) => state.auth);
 
@@ -33,11 +37,7 @@ export default function LoginScreen({ navigation }: any) {
     }, [authError, dispatch]);
 
     // Navigate to home screen when authenticated
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigation.replace('HomeScreen');
-        }
-    }, [isAuthenticated, navigation]);
+    // Navigation happens automatically in AppNavigator via isAuthenticated check
 
     const handleLogin = async () => {
         if (isLoading) return;
@@ -51,8 +51,23 @@ export default function LoginScreen({ navigation }: any) {
         setLocalError('');
 
         try {
-            await dispatch(loginUser({ email: email.trim(), password })).unwrap();
-            // Navigation will happen automatically via useEffect when isAuthenticated becomes true
+            // Set the current screen to BasicInfo so the AppNavigator's Splash knows where to go
+            dispatch(setCurrentScreen('BasicInfo'));
+            const result = await dispatch(loginUser({ emailOrPhone: email.trim(), password })).unwrap();
+
+            // Initialize basic info with user data
+            if (result.user) {
+                const userData = {
+                    fullName: result.user.fullName || '',
+                    email: result.user.email || email.trim(),
+                };
+
+                dispatch(initializeBasicInfo(userData));
+
+                // Persist to AsyncStorage
+                await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
+            }
+
             console.log('✅ Login successful');
         } catch (err: any) {
             console.log('err: ', err);
@@ -70,7 +85,7 @@ export default function LoginScreen({ navigation }: any) {
             const googleResponse = await signInWithGoogle(dispatch);
             console.log('googleResponse: ', googleResponse);
             handleLogin()
-            navigation.replace('BasicInfo');
+            // Navigation will happen automatically via Redux state change
         } catch (err: any) {
             setLocalError(err.message || 'Google Sign-In failed. Please try again.');
         } finally {

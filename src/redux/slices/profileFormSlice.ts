@@ -3,6 +3,7 @@ import profileService from '../../api/services/profileService';
 
 type BasicInfoForm = {
   fullName: string;
+  email: string;
   age: string;
   location: string;
   profession: string;
@@ -45,6 +46,7 @@ export type ProfileFormState = {
 const initialState: ProfileFormState = {
   basicInfo: {
     fullName: '',
+    email: '',
     age: '',
     location: '',
     profession: '',
@@ -81,7 +83,7 @@ export const completeProfile = createAsyncThunk(
     try {
       const state: any = getState();
       const profile = state.profileForm;
-      
+
       const payload = {
         userId: profile.basicInfo.fullName, // placeholder, replace with actual user ID
         fullName: profile.basicInfo.fullName,
@@ -96,10 +98,10 @@ export const completeProfile = createAsyncThunk(
         photos: profile.aboutYou.photos.map((url: any, idx: number) => ({ url, order: idx })),
         familyDetails: profile.familyDetails,
         preferences: {
-            ageMin: Number(profile.preferences.preferredAgeMin),
-            ageMax: Number(profile.preferences.preferredAgeMax),
-            preferredLocations: profile.preferences.preferredLocations.split(',').map((l: string) => ({ location: l.trim() })),
-            preferredEducation: profile.preferences.preferredEducation.split(',').map((e: string) => ({ education: e.trim() })),
+          ageMin: Number(profile.preferences.preferredAgeMin),
+          ageMax: Number(profile.preferences.preferredAgeMax),
+          preferredLocations: profile.preferences.preferredLocations.split(',').map((l: string) => ({ location: l.trim() })),
+          preferredEducation: profile.preferences.preferredEducation.split(',').map((e: string) => ({ education: e.trim() })),
         }
       };
 
@@ -115,6 +117,10 @@ const profileFormSlice = createSlice({
   name: 'profileForm',
   initialState,
   reducers: {
+    initializeBasicInfo: (state, action: PayloadAction<{ fullName: string; email: string }>) => {
+      state.basicInfo.fullName = action.payload.fullName;
+      state.basicInfo.email = action.payload.email;
+    },
     updateBasicInfo: (state, action: PayloadAction<Partial<BasicInfoForm>>) => {
       state.basicInfo = { ...state.basicInfo, ...action.payload };
     },
@@ -155,6 +161,7 @@ const profileFormSlice = createSlice({
 });
 
 export const {
+  initializeBasicInfo,
   updateBasicInfo,
   updateAboutYou,
   updateFamilyDetails,

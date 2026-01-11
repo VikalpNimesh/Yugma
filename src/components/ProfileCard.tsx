@@ -2,56 +2,34 @@ import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
-interface ProfileCardProps {
-    name: string;
-    age: number;
-    location: string;
-    profession: string;
-    education: string;
-    image: string;
-    isVerified?: boolean;
-    isPremium?: boolean;
-    familyDetails?: {
-        father?: string;
-        mother?: string;
-        siblings?: string;
-    };
-}
+import { DiscoveryProfile } from "../api/types/discovery.types";
+
+interface ProfileCardProps extends DiscoveryProfile { }
 
 const ProfileCard: React.FC<ProfileCardProps> = ({
-    name,
+    fullName,
     age,
     location,
     profession,
     education,
-    image,
-    isVerified = false,
-    isPremium = false,
+    photos,
     familyDetails,
 }) => {
+    // Get the first photo as the main image, or use a placeholder
+    const image = photos && photos.length > 0 ? photos[0].url : "https://via.placeholder.com/300x300.png?text=No+Photo";
+
     return (
         <View style={styles.card}>
             {/* Profile Image + Badges */}
             <View style={{ position: "relative" }}>
                 <Image source={{ uri: image }} style={styles.profileImage} />
 
-                {isVerified && (
-                    <View style={styles.verifiedBadge}>
-                        <Text style={styles.verifiedText}>Verified</Text>
-                    </View>
-                )}
-
-                {isPremium && (
-                    <View style={styles.premiumBadge}>
-                        <Ionicons name="star" color="#fff" size={12} />
-                        <Text style={styles.premiumText}>Premium</Text>
-                    </View>
-                )}
+                {/* Badges could be added back if API provides this info */}
             </View>
 
             {/* Profile Details */}
             <View style={styles.details}>
-                <Text style={styles.name}>{`${name}, ${age}`}</Text>
+                <Text style={styles.name}>{`${fullName}, ${age}`}</Text>
 
                 <InfoRow icon="location-outline" text={location} />
                 <InfoRow icon="briefcase-outline" text={profession} />
@@ -61,14 +39,14 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
                 {familyDetails && (
                     <View style={styles.familyBox}>
                         <Text style={styles.familyTitle}>Family Details</Text>
-                        {familyDetails.father && (
+                        {familyDetails.fatherOccupation && (
                             <Text style={styles.familyText}>
-                                Father: {familyDetails.father}
+                                Father: {familyDetails.fatherOccupation}
                             </Text>
                         )}
-                        {familyDetails.mother && (
+                        {familyDetails.motherOccupation && (
                             <Text style={styles.familyText}>
-                                Mother: {familyDetails.mother}
+                                Mother: {familyDetails.motherOccupation}
                             </Text>
                         )}
                         {familyDetails.siblings && (

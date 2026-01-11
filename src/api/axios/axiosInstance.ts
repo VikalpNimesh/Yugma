@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
 
 // Base URL - Update this with your API base URL
-const BASE_URL = 'http://localhost:3001'; // TODO: Replace with your actual API URL
+const BASE_URL = 'http://10.0.2.2:3001'; // TODO: Replace with your actual API URL
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({
@@ -18,11 +18,15 @@ const axiosInstance: AxiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
     async (config: InternalAxiosRequestConfig) => {
         try {
-            // Get token from AsyncStorage
-            const token = await AsyncStorage.getItem('authToken');
+            // Get credentials from Keychain
+            const credentials = await Keychain.getGenericPassword();
 
-            if (token && config.headers) {
-                config.headers.Authorization = `Bearer ${token}`;
+            if (credentials && config.headers) {
+                const tokens = JSON.parse(credentials.password);
+                const token = tokens.access;
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
             }
 
             // Add any other default headers here
@@ -56,8 +60,8 @@ axiosInstance.interceptors.response.use(
             originalRequest._retry = true;
 
             try {
-                // Clear stored token
-                await AsyncStorage.removeItem('authToken');
+                // Clear stored tokens from Keychain
+                await Keychain.resetGenericPassword();
 
                 // You can implement token refresh logic here if needed
                 // For now, we'll just clear the token and let the app handle re-authentication

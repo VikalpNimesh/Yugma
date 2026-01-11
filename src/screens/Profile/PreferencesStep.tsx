@@ -4,7 +4,6 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    SafeAreaView,
     StyleSheet,
 } from "react-native";
 import Toast from "react-native-toast-message";
@@ -13,6 +12,7 @@ import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updatePreferences, setCurrentScreen, completeProfile } from "../../redux/slices/profileFormSlice";
 import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const PreferencesStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();

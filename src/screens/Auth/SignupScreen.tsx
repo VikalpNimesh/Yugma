@@ -10,8 +10,11 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { createUserWithEmailPassword } from '../../api/firebase/auth';
+import { useSelector, useDispatch } from 'react-redux';
+import { signupUser } from '../../redux/slices/authSlice';
+import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
 
 export default function SignupScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
@@ -20,6 +23,9 @@ export default function SignupScreen({ navigation }: any) {
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    const { appType } = useSelector((state: any) => state.user);
+    const dispatch = useDispatch();
 
     const handleSignup = async () => {
         if (loading) return;
@@ -40,17 +46,44 @@ export default function SignupScreen({ navigation }: any) {
         setLoading(true);
 
         try {
-            const user = await createUserWithEmailPassword(
+            // Set the current screen to BasicInfo so the AppNavigator's Splash knows where to go
+            dispatch(setCurrentScreen('BasicInfo'));
+
+            const resultAction = await dispatch(signupUser({
                 email,
                 password,
-                displayName || undefined
-            );
+                name: displayName || 'User',
+                accountMode: appType || 'matrimonial',
+            }) as any);
 
-            console.log('✅ User registered:', user.email);
+            if (signupUser.fulfilled.match(resultAction)) {
+                console.log('✅ User registered:', (resultAction.payload as any).user.email);
 
-            // Show success message and navigate
-            navigation.replace('BasicInfo');
+                // Initialize basic info with user data
+                const userData = resultAction.payload as any;
+                if (userData.user) {
+                    const basicInfo = {
+                        fullName: userData.user.fullName || displayName || '',
+                        email: userData.user.email || email.trim(),
+                    };
+
+                    dispatch(initializeBasicInfo(basicInfo));
+
+                    // Persist to AsyncStorage
+                    await AsyncStorage.setItem('userBasicInfo', JSON.stringify(basicInfo));
+                }
+
+                // No need for navigation.replace('BasicInfo') here as the RootNavigator
+                // will swap to AppNavigator and Splash will handle the routing.
+            } else {
+                if (resultAction.payload) {
+                    setError(resultAction.payload as string);
+                } else {
+                    setError('Unable to create account. Please try again.');
+                }
+            }
         } catch (err: any) {
+            console.error(err);
             setError(err.message || 'Unable to create account. Please try again.');
         } finally {
             setLoading(false);

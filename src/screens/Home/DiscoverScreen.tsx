@@ -1,128 +1,60 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
     View,
     Text,
     TouchableOpacity,
     StyleSheet,
     ScrollView,
+    ActivityIndicator,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
-// import ProfileCard from "../components/ProfileCard";
 import Swiper from "react-native-deck-swiper";
 import ProfileCard from "../../components/ProfileCard";
-
-export const profiles = [
-    {
-        id: 1,
-        name: "Priya Sharma",
-        age: 26,
-        location: "Mumbai, Maharashtra",
-        profession: "Software Engineer",
-        education: "Master's in Computer Science",
-        image:
-            "https://images.pexels.com/photos/33402174/pexels-photo-33402174.jpeg",
-        isVerified: true,
-        isPremium: true,
-        familyDetails: {
-            father: "Business Owner",
-            mother: "Teacher",
-            siblings: "1 sister",
-        },
-    },
-    {
-        id: 2,
-        name: "Riya Patel",
-        age: 24,
-        location: "Delhi, India",
-        profession: "Fashion Designer",
-        education: "Bachelor's in Arts",
-        image:
-            "https://images.pexels.com/photos/2100063/pexels-photo-2100063.jpeg",
-        isVerified: true,
-        isPremium: false,
-        familyDetails: {
-            father: "Doctor",
-            mother: "Homemaker",
-            siblings: "1 brother",
-        },
-    },
-    {
-        id: 3,
-        name: "Sneha Verma",
-        age: 27,
-        location: "Bangalore, Karnataka",
-        profession: "Product Manager",
-        education: "MBA",
-        image:
-            "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-        isVerified: false,
-        isPremium: true,
-        familyDetails: {
-            father: "Retired Army Officer",
-            mother: "Teacher",
-            siblings: "2 brothers",
-        },
-    },
-    {
-        id: 1,
-        name: "Priya Sharma",
-        age: 26,
-        location: "Mumbai, Maharashtra",
-        profession: "Software Engineer",
-        education: "Master's in Computer Science",
-        image:
-            "https://images.pexels.com/photos/33402174/pexels-photo-33402174.jpeg",
-        isVerified: true,
-        isPremium: true,
-        familyDetails: {
-            father: "Business Owner",
-            mother: "Teacher",
-            siblings: "1 sister",
-        },
-    },
-    {
-        id: 2,
-        name: "Riya Patel",
-        age: 24,
-        location: "Delhi, India",
-        profession: "Fashion Designer",
-        education: "Bachelor's in Arts",
-        image:
-            "https://images.pexels.com/photos/2100063/pexels-photo-2100063.jpeg",
-        isVerified: true,
-        isPremium: false,
-        familyDetails: {
-            father: "Doctor",
-            mother: "Homemaker",
-            siblings: "1 brother",
-        },
-    },
-    {
-        id: 3,
-        name: "Sneha Verma",
-        age: 27,
-        location: "Bangalore, Karnataka",
-        profession: "Product Manager",
-        education: "MBA",
-        image:
-            "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg",
-        isVerified: false,
-        isPremium: true,
-        familyDetails: {
-            father: "Retired Army Officer",
-            mother: "Teacher",
-            siblings: "2 brothers",
-        },
-    },
-];
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../redux/store";
+import { fetchDiscoveryFeed, likeDiscoveryProfile, passDiscoveryProfile } from "../../redux/slices/discoverySlice";
 
 const DiscoverScreen = () => {
+    const dispatch = useDispatch<AppDispatch>();
+    const { profiles, loading, error } = useSelector((state: RootState) => state.discovery);
+
+    useEffect(() => {
+        dispatch(fetchDiscoveryFeed());
+    }, [dispatch]);
+
+    const handleLike = (userId: string) => {
+        dispatch(likeDiscoveryProfile(userId));
+    };
+
+    const handlePass = (userId: string) => {
+        dispatch(passDiscoveryProfile(userId));
+    };
+
+    if (loading && profiles.length === 0) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centered]}>
+                <ActivityIndicator size="large" color="#E94057" />
+            </SafeAreaView>
+        );
+    }
+
+    if (error && profiles.length === 0) {
+        return (
+            <SafeAreaView style={[styles.container, styles.centered]}>
+                <Text style={styles.errorText}>{error}</Text>
+                <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.retryButton}>
+                    <Text style={styles.retryText}>Retry</Text>
+                </TouchableOpacity>
+            </SafeAreaView>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView
-                contentContainerStyle={{ paddingBottom: 50 }}
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 50 }}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header */}
@@ -134,49 +66,58 @@ const DiscoverScreen = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Swiper */}
-                <View style={styles.swiperWrapper}>
-                    <Swiper
-                        cards={profiles}
-                        renderCard={(card) => <ProfileCard {...card} />}
-                        stackSize={2}
-                        backgroundColor="transparent"
-                        cardVerticalMargin={10}
-                        cardHorizontalMargin={16}
-                        animateCardOpacity
-                        horizontalSwipe
-                        verticalSwipe={false}
-                        onSwipedLeft={(index) =>
-                            console.log("Swiped left:", profiles[index]?.name)
-                        }
-                        onSwipedRight={(index) =>
-                            console.log("Swiped right:", profiles[index]?.name)
-                        }
-                    />
+                {/* Swiper / Content */}
+                {profiles.length > 0 ? (
+                    <>
+                        <View style={styles.swiperWrapper}>
+                            <Swiper
+                                key={profiles.length} // Force re-render on length change
+                                cards={profiles}
+                                renderCard={(card) => <ProfileCard {...card} />}
+                                stackSize={Math.min(profiles.length, 3)}
+                                backgroundColor="transparent"
+                                cardVerticalMargin={10}
+                                cardHorizontalMargin={16}
+                                animateCardOpacity
+                                horizontalSwipe
+                                verticalSwipe={false}
+                                onSwipedLeft={(index) => handlePass(profiles[index].userId)}
+                                onSwipedRight={(index) => handleLike(profiles[index].userId)}
+                            />
+                        </View>
+                        <View style={styles.likeDislikebtn}>
+                            <TouchableOpacity
+                                style={styles.passButton}
+                                onPress={() => {
+                                    if (profiles.length > 0) handlePass(profiles[0].userId);
+                                }}
+                            >
+                                <Ionicons name="close" size={28} color="#E64A8B" />
+                            </TouchableOpacity>
 
-                </View>
-                <View style={styles.likeDislikebtn}>
-                    <TouchableOpacity style={styles.passButton}>
-                        <Ionicons name="close" size={28} color="#E64A8B" />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity>
-                        <LinearGradient
-                            colors={["#FF512F", "#DD2476"]}
-                            style={styles.likeButton}
-                        >
-                            <Ionicons name="heart" size={28} color="#fff" />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                    {/* <Text style={styles.swipeText}>
-                    Swipe right to like • Swipe left to pass
-                </Text> */}
-                </View>
-
-
+                            <TouchableOpacity
+                                onPress={() => {
+                                    if (profiles.length > 0) handleLike(profiles[0].userId);
+                                }}
+                            >
+                                <LinearGradient
+                                    colors={["#FF512F", "#DD2476"]}
+                                    style={styles.likeButton}
+                                >
+                                    <Ionicons name="heart" size={28} color="#fff" />
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </>
+                ) : (
+                    <View style={styles.centered}>
+                        <Text style={styles.emptyText}>No more profiles found!</Text>
+                        <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.retryButton}>
+                            <Text style={styles.retryText}>Refresh</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </ScrollView>
-
-
         </SafeAreaView>
     );
 };
@@ -185,7 +126,12 @@ export default DiscoverScreen;
 
 const styles = StyleSheet.create({
     container: { flex: 1, backgroundColor: "#FFF9F6" },
-
+    centered: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+    },
     titleContainer: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -209,9 +155,7 @@ const styles = StyleSheet.create({
     swiperWrapper: {
         height: 500,
         marginTop: 10,
-
         paddingHorizontal: 16
-
     },
 
     swipeText: {
@@ -221,15 +165,6 @@ const styles = StyleSheet.create({
         fontSize: 13,
     },
 
-    actions: {
-        // position: "absolute",
-        // bottom: 40,
-        // left: 0,
-        // right: 0,
-        flexDirection: "row",
-        justifyContent: "center",
-        gap: 30,
-    },
     passButton: {
         width: 60,
         height: 60,
@@ -255,6 +190,29 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         gap: 30
-
-    }
+    },
+    errorText: {
+        fontSize: 16,
+        color: "#E64A8B",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    emptyText: {
+        fontSize: 18,
+        color: "#555",
+        fontWeight: "600",
+        textAlign: "center",
+        marginBottom: 20,
+    },
+    retryButton: {
+        backgroundColor: "#E94057",
+        paddingHorizontal: 24,
+        paddingVertical: 12,
+        borderRadius: 25,
+    },
+    retryText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "600",
+    },
 });

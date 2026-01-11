@@ -6,6 +6,7 @@ import {
     TouchableOpacity,
     ScrollView,
 } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
 import { Provider, TextInput } from "react-native-paper";
@@ -24,6 +25,21 @@ export const BasicInfoScreen: React.FC = () => {
 
     React.useEffect(() => {
         dispatch(setCurrentScreen('BasicInfo'));
+
+        // Load user data from AsyncStorage
+        const loadUserData = async () => {
+            try {
+                const storedData = await AsyncStorage.getItem('userBasicInfo');
+                if (storedData) {
+                    const userData = JSON.parse(storedData);
+                    dispatch(updateBasicInfo(userData));
+                }
+            } catch (error) {
+                console.error('Failed to load user data from AsyncStorage:', error);
+            }
+        };
+
+        loadUserData();
     }, [dispatch]);
 
     const handleChange = (field: keyof typeof form, value: string) => {
@@ -31,9 +47,9 @@ export const BasicInfoScreen: React.FC = () => {
     };
 
     const handleNext = () => {
-        const { fullName, age, location, profession, education, religion, community } = form;
+        const { fullName, email, age, location, profession, education, religion, community } = form;
 
-        if (!fullName || !age || !location || !profession || !education || !religion || !community) {
+        if (!fullName || !email || !age || !location || !profession || !education || !religion || !community) {
             Toast.show({
                 type: 'error',
                 text1: 'Missing Information',
@@ -93,8 +109,23 @@ export const BasicInfoScreen: React.FC = () => {
                                 onFocus={() => setFocusedField("fullName")}
                                 onBlur={() => setFocusedField(null)}
                                 isFocused={focusedField === "fullName"}
+                                editable={false}
                             />
 
+                            <InputField
+                                label="Email"
+                                placeholder="Your email"
+                                value={form.email}
+                                onChangeText={(text) => handleChange("email", text)}
+                                onFocus={() => setFocusedField("email")}
+                                onBlur={() => setFocusedField(null)}
+                                isFocused={focusedField === "email"}
+                                keyboardType="email-address"
+                                editable={false}
+                            />
+                        </View>
+
+                        <View style={styles.row}>
                             <InputField
                                 label="Age"
                                 placeholder="Your age"
@@ -248,6 +279,7 @@ type InputFieldProps = {
     onBlur: () => void;
     isFocused: boolean;
     keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
+    editable?: boolean;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -259,6 +291,7 @@ const InputField: React.FC<InputFieldProps> = ({
     onBlur,
     isFocused,
     keyboardType = "default",
+    editable = true,
 }) => (
     <View style={styles.inputContainer}>
         <Text style={styles.label}>{label}</Text>
@@ -275,6 +308,7 @@ const InputField: React.FC<InputFieldProps> = ({
             style={[
                 styles.paperInput,
                 isFocused && { borderColor: "#E94057" },
+                !editable && { backgroundColor: "#f0f0f0", opacity: 0.7 },
             ]}
             textColor='#000'
             theme={{
@@ -283,10 +317,11 @@ const InputField: React.FC<InputFieldProps> = ({
                     text: "#000",            // 👈 Text color stays black
                     placeholder: "#999",     // 👈 Placeholder color
                     primary: "#E94057",      // 👈 Border color on focus
-                    background: "#fff",      // 👈 Input background
+                    background: editable ? "#fff" : "#f0f0f0",      // 👈 Input background
                 },
             }}
             keyboardType={keyboardType}
+            editable={editable}
         />
     </View>
 );

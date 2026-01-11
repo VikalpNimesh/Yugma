@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
+import * as Keychain from 'react-native-keychain';
 import type { NavigationProp } from '@react-navigation/native';
 import {
   validateEmail,
@@ -172,21 +173,24 @@ export const handleLogout = async (
     }
 
     // Sign out from Firebase
-    await auth().signOut();
+    try {
+      await auth().signOut();
+    } catch (error) {
+      console.warn('Firebase sign-out failed:', error);
+    }
+
+    // Clear stored tokens from Keychain
+    try {
+      await Keychain.resetGenericPassword();
+    } catch (error) {
+      console.warn('Keychain reset failed:', error);
+    }
 
     // Clear Redux state if dispatch provided
     if (dispatch) {
-      dispatch(logout());
+      dispatch(logout()); // from userSlice
       dispatch(resetProfileForm());
-      dispatch(resetAuth());
-    }
-
-    // Navigate to login screen
-    if (navigation) {
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'GoogleLogin' }],
-      });
+      dispatch(resetAuth()); // from authSlice
     }
 
     Alert.alert('Success', 'You have been logged out successfully');

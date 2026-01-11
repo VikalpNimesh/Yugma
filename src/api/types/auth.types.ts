@@ -3,7 +3,7 @@
  */
 
 export interface LoginRequest {
-    email: string;
+    emailOrPhone: string;
     password: string;
 }
 
@@ -11,34 +11,45 @@ export interface LoginResponse {
     success: boolean;
     message: string;
     data: {
+        tokens: {
+            access: string;
+            refresh: string;
+        };
         user: {
             id: string;
-            name: string;
             email: string;
-            avatar?: string;
+            fullName: string;
+            accountMode: string;
+            isPremium: boolean;
+            isVerified: boolean;
         };
-        token: string;
-        refreshToken?: string;
     };
 }
 
 export interface SignupRequest {
-    email: string;
+    email?: string;
+    phone?: string;
     password: string;
     name: string;
-    // Add other signup fields as needed
+    accountMode: string;
 }
 
 export interface SignupResponse {
     success: boolean;
     message: string;
     data: {
+        tokens: {
+            access: string;
+            refresh: string;
+        };
         user: {
             id: string;
-            name: string;
             email: string;
+            fullName: string;
+            accountMode: string;
+            isVerified: boolean;
+            isPremium: boolean;
         };
-        token: string;
     };
 }
 

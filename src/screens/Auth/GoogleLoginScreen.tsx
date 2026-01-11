@@ -1,11 +1,13 @@
 // GoogleLoginScreen.tsx
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import LinearGradient from "react-native-linear-gradient";
 import { useDispatch } from "react-redux";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import { signInWithGoogle } from "../../api/firebase/auth";
+import { initializeBasicInfo } from "../../redux/slices/profileFormSlice";
 
 const GoogleLoginScreen = ({ navigation }: any) => {
     const dispatch = useDispatch();
@@ -19,7 +21,21 @@ const GoogleLoginScreen = ({ navigation }: any) => {
         setLoading(true);
 
         try {
-            await signInWithGoogle(dispatch);
+            const googleUserData = await signInWithGoogle(dispatch);
+
+            // Initialize basic info with Google user data
+            if (googleUserData) {
+                const userData = {
+                    fullName: googleUserData.user?.name || '',
+                    email: googleUserData.user?.email || '',
+                };
+
+                dispatch(initializeBasicInfo(userData));
+
+                // Persist to AsyncStorage
+                await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
+            }
+
             navigation.replace("HomeScreen");
         } catch (err: any) {
             setError(err.message || "Google Sign-In failed. Please try again.");

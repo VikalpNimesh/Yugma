@@ -1,24 +1,24 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Keychain from 'react-native-keychain';
 import authService from '../../api/services/authService';
 import type {
   LoginRequest,
   SignupRequest,
-  ApiError,
 } from '../../api/types/auth.types';
 
 // Types
 interface User {
   id: string;
-  name: string;
   email: string;
-  avatar?: string;
+  fullName: string;
+  accountMode: string;
+  isPremium: boolean;
+  isVerified: boolean;
 }
 
 interface AuthState {
   user: User | null;
   token: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -27,29 +27,49 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   token: null,
-  refreshToken: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: false, // Start loading to check auth state
   error: null,
 };
 
 // Async Thunks
+export const checkAuthState = createAsyncThunk(
+  'auth/checkAuthState',
+  async (_, { dispatch }) => {
+    try {
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        const tokens = JSON.parse(credentials.password);
+        // Ideally we should validate the token or fetch user profile here
+        // For now, we assume if tokens exist, we are somewhat authenticated
+        // But we need the user data.
+        // If we don't persist user data, we might need to fetch it.
+        // For this step, let's assume we need to re-fetch user profile or valid tokens?
+        // Actually, without user data in storage, we can't fully restore state.
+        // Let's return just token to state, and maybe app should fetch profile.
+        // OR: we can store user data in Async Storage for recovery.
+        console.log(tokens);
+        return { token: tokens.access };
+      }
+      return null;
+    } catch (error) {
+      return null;
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
 
-      // Store token in AsyncStorage
-      if (response.data.token) {
-        await AsyncStorage.setItem('authToken', response.data.token);
-      }
+      const { tokens, user } = response.data;
 
-      if (response.data.refreshToken) {
-        await AsyncStorage.setItem('refreshToken', response.data.refreshToken);
-      }
+      // Store tokens in Keychain
+      await Keychain.setGenericPassword('auth_tokens', JSON.stringify(tokens));
 
-      return response.data;
+      return { user, token: tokens.access };
     } catch (error: any) {
       return rejectWithValue(
         error.message || 'Login failed. Please try again.',
@@ -63,13 +83,15 @@ export const signupUser = createAsyncThunk(
   async (userData: SignupRequest, { rejectWithValue }) => {
     try {
       const response = await authService.signup(userData);
+      console.log(response);
+      // Using the same pattern as loginUser
+      // Assuming response is the Axios response and data contains tokens and user
+      const { tokens, user } = response.data;
+      console.log(tokens, user);
 
-      // Store token in AsyncStorage
-      if (response.data.token) {
-        await AsyncStorage.setItem('authToken', response.data.token);
-      }
-
-      return response.data;
+      // Store tokens in Keychain
+      await Keychain.setGenericPassword('auth_tokens', JSON.stringify(tokens));
+      return { user, token: tokens.access };
     } catch (error: any) {
       return rejectWithValue(
         error.message || 'Signup failed. Please try again.',
@@ -83,16 +105,10 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
-
-      // Clear tokens from AsyncStorage
-      await AsyncStorage.removeItem('authToken');
-      await AsyncStorage.removeItem('refreshToken');
-
+      await Keychain.resetGenericPassword();
       return true;
     } catch (error: any) {
-      // Even if API call fails, clear local storage
-      await AsyncStorage.removeItem('authToken');
-      await AsyncStorage.removeItem('refreshToken');
+      await Keychain.resetGenericPassword();
       return rejectWithValue(error.message || 'Logout failed.');
     }
   },
@@ -114,14 +130,30 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.isAuthenticated = true;
     },
-    // Initialize auth state from stored token
-    initializeAuth: state => {
-      // This will be handled by checking AsyncStorage on app start
-      // You can dispatch this action after checking for stored token
+    resetAuth: state => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+      state.error = null;
     },
-    resetAuth: () => initialState,
   },
   extraReducers: builder => {
+    // Check Auth State
+    builder.addCase(checkAuthState.fulfilled, (state, action) => {
+      state.isLoading = false;
+      if (action.payload) {
+        state.token = action.payload.token;
+        // state.isAuthenticated = true; // Wait, we don't have user data yet?
+        // If we only have token, we are effectively authenticated but might need to fetch profile.
+        // For now, let's set authenticated so we pass the navigation check, 
+        // but we might want a splash screen to fetch profile.
+        state.isAuthenticated = true;
+      } else {
+        state.isAuthenticated = false;
+      }
+    });
+
     // Login
     builder
       .addCase(loginUser.pending, state => {
@@ -132,7 +164,6 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload.user;
         state.token = action.payload.token;
-        state.refreshToken = action.payload.refreshToken || null;
         state.isAuthenticated = true;
         state.error = null;
       })
@@ -167,29 +198,15 @@ const authSlice = createSlice({
 
     // Logout
     builder
-      .addCase(logoutUser.pending, state => {
-        state.isLoading = true;
-      })
       .addCase(logoutUser.fulfilled, state => {
         state.isLoading = false;
         state.user = null;
         state.token = null;
-        state.refreshToken = null;
         state.isAuthenticated = false;
         state.error = null;
-      })
-      .addCase(logoutUser.rejected, (state, action) => {
-        state.isLoading = false;
-        // Even if logout fails, clear the state
-        state.user = null;
-        state.token = null;
-        state.refreshToken = null;
-        state.isAuthenticated = false;
-        state.error = action.payload as string;
       });
   },
 });
 
-export const { clearError, setCredentials, initializeAuth, resetAuth } =
-  authSlice.actions;
+export const { clearError, setCredentials, resetAuth } = authSlice.actions;
 export default authSlice.reducer;

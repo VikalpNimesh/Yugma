@@ -3,25 +3,23 @@
  * Centralized endpoint definitions for the application
  */
 
-const API_BASE = ''; // Adjust based on your API structure
-
 export const API_ENDPOINTS = {
     // Auth endpoints
     AUTH: {
-        LOGIN: `${API_BASE}/auth/login`,
-        SIGNUP: `${API_BASE}/auth/signup`,
-        LOGOUT: `${API_BASE}/auth/logout`,
-        REFRESH_TOKEN: `${API_BASE}/auth/refresh-token`,
-        FORGOT_PASSWORD: `${API_BASE}/auth/forgot-password`,
-        RESET_PASSWORD: `${API_BASE}/auth/reset-password`,
-        VERIFY_EMAIL: `${API_BASE}/auth/verify-email`,
+        LOGIN: `auth/login`,
+        SIGNUP: `auth/register`,
+        LOGOUT: `auth/logout`,
+        REFRESH_TOKEN: `auth/refresh-token`,
+        FORGOT_PASSWORD: `auth/forgot-password`,
+        RESET_PASSWORD: `auth/reset-password`,
+        VERIFY_EMAIL: `auth/verify-email`,
     },
 
     // User endpoints
     USER: {
-        PROFILE: `${API_BASE}/user/profile`,
-        UPDATE_PROFILE: `${API_BASE}/users/profile`,
-        UPLOAD_AVATAR: `${API_BASE}/user/avatar`,
+        PROFILE: `user/profile`,
+        UPDATE_PROFILE: `users/profile`,
+        UPLOAD_AVATAR: `user/avatar`,
     },
 
     // Add more endpoint categories as needed

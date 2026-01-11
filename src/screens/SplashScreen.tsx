@@ -4,16 +4,18 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import auth from "@react-native-firebase/auth";
-import { useAppSelector } from "../redux/hooks";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { checkAuthState } from "../redux/slices/authSlice";
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
 const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
+    const dispatch = useAppDispatch();
     const currentScreen = useAppSelector((state) => state.profileForm.currentScreen);
-
+    const { isAuthenticated, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
+    console.log(isAuthenticated, "isAuthenticated");
     // Helper function to get the navigation stack based on current screen
     const getNavigationStack = (screen: string) => {
         const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
@@ -45,58 +47,46 @@ const SplashScreen = () => {
             offlineAccess: false,
         });
 
-        const unsubscribe = auth().onAuthStateChanged(user => {
-            if (user) {
-                // If user is authenticated and has a saved screen, navigate to it
-                const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
-                if (currentScreen && validScreens.includes(currentScreen)) {
-                    // Build the navigation stack properly
-                    navigation.reset({
-                        index: getScreenIndex(currentScreen),
-                        routes: getNavigationStack(currentScreen),
-                    });
-                } else {
-                    navigation.replace("BottomTabs");
-                }
-            }
-        });
-
-        return unsubscribe;
-    }, [currentScreen, navigation]);
+        // Initialize auth state from Keychain only if not already authenticated
+        if (!isAuthenticated) {
+            dispatch(checkAuthState());
+        }
+    }, [dispatch, isAuthenticated]);
 
     useEffect(() => {
-        const checkFirstLaunch = async () => {
+        // Wait for both the initial app delay and the auth check to complete
+        const timer = setTimeout(async () => {
+            if (isAuthLoading) return; // Wait until auth check is finished
+
             try {
-                const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-
-                // If no user is authenticated, check if there's a saved screen to resume
-                const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
-
-                if (currentScreen && validScreens.includes(currentScreen)) {
-                    // Build the navigation stack properly
-                    navigation.reset({
-                        index: getScreenIndex(currentScreen),
-                        routes: getNavigationStack(currentScreen),
-                    });
-                } else if (hasLaunched === null) {
-                    // First time launch
-                    navigation.replace("AppTypeSelection");
+                if (isAuthenticated) {
+                    // User is authenticated, check for pending profile steps
+                    const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+                    if (currentScreen && validScreens.includes(currentScreen)) {
+                        navigation.reset({
+                            index: getScreenIndex(currentScreen),
+                            routes: getNavigationStack(currentScreen),
+                        });
+                    } else {
+                        navigation.replace("BottomTabs");
+                    }
                 } else {
-                    // Not first time, go to Login
-                    navigation.replace("AppTypeSelection");
+                    // Not authenticated, check first launch
+                    const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+                    if (hasLaunched === null) {
+                        navigation.replace("AppTypeSelection");
+                    } else {
+                        navigation.replace("AppTypeSelection");
+                    }
                 }
             } catch (error) {
-                console.error('Error checking first launch:', error);
+                console.error('Error in splash navigation:', error);
                 navigation.replace("LoginScreen");
             }
-        };
-
-        const timer = setTimeout(() => {
-            checkFirstLaunch();
-        }, 2000);
+        }, 500);
 
         return () => clearTimeout(timer);
-    }, [navigation, currentScreen]);
+    }, [navigation, currentScreen, isAuthenticated, isAuthLoading]);
 
     return (
         <View style={styles.container}>
