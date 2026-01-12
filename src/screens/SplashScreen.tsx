@@ -4,12 +4,42 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
-import auth from "@react-native-firebase/auth";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { checkAuthState } from "../redux/slices/authSlice";
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
 const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
+    const dispatch = useAppDispatch();
+    const currentScreen = useAppSelector((state) => state.profileForm.currentScreen);
+    const { isAuthenticated, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
+    console.log(isAuthenticated, "isAuthenticated");
+    // Helper function to get the navigation stack based on current screen
+    const getNavigationStack = (screen: string) => {
+        const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+        const currentIndex = screenOrder.indexOf(screen);
+
+        if (currentIndex === -1) return [{ name: screen as keyof RootStackParamList, key: screen }];
+
+        // Build stack up to current screen
+        const stack = [];
+        for (let i = 0; i <= currentIndex; i++) {
+            stack.push({
+                name: screenOrder[i] as keyof RootStackParamList,
+                key: screenOrder[i] + '_' + i
+            });
+        }
+        return stack;
+    };
+
+    // Helper function to get the index of current screen in stack
+    const getScreenIndex = (screen: string) => {
+        const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+        const index = screenOrder.indexOf(screen);
+        return index === -1 ? 0 : index;
+    };
 
     useEffect(() => {
         GoogleSignin.configure({
@@ -17,49 +47,57 @@ const SplashScreen = () => {
             offlineAccess: false,
         });
 
-
-        const unsubscribe = auth().onAuthStateChanged(user => {
-            if (user) {
-                navigation.replace("BottomTabs");
-            }
-        });
-
-        return unsubscribe;
-    }, []);
+        // Initialize auth state from Keychain only if not already authenticated
+        if (!isAuthenticated) {
+            dispatch(checkAuthState());
+        }
+    }, [dispatch, isAuthenticated]);
 
     useEffect(() => {
-        const timer = setTimeout(() => {
-            navigation.replace("GoogleLogin");
-        }, 2000);
+        // Wait for both the initial app delay and the auth check to complete
+        const timer = setTimeout(async () => {
+            if (isAuthLoading) return; // Wait until auth check is finished
+
+            try {
+                if (isAuthenticated) {
+                    // User is authenticated, check for pending profile steps
+                    const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+                    if (currentScreen && validScreens.includes(currentScreen)) {
+                        navigation.reset({
+                            index: getScreenIndex(currentScreen),
+                            routes: getNavigationStack(currentScreen),
+                        });
+                    } else {
+                        navigation.replace("BottomTabs");
+                    }
+                } else {
+                    // Not authenticated, check first launch
+                    const hasLaunched = await AsyncStorage.getItem('hasLaunched');
+                    if (hasLaunched === null) {
+                        navigation.replace("AppTypeSelection");
+                    } else {
+                        navigation.replace("AppTypeSelection");
+                    }
+                }
+            } catch (error) {
+                console.error('Error in splash navigation:', error);
+                navigation.replace("LoginScreen");
+            }
+        }, 500);
 
         return () => clearTimeout(timer);
-    }, [navigation]);
+    }, [navigation, currentScreen, isAuthenticated, isAuthLoading]);
 
     return (
         <View style={styles.container}>
-            {/* <Image
-                source={require("../../assets/logo.png")}
+            <Image
+                source={require("../assets/yugmaNew.jpg")}
                 style={styles.logo}
                 resizeMode="contain"
-            /> */}
-            <Text style={styles.title}>Welcome to VivahSetu</Text>
+            />
+            <Text style={styles.title}>Welcome to Yugma</Text>
             <Text style={styles.subtitle}>Find your perfect match</Text>
 
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                    style={[styles.button, styles.matrimonyButton]}
-                    onPress={() => navigation.navigate("Matrimonial")}
-                >
-                    <Text style={styles.buttonText}>💍 Matrimonial</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.button, styles.datingButton]}
-                    onPress={() => navigation.navigate("BasicInfo")}
-                >
-                    <Text style={styles.buttonText}>💘 Dating</Text>
-                </TouchableOpacity>
-            </View>
         </View>
     );
 };

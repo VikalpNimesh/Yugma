@@ -2,13 +2,13 @@ import React from "react";
 import { View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
-import DiscoverScreen from "../screens/DiscoverScreen";
-import { DatingScreen } from "../screens/DatingScreen";
-import { HomeScreen } from "../screens/HomeScreen";
-import { BasicInfoScreen } from "../screens/BasicInfoScreen";
-import MatchesScreen from "../screens/MatchesScreen";
-import MessagesScreen from "../screens/MessagesScreen";
-import SettingsScreen from "../screens/SettingScreen";
+import DiscoverScreen from "../screens/Home/DiscoverScreen";
+import { DatingScreen } from "../screens/Home/DatingScreen";
+import { HomeScreen } from "../screens/Home/HomeScreen";
+import { BasicInfoScreen } from "../screens/Profile/BasicInfoScreen";
+import MatchesScreen from "../screens/Home/MatchesScreen";
+import MessagesScreen from "../screens/Home/MessagesScreen";
+import SettingsScreen from "../screens/Settings/SettingsScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,7 +19,7 @@ export default function BottomTabs() {
                 headerShown: false,
                 tabBarShowLabel: false,
                 tabBarActiveTintColor: "#fff",
-                tabBarInactiveTintColor: "#000",
+                tabBarInactiveTintColor: "#DD2476",
                 tabBarStyle: {
                     // backgroundColor: "#fff",
                     // borderTopColor: "#eee",
@@ -49,7 +49,7 @@ export default function BottomTabs() {
                     return (
                         <View
                             style={{
-                                backgroundColor: focused ? "black" : "transparent",
+                                backgroundColor: focused ? "#DD2476" : "transparent",
                                 // paddingVertical: 8,
                                 // paddingHorizontal: 20,
                                 borderRadius: 8,
@@ -80,11 +80,11 @@ export default function BottomTabs() {
                 },
             })}
         >
-            <Tab.Screen name="Discover" component={SettingsScreen} />
+            <Tab.Screen name="Discover" component={DiscoverScreen} />
             {/* <Tab.Screen name="Dating" component={BasicInfoScreen} /> */}
             <Tab.Screen name="MatchesScreen" component={MatchesScreen} />
             <Tab.Screen name="Messages" component={MessagesScreen} />
-            <Tab.Screen name="Settings" component={DatingScreen} />
+            <Tab.Screen name="Settings" component={SettingsScreen} />
         </Tab.Navigator>
     );
 }
