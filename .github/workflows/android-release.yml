@@ -1,7 +1,7 @@
 name: Android Assemble Release (FREE)
 
 on:
-  workflow_dispatch: # manual run button
+  workflow_dispatch:
 
 jobs:
   build:
@@ -22,16 +22,13 @@ jobs:
         with:
           node-version: 18
 
-      - name: Install dependencies
+      - name: Install JS dependencies
         run: npm install
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x android/gradlew
 
       - name: Build APK (assembleRelease)
         run: |
           cd android
           ./gradlew assembleRelease
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-release-apk
-          path: android/app/build/outputs/apk/release/
