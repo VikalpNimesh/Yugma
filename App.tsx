@@ -1,45 +1,37 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import 'react-native-get-random-values';
+import Toast from 'react-native-toast-message';
+import { Provider, useSelector } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { ActivityIndicator } from "react-native";
+import { persistor, store } from "./src/redux/store";
+import AppNavigator from "./src/navigation/AppNavigator";
+import AuthNavigator from "./src/navigation/AuthNavigator";
+import { NavigationContainer } from '@react-navigation/native';
+import { useRef } from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
+function RootNavigator() {
+  const isLoggedIn = useSelector(
+    (state: any) => state.auth.isAuthenticated
   );
+  console.log("isLoggedIn", isLoggedIn);
+  return isLoggedIn ? <AppNavigator /> : <AuthNavigator />;
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
+export default function App() {
+  const navigationRef = useRef(null);
 
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
+  return (<SafeAreaView style={{ flex: 1 }}>
+
+
+    <NavigationContainer ref={navigationRef}>
+      <Provider store={store}>
+        <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
+          <RootNavigator />
+          <Toast />
+        </PersistGate>
+      </Provider>
+    </NavigationContainer>
+  </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
