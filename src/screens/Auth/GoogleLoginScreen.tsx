@@ -46,7 +46,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
 
     return (
         <LinearGradient
-            colors={["#6f1478ff", "#dd2477ff"]}
+            colors={["#6f1478ff", "#300017ff"]}
             start={{ x: 1, y: 1 }}
             end={{ x: 1, y: 0 }}
             style={styles.gradientContainer}
@@ -54,14 +54,14 @@ const GoogleLoginScreen = ({ navigation }: any) => {
             <View style={styles.logoContainer}>
                 {/* Logo placeholder */}
                 <Image
-                    source={require("../../assets/yugmaNew.jpg")}
+                    source={require("../../assets/yug.png")}
                     style={styles.logo}
                     resizeMode="contain"
                 />
             </View>
 
             <View style={styles.content}>
-                <Text style={styles.newText}>New to Yugma ?</Text>
+                {/* <Text style={styles.newText}>New to Yugma ?</Text> */}
 
                 <TouchableOpacity
                     style={[styles.button, loading && styles.buttonDisabled]}
