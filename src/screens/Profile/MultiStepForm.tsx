@@ -6,6 +6,8 @@ import {
     TouchableOpacity,
     ScrollView,
     StyleSheet,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
@@ -13,7 +15,6 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 
 import { useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
 
 const MultiStepForm = ({ navigation }: any) => {
     const { appType } = useSelector((state: any) => state.user); // Assuming user slice has appType
@@ -34,62 +35,69 @@ const MultiStepForm = ({ navigation }: any) => {
     };
 
     return (
-        <ScrollView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={prevStep}
-                    disabled={step === 1}
-                    style={[styles.backBtn, step === 1 && { opacity: 0.4 }]}
-                >
-                    <Ionicons name="arrow-back" size={20} color="#333" />
-                    <Text style={styles.backText}>Back</Text>
-                </TouchableOpacity>
+        <View style={{ flex: 1, backgroundColor: "#FFF8F6" }}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView style={styles.container}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <TouchableOpacity
+                            onPress={prevStep}
+                            disabled={step === 1}
+                            style={[styles.backBtn, step === 1 && { opacity: 0.4 }]}
+                        >
+                            <Ionicons name="arrow-back" size={20} color="#333" />
+                            <Text style={styles.backText}>Back</Text>
+                        </TouchableOpacity>
 
-                <Text style={styles.stepText}>Step {step} of {totalSteps}</Text>
-            </View>
+                        <Text style={styles.stepText}>Step {step} of {totalSteps}</Text>
+                    </View>
 
-            {/* Progress bar */}
-            <View style={styles.progressContainer}>
-                <View
-                    style={[
-                        styles.progressBar,
-                        { width: `${(step / totalSteps) * 100}%` },
-                    ]}
-                />
-            </View>
+                    {/* Progress bar */}
+                    <View style={styles.progressContainer}>
+                        <View
+                            style={[
+                                styles.progressBar,
+                                { width: `${(step / totalSteps) * 100}%` },
+                            ]}
+                        />
+                    </View>
 
-            {/* Dynamic Form Content */}
-            <View style={styles.card}>
-                {step === 1 && <StepOne />}
-                {step === 2 && <StepTwo />}
-                {step === 3 && <StepThree appType={appType} />}
-                {step === 4 && <StepFour />}
-            </View>
+                    {/* Dynamic Form Content */}
+                    <View style={styles.card}>
+                        {step === 1 && <StepOne />}
+                        {step === 2 && <StepTwo />}
+                        {step === 3 && <StepThree appType={appType} />}
+                        {step === 4 && <StepFour />}
+                    </View>
 
-            {/* Navigation buttons */}
-            <View style={styles.navButtons}>
-                <TouchableOpacity
-                    style={[styles.prevBtn, step === 1 && { opacity: 0.5 }]}
-                    disabled={step === 1}
-                    onPress={prevStep}
-                >
-                    <Ionicons name="arrow-back" size={18} color="#333" />
-                    <Text style={styles.prevText}>Previous</Text>
-                </TouchableOpacity>
+                    {/* Navigation buttons */}
+                    <View style={styles.navButtons}>
+                        <TouchableOpacity
+                            style={[styles.prevBtn, step === 1 && { opacity: 0.5 }]}
+                            disabled={step === 1}
+                            onPress={prevStep}
+                        >
+                            <Ionicons name="arrow-back" size={18} color="#333" />
+                            <Text style={styles.prevText}>Previous</Text>
+                        </TouchableOpacity>
 
-                <TouchableOpacity style={styles.nextBtn} onPress={nextStep}>
-                    <Text style={styles.nextText}>
-                        {step === totalSteps ? "Complete Profile" : "Next"}
-                    </Text>
-                    <Ionicons
-                        name={step === totalSteps ? "checkmark" : "arrow-forward"}
-                        size={18}
-                        color="#fff"
-                    />
-                </TouchableOpacity>
-            </View>
-        </ScrollView>
+                        <TouchableOpacity style={styles.nextBtn} onPress={nextStep}>
+                            <Text style={styles.nextText}>
+                                {step === totalSteps ? "Complete Profile" : "Next"}
+                            </Text>
+                            <Ionicons
+                                name={step === totalSteps ? "checkmark" : "arrow-forward"}
+                                size={18}
+                                color="#fff"
+                            />
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 };
 

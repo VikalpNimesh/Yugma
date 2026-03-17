@@ -4,7 +4,6 @@ import { StyleSheet, Text, View, ScrollView, FlatList } from 'react-native';
 // import MessageCard from '../components/MessageCard';
 import LinearGradient from 'react-native-linear-gradient';
 import MessageCard from '../../components/MessageCard';
-// import MessageItem from '../components/MessageItem';
 
 const MessagesScreen = () => {
     const messages = [
@@ -71,24 +70,22 @@ const MessagesScreen = () => {
             end={{ x: 0, y: 1 }}
             style={styles.gradientContainer}
         >
+                <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+                    <Text style={styles.title}>Messages</Text>
+                    <Text style={styles.subtitle}>
+                        Connect with your matches and build meaningful relationships
+                    </Text>
 
+                    <FlatList
+                        contentContainerStyle={styles.list}
+                        data={messages}
+                        renderItem={({ item }) => (
+                            <MessageCard key={item.id} {...item} />
 
-            <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-                <Text style={styles.title}>Messages</Text>
-                <Text style={styles.subtitle}>
-                    Connect with your matches and build meaningful relationships
-                </Text>
+                        )}
 
-                <FlatList
-                    contentContainerStyle={styles.list}
-                    data={messages}
-                    renderItem={({ item }) => (
-                        <MessageCard key={item.id} {...item} />
-
-                    )}
-
-                />
-            </ScrollView>
+                    />
+                </ScrollView>
         </LinearGradient>
     );
 };

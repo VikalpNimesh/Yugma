@@ -14,8 +14,8 @@ const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
     const dispatch = useAppDispatch();
     const currentScreen = useAppSelector((state) => state.profileForm.currentScreen);
-    const { isAuthenticated, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
-    console.log(isAuthenticated, "isAuthenticated");
+    const { isAuthenticated, profile, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
+    console.log(isAuthenticated, "isAuthenticated", profile, "profile");
     // Helper function to get the navigation stack based on current screen
     const getNavigationStack = (screen: string) => {
         const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
@@ -60,33 +60,38 @@ const SplashScreen = () => {
 
             try {
                 if (isAuthenticated) {
-                    // User is authenticated, check for pending profile steps
-                    const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
-                    if (currentScreen && validScreens.includes(currentScreen)) {
-                        navigation.reset({
-                            index: getScreenIndex(currentScreen),
-                            routes: getNavigationStack(currentScreen),
-                        });
-                    } else {
+                    // User is authenticated, check profile data
+                    if (profile !== null) {
+                        // Profile exists, go to BottomTabs
                         navigation.replace("BottomTabs");
+                    } else {
+                        // Profile is null, check for pending local profile steps or go to default root
+                        const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+                        if (currentScreen && validScreens.includes(currentScreen)) {
+                            navigation.reset({
+                                index: getScreenIndex(currentScreen),
+                                routes: getNavigationStack(currentScreen),
+                            });
+                        } else {
+                            // Default root for null profile
+                            navigation.replace("BasicInfo");
+                        }
                     }
                 } else {
                     // Not authenticated, check first launch
                     const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-                    if (hasLaunched === null) {
-                        navigation.replace("AppTypeSelection");
-                    } else {
-                        navigation.replace("AppTypeSelection");
-                    }
+                    navigation.replace("AppTypeSelection");
                 }
             } catch (error) {
                 console.error('Error in splash navigation:', error);
-                navigation.replace("LoginScreen");
+                if (!isAuthenticated) {
+                    navigation.replace("LoginScreen");
+                }
             }
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [navigation, currentScreen, isAuthenticated, isAuthLoading]);
+    }, [navigation, currentScreen, isAuthenticated, isAuthLoading, profile]);
 
     return (
         <View style={styles.container}>

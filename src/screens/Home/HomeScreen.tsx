@@ -7,7 +7,7 @@ import {
     Image,
     ScrollView,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import Ionicons from "react-native-vector-icons/Ionicons";
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Entypo from 'react-native-vector-icons/Entypo';
 import Feather from 'react-native-vector-icons/Feather';
@@ -15,7 +15,7 @@ import Feather from 'react-native-vector-icons/Feather';
 
 export const HomeScreen: React.FC = ({ navigation }: any) => {
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }}>
+        <View style={{ flex: 1, backgroundColor: "#fff" }}>
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.headerContainer}>
                     <Text style={styles.logoText}>
@@ -102,7 +102,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                     </TouchableOpacity>
                 </View>
             </ScrollView>
-        </SafeAreaView>
+        </View>
     );
 };
 

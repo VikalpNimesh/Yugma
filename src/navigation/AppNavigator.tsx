@@ -15,6 +15,8 @@ import MatchesScreen from "../screens/Home/MatchesScreen";
 import SignupScreen from "../screens/Auth/SignupScreen";
 import LoginScreen from "../screens/Auth/LoginScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
+import NotificationsScreen from "../screens/Notifications/NotificationsScreen";
+import PremiumPlansScreen from "../screens/Premium/PremiumPlansScreen";
 import AppTypeSelectionScreen from "../screens/Auth/AppTypeSelectionScreen";
 
 export type RootStackParamList = {
@@ -31,6 +33,8 @@ export type RootStackParamList = {
     MatchesScreen: undefined;
     LoginScreen: undefined;
     SettingsScreen: undefined;
+    Notifications: undefined;
+    PremiumPlans: undefined;
     ProfileDetails: { userId: string };
     Matrimonial: undefined;
     AppTypeSelection: undefined;
@@ -58,6 +62,8 @@ const AppNavigator = () => {
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ header: () => <Header />, headerShown: true }} />
+            <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="PremiumPlans" component={PremiumPlansScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 };

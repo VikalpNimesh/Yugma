@@ -5,11 +5,14 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
+    ScrollView,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { RootState } from "../../redux/store";
 import { Dropdown } from "react-native-element-dropdown";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateFamilyDetails, setCurrentScreen } from "../../redux/slices/profileFormSlice";
@@ -43,115 +46,122 @@ const FamilyDetailsStep = ({ navigation }: any) => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    style={styles.backButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Ionicons name="arrow-back" size={20} color="#000" />
-                    <Text style={styles.backText}>Back</Text>
-                </TouchableOpacity>
-                <Text style={styles.stepText}>Step 3 of 4</Text>
-            </View>
-
-            {/* Progress Bar */}
-            <View style={styles.progressBarContainer}>
-                <View style={styles.progressFill} />
-            </View>
-
-            {/* Card Section */}
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>Family Details</Text>
-
-                <View style={styles.row}>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Father's Occupation</Text>
-                        <TextInput
-                            placeholder="Father's profession"
-                            placeholderTextColor="#A0A0A0"
-                            style={styles.input}
-                            value={form.fatherOccupation}
-                            onChangeText={(text) => handleChange("fatherOccupation", text)}
-                        />
+        <View style={styles.container}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <TouchableOpacity
+                            style={styles.backButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Ionicons name="arrow-back" size={20} color="#000" />
+                            <Text style={styles.backText}>Back</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.stepText}>Step 3 of 4</Text>
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Mother's Occupation</Text>
-                        <TextInput
-                            placeholder="Mother's profession"
-                            placeholderTextColor="#A0A0A0"
-                            style={styles.input}
-                            value={form.motherOccupation}
-                            onChangeText={(text) => handleChange("motherOccupation", text)}
-                        />
-                    </View>
-                </View>
-
-                <View style={styles.row}>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Siblings</Text>
-                        <TextInput
-                            placeholder="e.g., 1 brother, 1 sister"
-                            placeholderTextColor="#A0A0A0"
-                            style={styles.input}
-                            value={form.siblings}
-                            onChangeText={(text) => handleChange("siblings", text)}
-                        />
+                    {/* Progress Bar */}
+                    <View style={styles.progressBarContainer}>
+                        <View style={styles.progressFill} />
                     </View>
 
-                    <View style={[styles.inputContainer]}>
-                        <Text style={styles.label}>Family Type</Text>
-                        <Dropdown
-                            data={[
-                                { label: "Joint Family", value: "Joint Family" },
-                                { label: "Nuclear Family", value: "Nuclear Family" },
-                                { label: "Extended Family", value: "Extended Family" },
-                            ]}
-                            labelField="label"
-                            valueField="value"
-                            placeholder="Select family type"
-                            value={form.familyType}
-                            onChange={(item) => handleChange("familyType", item.value)}
-                            style={[
-                                styles.dropdown,
-                                form.familyType ? styles.dropdownFilled : {},
-                            ]}
-                            placeholderStyle={styles.placeholderStyle}
-                            selectedTextStyle={styles.selectedTextStyle}
-                            itemTextStyle={{ color: "#333" }}
-                            activeColor="#f4f4f4"
-                            renderRightIcon={() => null}
-                        />
+                    {/* Card Section */}
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Family Details</Text>
+
+                        <View style={styles.row}>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Father's Occupation</Text>
+                                <TextInput
+                                    placeholder="Father's profession"
+                                    placeholderTextColor="#A0A0A0"
+                                    style={styles.input}
+                                    value={form.fatherOccupation}
+                                    onChangeText={(text) => handleChange("fatherOccupation", text)}
+                                />
+                            </View>
+
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Mother's Occupation</Text>
+                                <TextInput
+                                    placeholder="Mother's profession"
+                                    placeholderTextColor="#A0A0A0"
+                                    style={styles.input}
+                                    value={form.motherOccupation}
+                                    onChangeText={(text) => handleChange("motherOccupation", text)}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.row}>
+                            <View style={styles.inputContainer}>
+                                <Text style={styles.label}>Siblings</Text>
+                                <TextInput
+                                    placeholder="e.g., 1 brother, 1 sister"
+                                    placeholderTextColor="#A0A0A0"
+                                    style={styles.input}
+                                    value={form.siblings}
+                                    onChangeText={(text) => handleChange("siblings", text)}
+                                />
+                            </View>
+
+                            <View style={[styles.inputContainer]}>
+                                <Text style={styles.label}>Family Type</Text>
+                                <Dropdown
+                                    data={[
+                                        { label: "Joint Family", value: "Joint Family" },
+                                        { label: "Nuclear Family", value: "Nuclear Family" },
+                                        { label: "Extended Family", value: "Extended Family" },
+                                    ]}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder="Select family type"
+                                    value={form.familyType}
+                                    onChange={(item) => handleChange("familyType", item.value)}
+                                    style={[
+                                        styles.dropdown,
+                                        form.familyType ? styles.dropdownFilled : {},
+                                    ]}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    itemTextStyle={{ color: "#333" }}
+                                    activeColor="#f4f4f4"
+                                    renderRightIcon={() => null}
+                                />
+                            </View>
+                        </View>
+
                     </View>
-                </View>
 
-            </View>
+                    {/* Buttons */}
+                    <View style={styles.footer}>
+                        <TouchableOpacity
+                            style={styles.previousButton}
+                            onPress={() => navigation.goBack()}
+                        >
+                            <Ionicons name="arrow-back" size={18} color="#000" />
+                            <Text style={styles.previousText}>Previous</Text>
+                        </TouchableOpacity>
 
-            {/* Buttons */}
-            <View style={styles.footer}>
-                <TouchableOpacity
-                    style={styles.previousButton}
-                    onPress={() => navigation.goBack()}
-                >
-                    <Ionicons name="arrow-back" size={18} color="#000" />
-                    <Text style={styles.previousText}>Previous</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={handleNext}
-                >
-                    <LinearGradient
-                        colors={["#FF512F", "#DD2476"]}
-                        style={styles.nextButton}
-                    >
-                        <Text style={styles.nextText}>Next</Text>
-                        <Ionicons name="arrow-forward" size={18} color="#fff" />
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
+                        <TouchableOpacity
+                            onPress={handleNext}
+                        >
+                            <LinearGradient
+                                colors={["#FF512F", "#DD2476"]}
+                                style={styles.nextButton}
+                            >
+                                <Text style={styles.nextText}>Next</Text>
+                                <Ionicons name="arrow-forward" size={18} color="#fff" />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 };
 

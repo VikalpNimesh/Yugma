@@ -6,11 +6,13 @@ import {
     TouchableOpacity,
     Image,
     ScrollView,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import { TextInput, Chip } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { RootState } from "../../redux/store";
 import Toast from 'react-native-toast-message';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
@@ -111,129 +113,134 @@ export const AboutYouStep: React.FC = () => {
     };
 
     return (
-        <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
-            <ScrollView contentContainerStyle={styles.container}>
-                {/* Header */}
-                <View style={styles.headerRow}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                        <Ionicons name="arrow-back" size={20} color="#000" />
-                        <Text style={styles.backText}>Back</Text>
-                    </TouchableOpacity>
-                    <Text style={styles.stepText}>Step 2 of 4</Text>
-                </View>
+        <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.container}>
+                    {/* Header */}
+                    <View style={styles.headerRow}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={20} color="#000" />
+                            <Text style={styles.backText}>Back</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.stepText}>Step 2 of 4</Text>
+                    </View>
 
-                {/* Progress Bar */}
-                <View style={styles.progressBarContainer}>
-                    <View style={[styles.progressBarFill, { width: "50%" }]} />
-                </View>
+                    {/* Progress Bar */}
+                    <View style={styles.progressBarContainer}>
+                        <View style={[styles.progressBarFill, { width: "50%" }]} />
+                    </View>
 
-                {/* About You Section */}
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>About You</Text>
+                    {/* About You Section */}
+                    <View style={styles.card}>
+                        <Text style={styles.sectionTitle}>About You</Text>
 
-                    <Text style={styles.label}>Bio</Text>
-                    <TextInput
-                        mode="outlined"
-                        placeholder="Tell us about yourself, your values, and what you're looking for in a life partner..."
-                        placeholderTextColor="#999"
-                        multiline
-                        numberOfLines={5}
-                        value={bio}
-                        onChangeText={(text) => dispatch(updateAboutYou({ bio: text }))}
-                        style={styles.textArea}
-                        theme={{
-                            roundness: 10,
-                            colors: { text: "#000", placeholder: "#999" },
-                        }}
-                    />
+                        <Text style={styles.label}>Bio</Text>
+                        <TextInput
+                            mode="outlined"
+                            placeholder="Tell us about yourself, your values, and what you're looking for in a life partner..."
+                            placeholderTextColor="#999"
+                            multiline
+                            numberOfLines={5}
+                            value={bio}
+                            onChangeText={(text) => dispatch(updateAboutYou({ bio: text }))}
+                            style={styles.textArea}
+                            theme={{
+                                roundness: 10,
+                                colors: { text: "#000", placeholder: "#999" },
+                            }}
+                        />
 
-                    {/* Interests */}
-                    <Text style={[styles.label, { marginTop: 20 }]}>
-                        Interests & Hobbies
-                    </Text>
-                    <Text style={styles.subText}>Select interests that describe you</Text>
+                        {/* Interests */}
+                        <Text style={[styles.label, { marginTop: 20 }]}>
+                            Interests & Hobbies
+                        </Text>
+                        <Text style={styles.subText}>Select interests that describe you</Text>
 
-                    <View style={styles.chipContainer}>
-                        {interestOptions.map((interest) => (
-                            <Chip
-                                key={interest}
-                                mode="flat"
-                                selected={interests.includes(interest)}
-                                onPress={() => toggleInterest(interest)}
-                                style={[
-                                    styles.chip,
-                                    interests.includes(interest) && styles.selectedChip,
-                                ]}
-                                textStyle={[
-                                    styles.chipText,
-                                    interests.includes(interest) && styles.selectedChipText,
-                                ]}
+                        <View style={styles.chipContainer}>
+                            {interestOptions.map((interest) => (
+                                <Chip
+                                    key={interest}
+                                    mode="flat"
+                                    selected={interests.includes(interest)}
+                                    onPress={() => toggleInterest(interest)}
+                                    style={[
+                                        styles.chip,
+                                        interests.includes(interest) && styles.selectedChip,
+                                    ]}
+                                    textStyle={[
+                                        styles.chipText,
+                                        interests.includes(interest) && styles.selectedChipText,
+                                    ]}
+                                >
+                                    {interest}
+                                </Chip>
+                            ))}
+                        </View>
+
+                        {/* Photos */}
+                        <Text style={[styles.label, { marginTop: 20 }]}>Photos</Text>
+                        <View style={styles.uploadBox}>
+                            {photos.length === 0 ? (
+                                <>
+                                    <Text style={styles.uploadIcon}>⬆️</Text>
+                                    <Text style={styles.uploadText}>Upload your photos</Text>
+                                    <Text style={styles.subText}>
+                                        Add at least 2 photos to get better matches
+                                    </Text>
+                                    <TouchableOpacity
+                                        onPress={handleAddPhotos}
+                                        style={styles.addPhotoBtn}
+                                    >
+                                        <Text style={styles.addPhotoText}>+ Add Photos</Text>
+                                    </TouchableOpacity>
+                                </>
+                            ) : (
+                                <View style={styles.photoGrid}>
+                                    {photos.map((uri, index) => (
+                                        <View key={index} style={styles.photoContainer}>
+                                            <Image source={{ uri }} style={styles.photoPreview} />
+                                            <TouchableOpacity
+                                                style={styles.deleteIcon}
+                                                onPress={() => handleDeletePhoto(index)}
+                                            >
+                                                <Ionicons name="trash" size={20} color="#fff" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    ))}
+                                    <TouchableOpacity
+                                        style={[styles.addPhotoBtn, { alignSelf: "center" }]}
+                                        onPress={handleAddPhotos}
+                                    >
+                                        <Text style={styles.addPhotoText}>+ Add More</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                        </View>
+                    </View>
+
+                    {/* Footer */}
+                    <View style={styles.footer}>
+                        <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                            <Ionicons name="arrow-back" size={18} color="#000" />
+                            <Text style={styles.previousText}>Previous</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={handleNext}>
+                            <LinearGradient
+                                colors={["#FF512F", "#DD2476"]}
+                                style={styles.nextButton}
                             >
-                                {interest}
-                            </Chip>
-                        ))}
+                                <Text style={styles.nextText}>Next</Text>
+                                <Ionicons name="arrow-forward" size={18} color="#fff" />
+                            </LinearGradient>
+                        </TouchableOpacity>
                     </View>
-
-                    {/* Photos */}
-                    <Text style={[styles.label, { marginTop: 20 }]}>Photos</Text>
-                    <View style={styles.uploadBox}>
-                        {photos.length === 0 ? (
-                            <>
-                                <Text style={styles.uploadIcon}>⬆️</Text>
-                                <Text style={styles.uploadText}>Upload your photos</Text>
-                                <Text style={styles.subText}>
-                                    Add at least 2 photos to get better matches
-                                </Text>
-                                <TouchableOpacity
-                                    onPress={handleAddPhotos}
-                                    style={styles.addPhotoBtn}
-                                >
-                                    <Text style={styles.addPhotoText}>+ Add Photos</Text>
-                                </TouchableOpacity>
-                            </>
-                        ) : (
-                            <View style={styles.photoGrid}>
-                                {photos.map((uri, index) => (
-                                    <View key={index} style={styles.photoContainer}>
-                                        <Image source={{ uri }} style={styles.photoPreview} />
-                                        <TouchableOpacity
-                                            style={styles.deleteIcon}
-                                            onPress={() => handleDeletePhoto(index)}
-                                        >
-                                            <Ionicons name="trash" size={20} color="#fff" />
-                                        </TouchableOpacity>
-                                    </View>
-                                ))}
-                                <TouchableOpacity
-                                    style={[styles.addPhotoBtn, { alignSelf: "center" }]}
-                                    onPress={handleAddPhotos}
-                                >
-                                    <Text style={styles.addPhotoText}>+ Add More</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
-                    </View>
-                </View>
-
-                {/* Footer */}
-                <View style={styles.footer}>
-                    <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
-                        <Ionicons name="arrow-back" size={18} color="#000" />
-                        <Text style={styles.previousText}>Previous</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={handleNext}>
-                        <LinearGradient
-                            colors={["#FF512F", "#DD2476"]}
-                            style={styles.nextButton}
-                        >
-                            <Text style={styles.nextText}>Next</Text>
-                            <Ionicons name="arrow-forward" size={18} color="#fff" />
-                        </LinearGradient>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 };
 

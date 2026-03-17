@@ -7,6 +7,18 @@ import { API_ENDPOINTS } from '../endpoints';
  */
 class ProfileService {
     /**
+     * Get user profile
+     */
+    async getProfile(): Promise<any> {
+        try {
+            const response = await axiosInstance.get(API_ENDPOINTS.USER.UPDATE_PROFILE);
+            return response.data;
+        } catch (error: any) {
+            throw this.handleError(error);
+        }
+    }
+
+    /**
      * Update user profile
      */
     async updateProfile(profileData: any): Promise<any> {

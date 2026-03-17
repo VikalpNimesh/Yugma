@@ -11,7 +11,6 @@ import {
     ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector, useDispatch } from 'react-redux';
 import { signupUser } from '../../redux/slices/authSlice';
 import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
@@ -95,7 +94,7 @@ export default function SignupScreen({ navigation }: any) {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -201,7 +200,7 @@ export default function SignupScreen({ navigation }: any) {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }
 

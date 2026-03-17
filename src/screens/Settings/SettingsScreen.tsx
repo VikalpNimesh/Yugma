@@ -16,6 +16,7 @@ import { handleLogout } from "../../api/firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from 'react-native-toast-message';
+import { updateBasicInfo, updateAboutYou } from "../../redux/slices/profileFormSlice";
 
 type TabType = "Profile" | "Notifications" | "Privacy" | "Premium" | "Verification";
 
@@ -42,11 +43,155 @@ export default function SettingsScreen() {
             {/* Main Content */}
             <ScrollView style={styles.content}>
                 {activeTab === "Profile" && <ProfileTab />}
-                {activeTab === "Notifications" && <Placeholder title="Notifications" />}
-                {activeTab === "Privacy" && <Placeholder title="Privacy & Safety" />}
+                {activeTab === "Notifications" && <NotificationTab />}
+                {activeTab === "Privacy" && <PrivacyTab />}
                 {activeTab === "Premium" && <PremiumTab />}
-                {activeTab === "Verification" && <Placeholder title="Verification" />}
+                {activeTab === "Verification" && <VerificationTab />}
             </ScrollView>
+        </View>
+    );
+}
+
+function NotificationTab() {
+    // Dummy state for notifications
+    const [newMatches, setNewMatches] = useState(true);
+    const [messages, setMessages] = useState(true);
+    const [likes, setLikes] = useState(false);
+    const [appUpdates, setAppUpdates] = useState(true);
+    const [emailPromos, setEmailPromos] = useState(false);
+
+    const NotificationItem = ({ label, value, onValueChange }: { label: string, value: boolean, onValueChange: (val: boolean) => void }) => (
+        <View style={styles.notificationRow}>
+            <Text style={styles.notificationLabel}>{label}</Text>
+            <Switch
+                trackColor={{ false: "#767577", true: "#DD2476" }}
+                thumbColor={value ? "#fff" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={onValueChange}
+                value={value}
+            />
+        </View>
+    );
+
+    return (
+        <View>
+            <Text style={styles.header}>Notification Settings</Text>
+
+            <View style={styles.sectionCard}>
+                <Text style={styles.sectionTitle}>Push Notifications</Text>
+                <NotificationItem label="New Matches" value={newMatches} onValueChange={setNewMatches} />
+                <View style={styles.separator} />
+                <NotificationItem label="Messages" value={messages} onValueChange={setMessages} />
+                <View style={styles.separator} />
+                <NotificationItem label="Likes & Comments" value={likes} onValueChange={setLikes} />
+                <View style={styles.separator} />
+                <NotificationItem label="App Updates & Tips" value={appUpdates} onValueChange={setAppUpdates} />
+            </View>
+
+            <View style={styles.sectionCard}>
+                <Text style={styles.sectionTitle}>Email Notifications</Text>
+                <NotificationItem label="Promotions & Offers" value={emailPromos} onValueChange={setEmailPromos} />
+            </View>
+        </View>
+    );
+}
+
+function PrivacyTab() {
+    // Dummy state for privacy
+    const [showProfile, setShowProfile] = useState(true);
+    const [showAge, setShowAge] = useState(true);
+    const [showDistance, setShowDistance] = useState(true);
+    const [readReceipts, setReadReceipts] = useState(true);
+    const [activityStatus, setActivityStatus] = useState(true);
+
+    const PrivacyItem = ({ label, value, onValueChange, description }: { label: string, value: boolean, onValueChange: (val: boolean) => void, description?: string }) => (
+        <View style={styles.privacyRow}>
+            <View style={{ flex: 1, paddingRight: 10 }}>
+                <Text style={styles.notificationLabel}>{label}</Text>
+                {description && <Text style={styles.privacyDescription}>{description}</Text>}
+            </View>
+            <Switch
+                trackColor={{ false: "#767577", true: "#DD2476" }}
+                thumbColor={value ? "#fff" : "#f4f3f4"}
+                ios_backgroundColor="#3e3e3e"
+                onValueChange={onValueChange}
+                value={value}
+            />
+        </View>
+    );
+
+    return (
+        <View>
+            <Text style={styles.header}>Privacy & Safety</Text>
+
+            <View style={styles.sectionCard}>
+                <Text style={styles.sectionTitle}>Visibility</Text>
+                <PrivacyItem
+                    label="Show me on Yugma"
+                    description="Turn this off to hide your profile. You won't be seen by new people."
+                    value={showProfile}
+                    onValueChange={setShowProfile}
+                />
+                <View style={styles.separator} />
+                <PrivacyItem label="Show my Age" value={showAge} onValueChange={setShowAge} />
+                <View style={styles.separator} />
+                <PrivacyItem label="Show my Distance" value={showDistance} onValueChange={setShowDistance} />
+            </View>
+
+            <View style={styles.sectionCard}>
+                <Text style={styles.sectionTitle}>Data & Activity</Text>
+                <PrivacyItem label="Read Receipts" value={readReceipts} onValueChange={setReadReceipts} />
+                <View style={styles.separator} />
+                <PrivacyItem label="Share Activity Status" value={activityStatus} onValueChange={setActivityStatus} />
+            </View>
+
+            <View style={styles.sectionCard}>
+                <TouchableOpacity style={styles.menuRow}>
+                    <Text style={styles.menuText}>Blocked Contacts</Text>
+                    <Ionicons name="chevron-forward" size={20} color="#ccc" />
+                </TouchableOpacity>
+                <View style={styles.separator} />
+                 <TouchableOpacity style={styles.menuRow}>
+                    <Text style={[styles.menuText, {color: 'red'}]}>Delete Account</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}
+
+function VerificationTab() {
+    return (
+        <View style={{ flex: 1 }}>
+            <Text style={styles.header}>Verification</Text>
+            
+            <View style={styles.verificationCard}>
+                <View style={styles.badgeContainer}>
+                    <Ionicons name="shield-checkmark" size={64} color="#DD2476" />
+                </View>
+                <Text style={styles.verificationStatus}>Get Verified</Text>
+                <Text style={styles.verificationSubtext}>
+                    Prove you're real, build trust, and get more matches with the Verification Badge.
+                </Text>
+
+                <View style={styles.benefitsList}>
+                    <View style={styles.benefitItem}>
+                        <Ionicons name="checkmark-circle" size={20} color="#DD2476" />
+                        <Text style={styles.benefitText}>Exclusive Verification Badge</Text>
+                    </View>
+                    <View style={styles.benefitItem}>
+                        <Ionicons name="checkmark-circle" size={20} color="#DD2476" />
+                        <Text style={styles.benefitText}>Higher trust from other users</Text>
+                    </View>
+                    <View style={styles.benefitItem}>
+                        <Ionicons name="checkmark-circle" size={20} color="#DD2476" />
+                        <Text style={styles.benefitText}>Priority support</Text>
+                    </View>
+                </View>
+
+                <TouchableOpacity style={styles.verifyBtn}>
+                    <Text style={styles.verifyBtnText}>Verify Now</Text>
+                </TouchableOpacity>
+            </View>
         </View>
     );
 }
@@ -79,66 +224,53 @@ function ProfileTab() {
             console.error("Logout error:", error);
         }
     };
-    const { email: reduxEmail, name: reduxName, photo } = useSelector((state: any) => state.user?.user || {});
+    const { email: reduxEmail, name: reduxName, photo: reduxPhoto } = useSelector((state: any) => state.user?.user || {});
+    const profileForm = useSelector((state: any) => state.profileForm);
+    const { basicInfo, aboutYou } = profileForm;
 
-    // Local state for editing
-    const [name, setName] = useState(reduxName || "");
-    const [age, setAge] = useState("");
-    const [location, setLocation] = useState("");
-    const [profession, setProfession] = useState("");
-    const [bio, setBio] = useState("");
-    const [email, setEmail] = useState(reduxEmail || "");
+    // Local state for editing - initialized with profileForm data or fallback to user slice
+    const [name, setName] = useState(basicInfo.fullName || reduxName || "");
+    const [age, setAge] = useState(basicInfo.age || "");
+    const [location, setLocation] = useState(basicInfo.location || "");
+    const [profession, setProfession] = useState(basicInfo.profession || "");
+    const [bio, setBio] = useState(aboutYou.bio || "");
+    const [email, setEmail] = useState(basicInfo.email || reduxEmail || "");
 
-    // Load info from AsyncStorage on mount
+    // Sync local state if Redux changes externally (though less likely here)
     React.useEffect(() => {
-        const loadUserInfo = async () => {
-            try {
-                const savedInfo = await AsyncStorage.getItem('userBasicInfo');
-                if (savedInfo) {
-                    const parsed = JSON.parse(savedInfo);
-                    if (parsed.fullName) setName(parsed.fullName);
-                    if (parsed.email) setEmail(parsed.email);
-                    if (parsed.age) setAge(parsed.age.toString());
-                    if (parsed.location) setLocation(parsed.location);
-                    if (parsed.profession) setProfession(parsed.profession);
-                    if (parsed.bio) setBio(parsed.bio);
-                }
-            } catch (error) {
-                console.error("Failed to load user info:", error);
-            }
-        };
-        loadUserInfo();
-    }, []);
+        if (!isEditing) {
+            setName(basicInfo.fullName || reduxName || "");
+            setAge(basicInfo.age || "");
+            setLocation(basicInfo.location || "");
+            setProfession(basicInfo.profession || "");
+            setBio(aboutYou.bio || "");
+            setEmail(basicInfo.email || reduxEmail || "");
+        }
+    }, [basicInfo, aboutYou, reduxName, reduxEmail, isEditing]);
 
     const handleSave = async () => {
         try {
-            const userData = {
+            // Update profileForm slice
+            dispatch(updateBasicInfo({
                 fullName: name,
                 email,
-                age: parseInt(age) || 0,
+                age,
                 location,
                 profession,
+            }));
+
+            dispatch(updateAboutYou({
                 bio,
-            };
-
-            // 1. Save to AsyncStorage
-            await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
-
-            // 2. Update Redux (making sure we don't overwrite the nested user object structure if expected)
-            dispatch(updateUser({
-                user: {
-                    ...user.user,
-                    fullName: name,
-                    email,
-                    age,
-                    location,
-                    profession,
-                    bio
-                }
             }));
 
             setIsEditing(false);
-            console.log("✅ Profile updated and persisted");
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'Profile updated successfully',
+                position: 'bottom',
+            });
+            console.log("✅ Profile updated in profileFormSlice");
         } catch (error) {
             console.error("Failed to save user info:", error);
         }
@@ -151,12 +283,43 @@ function ProfileTab() {
 
             {!isEditing ? (
                 <View style={styles.profileCard}>
-                    <Image source={{
-                        uri: photo
-                    }} style={{ width: 100, height: 100, marginTop: 20, borderRadius: 50 }} />
+                    <View style={styles.profileHeader}>
+                        <Image source={{
+                            uri: basicInfo.photo || reduxPhoto || "https://via.placeholder.com/150"
+                        }} style={styles.profileAvatar} />
+                        <View style={styles.profileBadge}>
+                            <Ionicons name="checkmark-circle" size={24} color="#DD2476" />
+                        </View>
+                    </View>
 
-                    <Text style={styles.text}>{name}</Text>
-                    <Text style={styles.verified}>{email}</Text>
+                    <Text style={styles.profileName}>{name}</Text>
+                    <Text style={styles.profileHandle}>{email}</Text>
+
+                    <View style={styles.profileDetails}>
+                        {(age || location) && (
+                            <View style={styles.detailRow}>
+                                <Ionicons name="location-outline" size={16} color="#666" />
+                                <Text style={styles.detailText}>
+                                    {age ? `${age} years old` : ""}
+                                    {age && location ? " • " : ""}
+                                    {location}
+                                </Text>
+                            </View>
+                        )}
+                        {profession ? (
+                            <View style={styles.detailRow}>
+                                <Ionicons name="briefcase-outline" size={16} color="#666" />
+                                <Text style={styles.detailText}>{profession}</Text>
+                            </View>
+                        ) : null}
+                    </View>
+
+                    {bio ? (
+                        <View style={styles.bioContainer}>
+                             <Text style={styles.bioLabel}>About Me</Text>
+                            <Text style={styles.bioText}>{bio}</Text>
+                        </View>
+                    ) : null}
 
                     <View style={styles.actionButtonsRow}>
                         <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.primaryBtn}>
@@ -218,7 +381,7 @@ function ProfileTab() {
             )}
 
             {/* Profile Mode Toggle */}
-            <View style={styles.modeContainer}>
+            {/* <View style={styles.modeContainer}>
                 <Text style={styles.modeTitle}>Profile Mode</Text>
                 <View style={styles.modeSwitch}>
                     <TouchableOpacity
@@ -249,7 +412,7 @@ function ProfileTab() {
                         </Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View> */}
         </View>
     );
 }
@@ -286,140 +449,43 @@ interface Plan {
     btnText: string;
 }
 
-// Premium Feature Data
-const premiumPlans: Record<string, Plan> = {
-    Plus: {
-        color: "#533A7B", // Deep Purple
-        features: [
-            { text: "Send unlimited likes", icon: "infinite" },
-            { text: "Send the first message", icon: "chatbubble-ellipses-outline" },
-            { text: "Send 5 comments daily", icon: "lock-closed-outline", fade: true },
-            { text: "Set more preferences", icon: "options-outline", info: true },
-            { text: "Explore 2x profiles in 'For You'", icon: "lock-closed-outline", fade: true },
-            { text: "Recheck up to 25 passed profiles", icon: "lock-closed-outline", fade: true },
-            { text: "See who likes you", icon: "lock-closed-outline", fade: true },
-            { text: "Browse in Private Mode", icon: "lock-closed-outline", fade: true },
-            { text: "See all curated profiles at once", icon: "lock-closed-outline", fade: true },
-        ],
-        pricing: [
-            { duration: "1 week", price: "₹ 249.00", perWeek: null },
-            { duration: "1 month", price: "₹ 116.43/wk", perWeek: null, save: "50%", total: "499.00" },
-            { duration: "3 months", price: "₹ 77.70/wk", perWeek: null, save: "67%" },
-            { duration: "6 months", price: "₹ 66.07/wk", perWeek: null, save: "72%" },
-        ],
-        btnText: "Get 1 month for ₹ 499.00"
-    },
-    Premium: {
-        color: "#993366", // Wine
-        features: [
-            { text: "Send unlimited likes", icon: "infinite" },
-            { text: "Send the first message", icon: "chatbubble-ellipses-outline" },
-            { text: "Send 5 comments daily", icon: "chatbox-outline" },
-            { text: "Set more preferences", icon: "options-outline", info: true },
-            { text: "Explore 2x profiles in 'For You'", icon: "star-outline", info: true },
-            { text: "Recheck up to 25 passed profiles", icon: "refresh-outline", info: true },
-            { text: "See who likes you", icon: "heart-outline" },
-            { text: "Browse in Private Mode", icon: "eye-off-outline", info: true },
-            { text: "See all curated profiles at once", icon: "lock-closed-outline", fade: true },
-        ],
-        pricing: [
-            { duration: "1 week", price: "₹ 399.00", perWeek: null },
-            { duration: "1 month", price: "₹ 186.43/wk", perWeek: null, save: "50%", total: "799.00" },
-            { duration: "3 months", price: "₹ 112.70/wk", perWeek: null, save: "70%" },
-            { duration: "6 months", price: "₹ 85.52/wk", perWeek: null, save: "77%" },
-        ],
-        btnText: "Get 1 month for ₹ 799.00"
-    },
-    Concierge: {
-        color: "#D4AF37", // Gold
-        features: [
-            { text: "Send unlimited likes and comments", icon: "infinite" },
-            { text: "Send the first message", icon: "chatbubble-ellipses-outline" },
-            { text: "Boost your comments to the top", icon: "trending-up-outline" },
-            { text: "Set more preferences", icon: "options-outline", info: true },
-            { text: "Explore 2x profiles in 'For You'", icon: "star-outline", info: true },
-            { text: "Recheck up to 25 passed profiles", icon: "refresh-outline", info: true },
-            { text: "See who likes you", icon: "heart-outline" },
-            { text: "Browse in Private Mode", icon: "eye-off-outline", info: true },
-            { text: "See all curated profiles at once", icon: "people-outline", info: true },
-        ],
-        pricing: [
-            { duration: "1 week", price: "₹ 649.00", perWeek: null },
-            { duration: "1 month", price: "₹ 349.77/wk", perWeek: null, save: "42%", total: "1,499.00" },
-            { duration: "3 months", price: "₹ 174.92/wk", perWeek: null, save: "71%" },
-            { duration: "6 months", price: "₹ 128.29/wk", perWeek: null, save: "79%" },
-        ],
-        btnText: "Get 1 month for ₹ 1,499.00"
-    }
-};
-
 function PremiumTab() {
-    const [selectedPlan, setSelectedPlan] = useState<"Plus" | "Premium" | "Concierge">("Premium");
-    const [selectedDuration, setSelectedDuration] = useState("1 month");
-
-    const plan = premiumPlans[selectedPlan];
+    const navigation = useNavigation<any>();
 
     return (
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-            {/* Plan Selector */}
-            <View style={styles.planSelector}>
-                {(Object.keys(premiumPlans) as Array<keyof typeof premiumPlans>).map((type) => (
-                    <TouchableOpacity
-                        key={type}
-                        onPress={() => setSelectedPlan(type as "Plus" | "Premium" | "Concierge")}
-                        style={[
-                            styles.planTypeBtn,
-                            selectedPlan === type && { backgroundColor: selectedPlan === "Concierge" ? "#D4AF37" : selectedPlan === "Premium" ? "#993366" : "#533A7B" }
-                        ]}
-                    >
-                        <Text style={[styles.planTypeText, selectedPlan === type && { color: "#fff" }]}>{type}</Text>
-                    </TouchableOpacity>
-                ))}
+        <View style={{ flex: 1 }}>
+            <Text style={styles.header}>Premium Membership</Text>
+
+            <View style={styles.premiumStatusCard}>
+                <View style={[styles.iconCircle, { backgroundColor: "#FFD700", width: 60, height: 60, borderRadius: 30, marginBottom: 16 }]}>
+                    <Ionicons name="gift-outline" size={32} color="#fff" />
+                </View>
+                <Text style={styles.premiumStatusTitle}>Unlock All Features</Text>
+                <Text style={styles.premiumStatusSubtext}>
+                    Send unlimited likes, see who likes you, and get verified with our premium plans.
+                </Text>
+
+                <TouchableOpacity 
+                    onPress={() => navigation.navigate('PremiumPlans')}
+                    style={styles.viewPlansBtn}
+                >
+                    <Text style={styles.viewPlansText}>View All Plans</Text>
+                    <Ionicons name="arrow-forward" size={18} color="#fff" />
+                </TouchableOpacity>
             </View>
 
-            <Text style={styles.planTitle}>Unlock new possibilities</Text>
-
-            {/* Feature List */}
-            <View style={styles.featureCard}>
-                {plan.features.map((feature, index) => (
-                    <View key={index} style={[styles.featureRow, feature.fade && { opacity: 0.4 }]}>
-                        <View style={styles.iconCircle}>
-                            <Ionicons name={feature.icon as any} size={16} color="#fff" />
-                        </View>
-                        <Text style={styles.featureText}>{feature.text}</Text>
-                        {feature.info && <Ionicons name="information-circle-outline" size={16} color="#999" style={{ marginLeft: "auto" }} />}
-                    </View>
-                ))}
+            <View style={styles.sectionCard}>
+                <TouchableOpacity style={styles.menuRow}>
+                    <Text style={styles.menuText}>Restore Purchase</Text>
+                    <Ionicons name="refresh-outline" size={20} color="#ccc" />
+                </TouchableOpacity>
+                <View style={styles.separator} />
+                <TouchableOpacity style={styles.menuRow}>
+                    <Text style={styles.menuText}>Redeem Code</Text>
+                    <Ionicons name="card-outline" size={20} color="#ccc" />
+                </TouchableOpacity>
             </View>
-
-            {/* Pricing Options */}
-            <View style={styles.pricingRow}>
-                {plan.pricing.map((price, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        onPress={() => setSelectedDuration(price.duration)}
-                        style={[
-                            styles.priceCard,
-                            selectedDuration === price.duration && { borderColor: plan.color, borderWidth: 2 }
-                        ]}
-                    >
-                        {price.save && <View style={styles.saveBadge}><Text style={styles.priceSaveText}>Save {price.save}</Text></View>}
-                        <Text style={styles.durationText}>{price.duration}</Text>
-                        <Text style={styles.priceText}>{price.price}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-
-            {/* Action Button */}
-            <TouchableOpacity style={[styles.actionBtn, { backgroundColor: "#000" }]}>
-                <Text style={styles.actionBtnText}>{plan.btnText}</Text>
-            </TouchableOpacity>
-
-            <Text style={styles.tncText}>
-                The subscription can be cancelled anytime and renews for the same package length.
-            </Text>
-
-        </ScrollView>
+        </View>
     );
 }
 
@@ -634,5 +700,248 @@ const styles = StyleSheet.create({
     },
     activeModeText: {
         color: "#DD2476",
+    },
+
+    // Notification Styles
+    sectionCard: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 16,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: "#eee",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 1,
+        },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 16,
+    },
+    notificationRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 12,
+    },
+    notificationLabel: {
+        fontSize: 14,
+        color: "#444",
+        fontWeight: "500",
+    },
+    separator: {
+        height: 1,
+        backgroundColor: "#f0f0f0",
+        marginVertical: 4,
+    },
+    privacyRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 12,
+    },
+    privacyDescription: {
+        fontSize: 12,
+        color: "#888",
+        marginTop: 2,
+        lineHeight: 16,
+    },
+    menuRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        paddingVertical: 14,
+    },
+    menuText: {
+        fontSize: 15,
+        color: "#333",
+        fontWeight: "500",
+    },
+
+    // Verification Styles
+    verificationCard: {
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 24,
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "#eee",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    badgeContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        backgroundColor: "#fcebf2",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 16,
+    },
+    verificationStatus: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 8,
+    },
+    verificationSubtext: {
+        fontSize: 14,
+        color: "#666",
+        textAlign: "center",
+        lineHeight: 20,
+        marginBottom: 24,
+    },
+    benefitsList: {
+        width: "100%",
+        marginBottom: 24,
+    },
+    benefitItem: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginBottom: 12,
+        gap: 10,
+    },
+    benefitText: {
+        fontSize: 15,
+        color: "#444",
+        fontWeight: "500",
+    },
+    verifyBtn: {
+        backgroundColor: "#DD2476",
+        paddingVertical: 14,
+        paddingHorizontal: 40,
+        borderRadius: 30,
+        width: "100%",
+        alignItems: "center",
+    },
+    verifyBtnText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "700",
+    },
+
+    // Enhanced Profile Styles
+    profileHeader: {
+        position: "relative",
+        marginTop: 10,
+        marginBottom: 10,
+    },
+    profileAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 3,
+        borderColor: "#fff",
+    },
+    profileBadge: {
+        position: "absolute",
+        bottom: 0,
+        right: 0,
+        backgroundColor: "#fff",
+        borderRadius: 12,
+    },
+    profileName: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 4,
+    },
+    profileHandle: {
+        fontSize: 14,
+        color: "#666",
+        marginBottom: 16,
+    },
+    profileDetails: {
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 6,
+        marginBottom: 20,
+    },
+    detailRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    detailText: {
+        fontSize: 14,
+        color: "#555",
+    },
+    bioContainer: {
+        width: "100%",
+        backgroundColor: "#f9f9f9",
+        padding: 12,
+        borderRadius: 8,
+        marginBottom: 20,
+    },
+    bioLabel: {
+        fontSize: 12,
+        fontWeight: "600",
+        color: "#999",
+        marginBottom: 4,
+        textTransform: "uppercase",
+    },
+    bioText: {
+        fontSize: 14,
+        color: "#444",
+        lineHeight: 20,
+        fontStyle: "italic",
+    },
+
+    // New Premium Entry Styles
+    premiumStatusCard: {
+        backgroundColor: "#fff",
+        borderRadius: 16,
+        padding: 24,
+        alignItems: "center",
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: "#eee",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    premiumStatusTitle: {
+        fontSize: 20,
+        fontWeight: "700",
+        color: "#333",
+        marginBottom: 8,
+    },
+    premiumStatusSubtext: {
+        fontSize: 14,
+        color: "#666",
+        textAlign: "center",
+        lineHeight: 20,
+        marginBottom: 24,
+    },
+    viewPlansBtn: {
+        backgroundColor: "#DD2476",
+        flexDirection: "row",
+        alignItems: "center",
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        borderRadius: 25,
+        gap: 8,
+        shadowColor: "#DD2476",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    viewPlansText: {
+        color: "#fff",
+        fontSize: 16,
+        fontWeight: "700",
     },
 });

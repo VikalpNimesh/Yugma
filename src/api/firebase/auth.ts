@@ -182,10 +182,12 @@ export const handleLogout = async (
     }
 
     // 4. Clear Redux state
-    // This will trigger the RootNavigator switch in App.tsx
+    // We clear auth state LAST to ensure other slices are reset 
+    // before the navigator swap happens in RootNavigator.
     if (dispatch) {
       dispatch(logout()); // from userSlice
       dispatch(resetProfileForm());
+      // Small delay or ensure this is last
       dispatch(resetAuth()); // from authSlice
     }
 

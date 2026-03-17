@@ -11,7 +11,6 @@ import {
     ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { signInWithGoogle } from '../../api/firebase/auth';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
@@ -49,8 +48,6 @@ export default function LoginScreen() {
         }
 
         try {
-            // Set the current screen to BasicInfo so the AppNavigator's Splash knows where to go
-            dispatch(setCurrentScreen('BasicInfo'));
             const result = await dispatch(loginUser({ emailOrPhone: email.trim(), password })).unwrap();
 
             // Initialize basic info with user data
@@ -95,7 +92,7 @@ export default function LoginScreen() {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -120,12 +117,12 @@ export default function LoginScreen() {
                                 <Text style={styles.googleText}>Continue with Google</Text>
                             )}
                         </TouchableOpacity> */}
-
+{/* 
                         <View style={styles.divider}>
                             <View style={styles.dividerLine} />
                             <Text style={styles.orText}>OR</Text>
                             <View style={styles.dividerLine} />
-                        </View>
+                        </View> */}
 
                         {/* Email Input */}
                         <TextInput
@@ -188,7 +185,7 @@ export default function LoginScreen() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
-        </SafeAreaView>
+        </View>
     );
 }
 

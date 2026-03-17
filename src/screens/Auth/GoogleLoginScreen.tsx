@@ -51,69 +51,80 @@ const GoogleLoginScreen = ({ navigation }: any) => {
             end={{ x: 1, y: 0 }}
             style={styles.gradientContainer}
         >
-            <View style={styles.logoContainer}>
-                {/* Logo placeholder */}
-                <Image
-                    source={require("../../assets/yug.png")}
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
-            </View>
+        <View style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
+                <View style={styles.logoContainer}>
+                    {/* Logo placeholder */}
+                    <Image
+                        source={require("../../assets/yug.png")}
+                        style={styles.logo}
+                        resizeMode="contain"
+                    />
+                </View>
 
-            <View style={styles.content}>
-                {/* <Text style={styles.newText}>New to Yugma ?</Text> */}
+                <View style={styles.content}>
+                    {/* <Text style={styles.newText}>New to Yugma ?</Text> */}
 
-                <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={() => navigation.navigate("SignupScreen")}
-                    disabled={loading}
-                >
-                    <Icon name="email" size={20} color="#ff3b3b" />
-                    <Text style={styles.buttonText}>Sign Up with Email</Text>
-                </TouchableOpacity>
-
-                {/* <TouchableOpacity
-                    style={[styles.button, styles.buttonDisabled]}
-                    disabled
-                >
-                    <Icon name="phone" size={20} color="#ff3b3b" />
-                    <Text style={styles.buttonText}>Sign Up with Mobile</Text>
-                </TouchableOpacity> */}
-
-                {/* <TouchableOpacity
-                    style={[styles.button, loading && styles.buttonDisabled]}
-                    onPress={handleGoogleSignIn}
-                    disabled={loading}
-                >
-                    {loading ? (
-                        <ActivityIndicator color="#ff3b3b" />
-                    ) : (
-                        <>
-                            <AntDesign name="google" size={20} color="#ff3b3b" />
-                            <Text style={styles.buttonText}>Sign Up with Google</Text>
-                        </>
-                    )}
-                </TouchableOpacity> */}
-
-                {error ? (
-                    <View style={styles.errorContainer}>
-                        <Text style={styles.errorText}>{error}</Text>
-                    </View>
-                ) : null}
-
-                <View style={styles.footer}>
-                    <Text style={styles.footerText}>Already have an account?</Text>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate("LoginScreen")}
+                        style={[styles.button, loading && styles.buttonDisabled]}
+                        onPress={() => navigation.navigate("SignupScreen")}
                         disabled={loading}
                     >
-                        <Text style={styles.loginLink}>Login</Text>
+                        <Icon name="email" size={20} color="#ff3b3b" />
+                        <Text style={styles.buttonText}>Sign Up with Email</Text>
                     </TouchableOpacity>
+
+                    {/* <TouchableOpacity
+                        style={[styles.button, styles.buttonDisabled]}
+                        disabled
+                    >
+                        <Icon name="phone" size={20} color="#ff3b3b" />
+                        <Text style={styles.buttonText}>Sign Up with Mobile</Text>
+                    </TouchableOpacity> */}
+
+                    {/* <TouchableOpacity
+                        style={[styles.button, loading && styles.buttonDisabled]}
+                        onPress={handleGoogleSignIn}
+                        disabled={loading}
+                    >
+                        {loading ? (
+                            <ActivityIndicator color="#ff3b3b" />
+                        ) : (
+                            <>
+                                <AntDesign name="google" size={20} color="#ff3b3b" />
+                                <Text style={styles.buttonText}>Sign Up with Google</Text>
+                            </>
+                        )}
+                    </TouchableOpacity> */}
+
+                    {error ? (
+                        <View style={styles.errorContainer}>
+                            <Text style={styles.errorText}>{error}</Text>
+                        </View>
+                    ) : null}
+
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>Already have an account?</Text>
+                        <TouchableOpacity
+                            onPress={() => navigation.navigate("LoginScreen")}
+                            disabled={loading}
+                        >
+                            <Text style={linkLinkStyles.loginLink}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
         </LinearGradient>
     );
 };
+
+const linkLinkStyles = StyleSheet.create({
+    loginLink: {
+        color: "#ff3b3b",
+        fontWeight: "700",
+        marginLeft: 5,
+        textDecorationLine: "underline",
+    },
+});
 
 export default GoogleLoginScreen;
 

@@ -21,12 +21,8 @@ export default function BottomTabs() {
                 tabBarActiveTintColor: "#fff",
                 tabBarInactiveTintColor: "#DD2476",
                 tabBarStyle: {
-                    // backgroundColor: "#fff",
-                    // borderTopColor: "#eee",
-                    height: 68,
-                    // paddingBottom: 8,
-                    paddingTop: 12,
-
+                    height: 58,
+                    paddingTop: 8,
                 },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName = "heart-outline";
@@ -50,27 +46,25 @@ export default function BottomTabs() {
                         <View
                             style={{
                                 backgroundColor: focused ? "#DD2476" : "transparent",
-                                // paddingVertical: 8,
-                                // paddingHorizontal: 20,
                                 borderRadius: 8,
                                 alignItems: "center",
                                 justifyContent: "center",
-                                minWidth: 90,
-                                height: 60,
-                                marginTop: 4
+                                minWidth: 70,
+                                height: 48,
+                                marginTop: 2
                             }}
                         >
                             <Icon
                                 name={iconName}
-                                size={24}
+                                size={20}
                                 color={focused ? "#fff" : "#666"}
                             />
                             <Text
                                 style={{
                                     color: focused ? "#fff" : "#666",
-                                    fontSize: 14,
+                                    fontSize: 11,
                                     fontWeight: focused ? "600" : "500",
-                                    marginTop: 4,
+                                    marginTop: 2,
                                 }}
                             >
                                 {label}

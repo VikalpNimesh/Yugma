@@ -5,6 +5,9 @@ import {
     TextInput,
     TouchableOpacity,
     StyleSheet,
+    ScrollView,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -12,7 +15,7 @@ import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updatePreferences, setCurrentScreen, completeProfile } from "../../redux/slices/profileFormSlice";
 import { useNavigation } from "@react-navigation/native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { RootState } from "../../redux/store";
 
 const PreferencesStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
@@ -73,87 +76,94 @@ const PreferencesStep = ({ navigation }: any) => {
     };
 
     return (
-        <SafeAreaView style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={20} color="#000" />
-                    <Text style={styles.backText}>Back</Text>
-                </TouchableOpacity>
-                <Text style={styles.stepText}>Step 4 of 4</Text>
-            </View>
+        <View style={styles.container}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView showsVerticalScrollIndicator={false}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={20} color="#000" />
+                            <Text style={styles.backText}>Back</Text>
+                        </TouchableOpacity>
+                        <Text style={styles.stepText}>Step 4 of 4</Text>
+                    </View>
 
-            {/* Progress Bar */}
-            <View style={styles.progressBarContainer}>
-                <View style={styles.progressFill} />
-            </View>
+                    {/* Progress Bar */}
+                    <View style={styles.progressBarContainer}>
+                        <View style={styles.progressFill} />
+                    </View>
 
-            {/* Card */}
-            <View style={styles.card}>
-                <Text style={styles.cardTitle}>Your Preferences</Text>
+                    {/* Card */}
+                    <View style={styles.card}>
+                        <Text style={styles.cardTitle}>Your Preferences</Text>
 
-                {/* Age Range */}
-                <Text style={styles.label}>Preferred Age Range</Text>
-                <View style={styles.ageRow}>
-                    <TextInput
-                        placeholder="25"
-                        placeholderTextColor="#A0A0A0"
-                        style={[styles.input, styles.ageInput]}
-                        keyboardType="numeric"
-                        value={form.preferredAgeMin}
-                        onChangeText={(text) => handleChange("preferredAgeMin", text)}
-                    />
-                    <Text style={styles.toText}>to</Text>
-                    <TextInput
-                        placeholder="35"
-                        placeholderTextColor="#A0A0A0"
-                        style={[styles.input, styles.ageInput]}
-                        keyboardType="numeric"
-                        value={form.preferredAgeMax}
-                        onChangeText={(text) => handleChange("preferredAgeMax", text)}
-                    />
-                    <Text style={styles.yearsText}>years</Text>
-                </View>
+                        {/* Age Range */}
+                        <Text style={styles.label}>Preferred Age Range</Text>
+                        <View style={styles.ageRow}>
+                            <TextInput
+                                placeholder="25"
+                                placeholderTextColor="#A0A0A0"
+                                style={[styles.input, styles.ageInput]}
+                                keyboardType="numeric"
+                                value={form.preferredAgeMin}
+                                onChangeText={(text) => handleChange("preferredAgeMin", text)}
+                            />
+                            <Text style={styles.toText}>to</Text>
+                            <TextInput
+                                placeholder="35"
+                                placeholderTextColor="#A0A0A0"
+                                style={[styles.input, styles.ageInput]}
+                                keyboardType="numeric"
+                                value={form.preferredAgeMax}
+                                onChangeText={(text) => handleChange("preferredAgeMax", text)}
+                            />
+                            <Text style={styles.yearsText}>years</Text>
+                        </View>
 
-                {/* Preferred Locations */}
-                <Text style={styles.label}>Preferred Locations</Text>
-                <TextInput
-                    placeholder="e.g., Mumbai, Delhi, Bangalore"
-                    placeholderTextColor="#A0A0A0"
-                    style={styles.input}
-                    value={form.preferredLocations}
-                    onChangeText={(text) => handleChange("preferredLocations", text)}
-                />
+                        {/* Preferred Locations */}
+                        <Text style={styles.label}>Preferred Locations</Text>
+                        <TextInput
+                            placeholder="e.g., Mumbai, Delhi, Bangalore"
+                            placeholderTextColor="#A0A0A0"
+                            style={styles.input}
+                            value={form.preferredLocations}
+                            onChangeText={(text) => handleChange("preferredLocations", text)}
+                        />
 
-                {/* Preferred Education */}
-                <Text style={styles.label}>Preferred Education</Text>
-                <TextInput
-                    placeholder="e.g., Bachelor's, Master's, PhD"
-                    placeholderTextColor="#A0A0A0"
-                    style={styles.input}
-                    value={form.preferredEducation}
-                    onChangeText={(text) => handleChange("preferredEducation", text)}
-                />
-            </View>
+                        {/* Preferred Education */}
+                        <Text style={styles.label}>Preferred Education</Text>
+                        <TextInput
+                            placeholder="e.g., Bachelor's, Master's, PhD"
+                            placeholderTextColor="#A0A0A0"
+                            style={styles.input}
+                            value={form.preferredEducation}
+                            onChangeText={(text) => handleChange("preferredEducation", text)}
+                        />
+                    </View>
 
-            {/* Footer Buttons */}
-            <View style={styles.footer}>
-                <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
-                    <Ionicons name="arrow-back" size={18} color="#000" />
-                    <Text style={styles.previousText}>Previous</Text>
-                </TouchableOpacity>
+                    {/* Footer Buttons */}
+                    <View style={styles.footer}>
+                        <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                            <Ionicons name="arrow-back" size={18} color="#000" />
+                            <Text style={styles.previousText}>Previous</Text>
+                        </TouchableOpacity>
 
-                <TouchableOpacity onPress={handleComplete}>
-                    <LinearGradient
-                        colors={["#FF512F", "#DD2476"]}
-                        style={styles.nextButton}
-                    >
-                        <Text style={styles.nextText}>Complete Profile</Text>
-                        <Ionicons name="arrow-forward" size={18} color="#fff" />
-                    </LinearGradient>
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
+                        <TouchableOpacity onPress={handleComplete}>
+                            <LinearGradient
+                                colors={["#FF512F", "#DD2476"]}
+                                style={styles.nextButton}
+                            >
+                                <Text style={styles.nextText}>Complete Profile</Text>
+                                <Ionicons name="arrow-forward" size={18} color="#fff" />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 };
 

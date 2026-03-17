@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
+import LinearGradient from "react-native-linear-gradient";
 import { DiscoveryProfile } from "../api/types/discovery.types";
 
 interface ProfileCardProps extends DiscoveryProfile { }
@@ -15,151 +15,120 @@ const ProfileCard: React.FC<ProfileCardProps> = ({
     photos,
     familyDetails,
 }) => {
+    console.log("sad",photos);
     // Get the first photo as the main image, or use a placeholder
-    const image = photos && photos.length > 0 ? photos[0].url : "https://via.placeholder.com/300x300.png?text=No+Photo";
+    const image =  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=688&ixlib=rb-4.0.3";
 
     return (
         <View style={styles.card}>
-            {/* Profile Image + Badges */}
-            <View style={{ position: "relative" }}>
-                <Image source={{ uri: image }} style={styles.profileImage} />
+            {/* Full Bleed Image */}
+            <Image source={{ uri: image }} style={styles.profileImage} resizeMode="cover" />
 
-                {/* Badges could be added back if API provides this info */}
-            </View>
+            {/* Bottom Gradient Overlay */}
+            <LinearGradient
+                colors={["transparent", "rgba(0,0,0,0.8)", "rgba(0,0,0,0.9)"]}
+                style={styles.gradientOverlay}
+            >
+                {/* Profile Information */}
+                <View style={styles.infoContent}>
+                    <Text style={styles.name}>{`${fullName}, ${age}`}</Text>
 
-            {/* Profile Details */}
-            <View style={styles.details}>
-                <Text style={styles.name}>{`${fullName}, ${age}`}</Text>
-
-                <InfoRow icon="location-outline" text={location} />
-                <InfoRow icon="briefcase-outline" text={profession} />
-                <InfoRow icon="school-outline" text={education} />
-
-                {/* Family Section */}
-                {familyDetails && (
-                    <View style={styles.familyBox}>
-                        <Text style={styles.familyTitle}>Family Details</Text>
-                        {familyDetails.fatherOccupation && (
-                            <Text style={styles.familyText}>
-                                Father: {familyDetails.fatherOccupation}
-                            </Text>
-                        )}
-                        {familyDetails.motherOccupation && (
-                            <Text style={styles.familyText}>
-                                Mother: {familyDetails.motherOccupation}
-                            </Text>
-                        )}
-                        {familyDetails.siblings && (
-                            <Text style={styles.familyText}>
-                                Siblings: {familyDetails.siblings}
-                            </Text>
-                        )}
+                    <View style={styles.detailsRow}>
+                        <View style={styles.tagLine}>
+                            <Ionicons name="location-sharp" size={14} color="#FFF" />
+                            <Text style={styles.tagText}>{location}</Text>
+                        </View>
+                        <View style={styles.tagLine}>
+                            <Ionicons name="briefcase-sharp" size={14} color="#FFF" />
+                            <Text style={styles.tagText}>{profession}</Text>
+                        </View>
                     </View>
-                )}
-            </View>
+
+                    {/* Tags / Interests could be added here */}
+                    <View style={styles.interestsRow}>
+                        <View style={styles.interestTag}>
+                            <Text style={styles.interestText}>{education}</Text>
+                        </View>
+                    </View>
+                </View>
+            </LinearGradient>
         </View>
     );
 };
 
-// ✅ Reusable Info Row (for icons + text)
-const InfoRow = ({
-    icon,
-    text,
-}: {
-    icon: string;
-    text: string;
-}) => (
-    <View style={styles.row}>
-        <Ionicons name={icon} size={16} color="#555" />
-        <Text style={styles.text}>{text}</Text>
-    </View>
-);
 
 export default ProfileCard;
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#fff",
-        borderRadius: 16,
+        backgroundColor: "#000",
+        borderRadius: 20,
+        height: 520, // Taller card for Tinder look
         overflow: "hidden",
-        marginVertical: 16,
-        elevation: 4,
+        elevation: 8,
         shadowColor: "#000",
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 4 },
+        position: 'relative',
     },
     profileImage: {
-        width: "100%",
-        height: 300,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
+        ...StyleSheet.absoluteFillObject,
     },
-    verifiedBadge: {
-        position: "absolute",
-        top: 10,
-        left: 10,
-        backgroundColor: "#3CB371",
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
+    gradientOverlay: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: '40%', // Cover bottom part
+        justifyContent: 'flex-end',
+        padding: 20,
     },
-    verifiedText: {
-        color: "#fff",
-        fontSize: 12,
-        fontWeight: "600",
-    },
-    premiumBadge: {
-        position: "absolute",
-        top: 10,
-        right: 10,
-        backgroundColor: "#E94057",
-        flexDirection: "row",
-        alignItems: "center",
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
-        gap: 4,
-    },
-    premiumText: {
-        color: "#fff",
-        fontSize: 12,
-        fontWeight: "600",
-    },
-    details: {
-        padding: 14,
+    infoContent: {
+        marginBottom: 10,
     },
     name: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#222",
+        fontSize: 28,
+        fontWeight: "800",
+        color: "#FFF",
         marginBottom: 8,
+        textShadowColor: 'rgba(0, 0, 0, 0.5)',
+        textShadowOffset: { width: 0, height: 1 },
+        textShadowRadius: 3,
     },
-    row: {
+    detailsRow: {
         flexDirection: "row",
         alignItems: "center",
-        marginVertical: 2,
+        flexWrap: "wrap",
+        gap: 15,
+        marginBottom: 12,
     },
-    text: {
-        fontSize: 14,
-        color: "#555",
-        marginLeft: 6,
+    tagLine: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
     },
-    familyBox: {
-        backgroundColor: "#FFF6EE",
-        borderRadius: 10,
-        padding: 10,
-        marginTop: 12,
-    },
-    familyTitle: {
+    tagText: {
         fontSize: 15,
-        fontWeight: "700",
-        color: "#222",
-        marginBottom: 4,
+        color: "#FFF",
+        fontWeight: '500',
     },
-    familyText: {
+    interestsRow: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    interestTag: {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 20,
+        paddingHorizontal: 12,
+        paddingVertical: 5,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    interestText: {
         fontSize: 13,
-        color: "#444",
-        lineHeight: 18,
+        color: "#FFF",
+        fontWeight: '600',
     },
 });

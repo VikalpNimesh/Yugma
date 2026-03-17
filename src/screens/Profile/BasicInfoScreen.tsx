@@ -5,13 +5,15 @@ import {
     StyleSheet,
     TouchableOpacity,
     ScrollView,
+    KeyboardAvoidingView,
+    Platform,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
 import { Provider, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { RootState } from "../../redux/store";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -81,183 +83,188 @@ export const BasicInfoScreen: React.FC = () => {
 
     return (
         <Provider>
-            <SafeAreaView style={{ flex: 1, backgroundColor: "#FFF" }}>
-                <ScrollView contentContainerStyle={styles.container}>
-                    {/* Header */}
-                    <View style={styles.headerRow}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={20} color="#000" />
-                            <Text style={styles.backText}>Back</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.stepText}>Step 1 of 4</Text>
-                    </View>
-
-                    {/* Progress Bar */}
-                    <View style={styles.progressBarContainer}>
-                        <View style={[styles.progressBarFill, { width: "25%" }]} />
-                    </View>
-
-                    <Text style={styles.title}>Basic Information</Text>
-
-                    <View style={styles.card}>
-                        <View style={styles.row}>
-                            <InputField
-                                label="Full Name"
-                                placeholder="Enter your full name"
-                                value={form.fullName}
-                                onChangeText={(text) => handleChange("fullName", text)}
-                                onFocus={() => setFocusedField("fullName")}
-                                onBlur={() => setFocusedField(null)}
-                                isFocused={focusedField === "fullName"}
-                                editable={false}
-                            />
-
-                            <InputField
-                                label="Email"
-                                placeholder="Your email"
-                                value={form.email}
-                                onChangeText={(text) => handleChange("email", text)}
-                                onFocus={() => setFocusedField("email")}
-                                onBlur={() => setFocusedField(null)}
-                                isFocused={focusedField === "email"}
-                                keyboardType="email-address"
-                                editable={false}
-                            />
+            <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1 }}
+                >
+                    <ScrollView contentContainerStyle={styles.container}>
+                        {/* Header */}
+                        <View style={styles.headerRow}>
+                            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                                {/* <Ionicons name="arrow-back" size={20} color="#000" />
+                                <Text style={styles.backText}>Back</Text> */}
+                            </TouchableOpacity>
+                            <Text style={styles.stepText}>Step 1 of 4</Text>
                         </View>
 
-                        <View style={styles.row}>
-                            <InputField
-                                label="Age"
-                                placeholder="Your age"
-                                value={form.age}
-                                onChangeText={(text) => handleChange("age", text)}
-                                onFocus={() => setFocusedField("age")}
-                                onBlur={() => setFocusedField(null)}
-                                isFocused={focusedField === "age"}
-                                keyboardType="numeric"
-                            />
+                        {/* Progress Bar */}
+                        <View style={styles.progressBarContainer}>
+                            <View style={[styles.progressBarFill, { width: "25%" }]} />
                         </View>
 
-                        <View style={styles.row}>
-                            <InputField
-                                label="Location"
-                                placeholder="City, State"
-                                value={form.location}
-                                onChangeText={(text) => handleChange("location", text)}
-                                onFocus={() => setFocusedField("location")}
-                                onBlur={() => setFocusedField(null)}
-                                isFocused={focusedField === "location"}
-                            />
-                            <InputField
-                                label="Profession"
-                                placeholder="Your profession"
-                                value={form.profession}
-                                onChangeText={(text) => handleChange("profession", text)}
-                                onFocus={() => setFocusedField("profession")}
-                                onBlur={() => setFocusedField(null)}
-                                isFocused={focusedField === "profession"}
-                            />
-                        </View>
+                        <Text style={styles.title}>Basic Information</Text>
 
-                        <View style={styles.row}>
-                            {/* Education Dropdown */}
-                            <View style={[styles.inputContainer, { flex: 1, margin: 6 }]}>
-                                <Text style={styles.label}>Education</Text>
-                                <Dropdown
-                                    data={[
-                                        { label: "High School", value: "High School" },
-                                        { label: "Bachelor's", value: "Bachelor's" },
-                                        { label: "Master's", value: "Master's" },
-                                        { label: "PhD", value: "PhD" },
-                                        { label: "Professional Degree", value: "Professional Degree" },
-                                    ]}
-                                    labelField="label"
-                                    valueField="value"
-                                    placeholder="Select education level"
-                                    value={form.education}
-                                    onChange={(item) => handleChange("education", item.value)}
-                                    style={[
-                                        styles.dropdown,
-                                        form.education ? styles.dropdownFilled : {},
-                                    ]}
-                                    placeholderStyle={styles.placeholderStyle}
-                                    selectedTextStyle={styles.selectedTextStyle}
-                                    itemTextStyle={{ color: "#333" }}
-                                    activeColor="#f4f4f4"
-                                    renderRightIcon={() => null}
-                                />
-                            </View>
-                        </View>
-
-                        <View style={styles.row}>
-                            <InputField
-                                label="Region"
-                                placeholder="Your region"
-                                value={form.region}
-                                onChangeText={(text) => handleChange("region", text)}
-                                onFocus={() => setFocusedField("region")}
-                                onBlur={() => setFocusedField(null)}
-                                isFocused={focusedField === "region"}
-                            />
-
-                            <View style={styles.inputContainer}>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <Text style={styles.label}>Area Cover</Text>
-                                    <View style={styles.premiumBadge}>
-                                        <Ionicons name="star" size={12} color="#FFD700" />
-                                        <Text style={styles.premiumText}>Premium</Text>
-                                    </View>
-                                </View>
-                                <TextInput
-                                    mode="outlined"
-                                    placeholder="Coverage area (Premium)"
-                                    placeholderTextColor={"#999"}
-                                    value={form.areaCover}
-                                    onChangeText={(text) => handleChange("areaCover", text)}
-                                    onFocus={() => setFocusedField("areaCover")}
+                        <View style={styles.card}>
+                            <View style={styles.row}>
+                                <InputField
+                                    label="Full Name"
+                                    placeholder="Enter your full name"
+                                    value={form.fullName}
+                                    onChangeText={(text) => handleChange("fullName", text)}
+                                    onFocus={() => setFocusedField("fullName")}
                                     onBlur={() => setFocusedField(null)}
-                                    outlineColor="#ddd"
-                                    activeOutlineColor="#dadada"
-                                    style={[
-                                        styles.paperInput,
-                                        focusedField === "areaCover" && { borderColor: "#E94057" },
-                                    ]}
-                                    textColor='#000'
-                                    theme={{
-                                        roundness: 10,
-                                        colors: {
-                                            text: "#000",
-                                            placeholder: "#999",
-                                            primary: "#E94057",
-                                            background: "#fff",
-                                        },
-                                    }}
+                                    isFocused={focusedField === "fullName"}
+                                    editable={false}
+                                />
+
+                                <InputField
+                                    label="Email"
+                                    placeholder="Your email"
+                                    value={form.email}
+                                    onChangeText={(text) => handleChange("email", text)}
+                                    onFocus={() => setFocusedField("email")}
+                                    onBlur={() => setFocusedField(null)}
+                                    isFocused={focusedField === "email"}
+                                    keyboardType="email-address"
+                                    editable={false}
                                 />
                             </View>
+
+                            <View style={styles.row}>
+                                <InputField
+                                    label="Age"
+                                    placeholder="Your age"
+                                    value={form.age}
+                                    onChangeText={(text) => handleChange("age", text)}
+                                    onFocus={() => setFocusedField("age")}
+                                    onBlur={() => setFocusedField(null)}
+                                    isFocused={focusedField === "age"}
+                                    keyboardType="numeric"
+                                />
+                            </View>
+
+                            <View style={styles.row}>
+                                <InputField
+                                    label="Location"
+                                    placeholder="City, State"
+                                    value={form.location}
+                                    onChangeText={(text) => handleChange("location", text)}
+                                    onFocus={() => setFocusedField("location")}
+                                    onBlur={() => setFocusedField(null)}
+                                    isFocused={focusedField === "location"}
+                                />
+                                <InputField
+                                    label="Profession"
+                                    placeholder="Your profession"
+                                    value={form.profession}
+                                    onChangeText={(text) => handleChange("profession", text)}
+                                    onFocus={() => setFocusedField("profession")}
+                                    onBlur={() => setFocusedField(null)}
+                                    isFocused={focusedField === "profession"}
+                                />
+                            </View>
+
+                            <View style={styles.row}>
+                                {/* Education Dropdown */}
+                                <View style={[styles.inputContainer, { flex: 1, margin: 6 }]}>
+                                    <Text style={styles.label}>Education</Text>
+                                    <Dropdown
+                                        data={[
+                                            { label: "High School", value: "High School" },
+                                            { label: "Bachelor's", value: "Bachelor's" },
+                                            { label: "Master's", value: "Master's" },
+                                            { label: "PhD", value: "PhD" },
+                                            { label: "Professional Degree", value: "Professional Degree" },
+                                        ]}
+                                        labelField="label"
+                                        valueField="value"
+                                        placeholder="Select education level"
+                                        value={form.education}
+                                        onChange={(item) => handleChange("education", item.value)}
+                                        style={[
+                                            styles.dropdown,
+                                            form.education ? styles.dropdownFilled : {},
+                                        ]}
+                                        placeholderStyle={styles.placeholderStyle}
+                                        selectedTextStyle={styles.selectedTextStyle}
+                                        itemTextStyle={{ color: "#333" }}
+                                        activeColor="#f4f4f4"
+                                        renderRightIcon={() => null}
+                                    />
+                                </View>
+                            </View>
+
+                            <View style={styles.row}>
+                                <InputField
+                                    label="Region"
+                                    placeholder="Your region"
+                                    value={form.region}
+                                    onChangeText={(text) => handleChange("region", text)}
+                                    onFocus={() => setFocusedField("region")}
+                                    onBlur={() => setFocusedField(null)}
+                                    isFocused={focusedField === "region"}
+                                />
+
+                                <View style={styles.inputContainer}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Text style={styles.label}>Area Cover</Text>
+                                        <View style={styles.premiumBadge}>
+                                            <Ionicons name="star" size={12} color="#FFD700" />
+                                            <Text style={styles.premiumText}>Premium</Text>
+                                        </View>
+                                    </View>
+                                    <TextInput
+                                        mode="outlined"
+                                        placeholder="Coverage area (Premium)"
+                                        placeholderTextColor={"#999"}
+                                        value={form.areaCover}
+                                        onChangeText={(text) => handleChange("areaCover", text)}
+                                        onFocus={() => setFocusedField("areaCover")}
+                                        onBlur={() => setFocusedField(null)}
+                                        outlineColor="#ddd"
+                                        activeOutlineColor="#dadada"
+                                        style={[
+                                            styles.paperInput,
+                                            focusedField === "areaCover" && { borderColor: "#E94057" },
+                                        ]}
+                                        textColor='#000'
+                                        theme={{
+                                            roundness: 10,
+                                            colors: {
+                                                text: "#000",
+                                                placeholder: "#999",
+                                                primary: "#E94057",
+                                                background: "#fff",
+                                            },
+                                        }}
+                                    />
+                                </View>
+                            </View>
+
+
                         </View>
 
+                        {/* Footer Buttons */}
+                        <View style={styles.footer}>
+                            <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                                <Ionicons name="arrow-back" size={18} color="#000" />
+                                <Text style={styles.previousText}>Previous</Text>
+                            </TouchableOpacity>
 
-                    </View>
-
-                    {/* Footer Buttons */}
-                    <View style={styles.footer}>
-                        <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
-                            <Ionicons name="arrow-back" size={18} color="#000" />
-                            <Text style={styles.previousText}>Previous</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity onPress={handleNext}>
-                            <LinearGradient
-                                colors={["#FF512F", "#DD2476"]}
-                                style={styles.nextButton}
-                            >
-                                <Text style={styles.nextText}>Next</Text>
-                                <Ionicons name="arrow-forward" size={18} color="#fff" />
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </SafeAreaView>
+                            <TouchableOpacity onPress={handleNext}>
+                                <LinearGradient
+                                    colors={["#FF512F", "#DD2476"]}
+                                    style={styles.nextButton}
+                                >
+                                    <Text style={styles.nextText}>Next</Text>
+                                    <Ionicons name="arrow-forward" size={18} color="#fff" />
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </View>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </View>
         </Provider>
     );
 };

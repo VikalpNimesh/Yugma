@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
     View,
     Text,
@@ -13,7 +13,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Swiper from "react-native-deck-swiper";
 import ProfileCard from "../../components/ProfileCard";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,6 +23,7 @@ const { width, height } = Dimensions.get("window");
 
 const DiscoverScreen = () => {
     const dispatch = useDispatch<AppDispatch>();
+    const swiperRef = useRef<any>(null);
     const { profiles, loading, error } = useSelector((state: RootState) => state.discovery);
     const [showFilter, setShowFilter] = React.useState(false);
     const [showSwipeTutorial, setShowSwipeTutorial] = React.useState(false);
@@ -58,25 +58,25 @@ const DiscoverScreen = () => {
 
     if (loading && profiles.length === 0) {
         return (
-            <SafeAreaView style={[styles.container, styles.centered]}>
+            <View style={[styles.container, styles.centered]}>
                 <ActivityIndicator size="large" color="#E94057" />
-            </SafeAreaView>
+            </View>
         );
     }
 
     if (error && profiles.length === 0) {
         return (
-            <SafeAreaView style={[styles.container, styles.centered]}>
+            <View style={[styles.container, styles.centered]}>
                 <Text style={styles.errorText}>{error}</Text>
                 <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.retryButton}>
                     <Text style={styles.retryText}>Retry</Text>
                 </TouchableOpacity>
-            </SafeAreaView>
+            </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
             <ScrollView
                 contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
                 showsVerticalScrollIndicator={false}
@@ -98,42 +98,50 @@ const DiscoverScreen = () => {
                     <>
                         <View style={styles.swiperWrapper}>
                             <Swiper
+                                ref={swiperRef}
                                 key={profiles.length} // Force re-render on length change
                                 cards={profiles}
                                 renderCard={(card) => <ProfileCard {...card} />}
                                 stackSize={Math.min(profiles.length, 3)}
                                 backgroundColor="transparent"
-                                cardVerticalMargin={10}
+                                cardVerticalMargin={0}
                                 cardHorizontalMargin={16}
                                 animateCardOpacity
                                 horizontalSwipe
                                 verticalSwipe={false}
                                 onSwipedLeft={(index) => handlePass(profiles[index].userId)}
                                 onSwipedRight={(index) => handleLike(profiles[index].userId)}
+                                overlayLabels={{
+                                    left: {
+                                        title: " ",
+                                        style: {
+                                            label: {
+                                                display: "none",
+                                            },
+                                            wrapper: {
+                                                backgroundColor: "rgba(255, 64, 87, 0.5)", // Light Red for NOPE
+                                                borderRadius: 20,
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            },
+                                        },
+                                    },
+                                    right: {
+                                        title: " ",
+                                        style: {
+                                            label: {
+                                                display: "none",
+                                            },
+                                            wrapper: {
+                                                backgroundColor: "rgba(60, 179, 113, 0.5)", // Light Green for LIKE
+                                                borderRadius: 20,
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                            },
+                                        },
+                                    },
+                                }}
                             />
-                        </View>
-                        <View style={styles.likeDislikebtn}>
-                            <TouchableOpacity
-                                style={styles.passButton}
-                                onPress={() => {
-                                    if (profiles.length > 0) handlePass(profiles[0].userId);
-                                }}
-                            >
-                                <Ionicons name="close" size={28} color="#E64A8B" />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                onPress={() => {
-                                    if (profiles.length > 0) handleLike(profiles[0].userId);
-                                }}
-                            >
-                                <LinearGradient
-                                    colors={["#FF512F", "#DD2476"]}
-                                    style={styles.likeButton}
-                                >
-                                    <Ionicons name="heart" size={28} color="#fff" />
-                                </LinearGradient>
-                            </TouchableOpacity>
                         </View>
                     </>
                 ) : (
@@ -146,18 +154,111 @@ const DiscoverScreen = () => {
                 )}
             </ScrollView>
 
-            {/* Filter Modal Stub */}
+            {/* Absolute Buttons - Outside ScrollView */}
+            {profiles.length > 0 && (
+                <View style={styles.likeDislikebtn}>
+                    <TouchableOpacity
+                        style={styles.passButton}
+                        onPress={() => {
+                            if (profiles.length > 0) swiperRef.current?.swipeLeft();
+                        }}
+                    >
+                        <Ionicons name="close" size={28} color="#E64A8B" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={() => {
+                            if (profiles.length > 0) swiperRef.current?.swipeRight();
+                        }}
+                    >
+                        <LinearGradient
+                            colors={["#FF512F", "#DD2476"]}
+                            style={styles.likeButton}
+                        >
+                            <Ionicons name="heart" size={28} color="#fff" />
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+            )}
+
+            {/* Filter Modal */}
             <Modal visible={showFilter} animationType="slide" transparent>
                 <View style={styles.modalContainer}>
                     <View style={styles.modalContent}>
-                        <Text style={styles.modalTitle}>Filters</Text>
-                        <Text>Filter options coming soon...</Text>
-                        <TouchableOpacity
-                            style={styles.closeButton}
-                            onPress={() => setShowFilter(false)}
-                        >
-                            <Text style={styles.closeButtonText}>Close</Text>
-                        </TouchableOpacity>
+                        {/* Modal Header */}
+                        <View style={styles.modalHeader}>
+                            <TouchableOpacity onPress={() => setShowFilter(false)}>
+                                <Text style={styles.clearText}>Clear</Text>
+                            </TouchableOpacity>
+                            <Text style={styles.modalTitle}>Filters</Text>
+                            <TouchableOpacity onPress={() => setShowFilter(false)}>
+                                <Text style={styles.doneText}>Done</Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {/* Gender Selection */}
+                            <Text style={styles.sectionTitle}>Interested In</Text>
+                            <View style={styles.chipRow}>
+                                {["Mens", "Womens", "Both"].map((type) => (
+                                    <TouchableOpacity
+                                        key={type}
+                                        style={[
+                                            styles.chip,
+                                            type === "Both" ? styles.activeChip : {},
+                                        ]}
+                                    >
+                                        <Text style={[
+                                            styles.chipText,
+                                            type === "Both" ? styles.activeChipText : {},
+                                        ]}>{type}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            {/* Age Range Slider (Dummy) */}
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionTitle}>Age Range</Text>
+                                <Text style={styles.rangeValue}>20 - 32</Text>
+                            </View>
+                            <View style={styles.dummySliderTrack}>
+                                <View style={styles.dummySliderRange} />
+                                <View style={[styles.dummySliderKnob, { left: "20%" }]} />
+                                <View style={[styles.dummySliderKnob, { left: "60%" }]} />
+                            </View>
+
+                            {/* Distance Slider (Dummy) */}
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionTitle}>Distance</Text>
+                                <Text style={styles.rangeValue}>15 km</Text>
+                            </View>
+                            <View style={styles.dummySliderTrack}>
+                                <View style={[styles.dummySliderRange, { width: "40%" }]} />
+                                <View style={[styles.dummySliderKnob, { left: "40%" }]} />
+                            </View>
+
+                            {/* Interests */}
+                            <Text style={styles.sectionTitle}>Interests</Text>
+                            <View style={styles.chipRow}>
+                                {["Music", "Cooking", "Travel", "Art", "Gym", "Movies", "Reading"].map((interest) => (
+                                    <TouchableOpacity key={interest} style={styles.interestChip}>
+                                        <Text style={styles.interestChipText}>{interest}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
+
+                            <TouchableOpacity
+                                style={styles.applyButton}
+                                onPress={() => setShowFilter(false)}
+                            >
+                                <LinearGradient
+                                    colors={["#FF512F", "#DD2476"]}
+                                    style={styles.applyButtonGradient}
+                                >
+                                    <Text style={styles.applyButtonText}>Confirm Filters</Text>
+                                </LinearGradient>
+                            </TouchableOpacity>
+                        </ScrollView>
                     </View>
                 </View>
             </Modal>
@@ -178,7 +279,7 @@ const DiscoverScreen = () => {
                     </View>
                 </TouchableOpacity>
             </Modal>
-        </SafeAreaView>
+        </View>
     );
 };
 
@@ -213,9 +314,9 @@ const styles = StyleSheet.create({
     filterText: { marginLeft: 4, color: "#000", fontWeight: "500" },
 
     swiperWrapper: {
-        height: 500,
+        height: 540,
         marginTop: 10,
-        paddingHorizontal: 16
+        paddingHorizontal: 0
     },
 
     swipeText: {
@@ -245,11 +346,15 @@ const styles = StyleSheet.create({
         elevation: 3,
     },
     likeDislikebtn: {
-        marginTop: 100,
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        gap: 30
+        gap: 30,
+        paddingBottom: 20, // Add some safe space
     },
     errorText: {
         fontSize: 16,
@@ -278,19 +383,81 @@ const styles = StyleSheet.create({
     modalContainer: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "center",
-        alignItems: "center",
+        justifyContent: "flex-end",
     },
     modalContent: {
-        width: "80%",
         backgroundColor: "#fff",
-        borderRadius: 12,
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
         padding: 20,
+        height: height * 0.7,
+    },
+    modalHeader: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 24,
+    },
+    modalTitle: { fontSize: 20, fontWeight: "800", color: "#000" },
+    clearText: { color: "#666", fontWeight: "600" },
+    doneText: { color: "#E94057", fontWeight: "700" },
+    sectionTitle: { fontSize: 16, fontWeight: "700", color: "#333", marginBottom: 16, marginTop: 8 },
+    sectionHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+    rangeValue: { color: "#E94057", fontWeight: "600" },
+    chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginBottom: 20 },
+    chip: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 12,
+        backgroundColor: "#F4F4F4",
+    },
+    activeChip: {
+        backgroundColor: "#FF512F",
+    },
+    chipText: { color: "#666", fontWeight: "600" },
+    activeChipText: { color: "#FFF" },
+    dummySliderTrack: {
+        height: 6,
+        backgroundColor: "#F0F0F0",
+        borderRadius: 3,
+        marginHorizontal: 10,
+        marginBottom: 30,
+        position: "relative",
+    },
+    dummySliderRange: {
+        position: "absolute",
+        height: "100%",
+        backgroundColor: "#FF512F",
+        width: "40%",
+        left: "20%",
+    },
+    dummySliderKnob: {
+        position: "absolute",
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        backgroundColor: "#FFF",
+        borderWidth: 2,
+        borderColor: "#FF512F",
+        top: -9,
+        elevation: 3,
+    },
+    interestChip: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: "#EEE",
+        backgroundColor: "#FFF",
+    },
+    interestChipText: { color: "#444", fontSize: 13, fontWeight: "500" },
+    applyButton: { marginTop: 30, marginBottom: 40 },
+    applyButtonGradient: {
+        paddingVertical: 16,
+        borderRadius: 16,
         alignItems: "center",
     },
-    modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 10 },
-    closeButton: { marginTop: 20, padding: 10, backgroundColor: "#E64A8B", borderRadius: 8 },
-    closeButtonText: { color: "#fff" },
+    applyButtonText: { color: "#FFF", fontSize: 16, fontWeight: "700" },
     tutorialOverlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.8)",

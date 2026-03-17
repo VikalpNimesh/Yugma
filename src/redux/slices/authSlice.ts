@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import * as Keychain from 'react-native-keychain';
 import authService from '../../api/services/authService';
+import profileService from '../../api/services/profileService';
 import type {
   LoginRequest,
   SignupRequest,
@@ -18,6 +19,7 @@ interface User {
 
 interface AuthState {
   user: User | null;
+  profile: any | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -26,6 +28,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
+  profile: null,
   token: null,
   isAuthenticated: false,
   isLoading: false, // Start loading to check auth state
@@ -40,15 +43,11 @@ export const checkAuthState = createAsyncThunk(
       const credentials = await Keychain.getGenericPassword();
       if (credentials) {
         const tokens = JSON.parse(credentials.password);
-        // Ideally we should validate the token or fetch user profile here
-        // For now, we assume if tokens exist, we are somewhat authenticated
-        // But we need the user data.
-        // If we don't persist user data, we might need to fetch it.
-        // For this step, let's assume we need to re-fetch user profile or valid tokens?
-        // Actually, without user data in storage, we can't fully restore state.
-        // Let's return just token to state, and maybe app should fetch profile.
-        // OR: we can store user data in Async Storage for recovery.
         console.log(tokens);
+        
+        // Fetch profile
+        await dispatch(fetchUserProfile());
+        
         return { token: tokens.access };
       }
       return null;
@@ -58,9 +57,23 @@ export const checkAuthState = createAsyncThunk(
   }
 );
 
+export const fetchUserProfile = createAsyncThunk(
+  'auth/fetchUserProfile',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await profileService.getProfile();
+      // user request specified that we check if data is null
+      console.log('Profile Response:', response);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to fetch profile');
+    }
+  }
+);
+
 export const loginUser = createAsyncThunk(
   'auth/login',
-  async (credentials: LoginRequest, { rejectWithValue }) => {
+  async (credentials: LoginRequest, { dispatch, rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
 
@@ -68,6 +81,9 @@ export const loginUser = createAsyncThunk(
 
       // Store tokens in Keychain
       await Keychain.setGenericPassword('auth_tokens', JSON.stringify(tokens));
+
+      // Fetch profile after login
+      await dispatch(fetchUserProfile());
 
       return { user, token: tokens.access };
     } catch (error: any) {
@@ -132,6 +148,7 @@ const authSlice = createSlice({
     },
     resetAuth: state => {
       state.user = null;
+      state.profile = null;
       state.token = null;
       state.isAuthenticated = false;
       state.isLoading = false;
@@ -201,9 +218,24 @@ const authSlice = createSlice({
       .addCase(logoutUser.fulfilled, state => {
         state.isLoading = false;
         state.user = null;
+        state.profile = null;
         state.token = null;
         state.isAuthenticated = false;
         state.error = null;
+      });
+
+    // Fetch User Profile
+    builder
+      .addCase(fetchUserProfile.pending, state => {
+        state.isLoading = true;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.profile = action.payload; // action.payload will be result.data which might be null
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.isLoading = false;
+        state.profile = null;
       });
   },
 });
