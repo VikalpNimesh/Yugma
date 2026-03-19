@@ -14,12 +14,23 @@ const persistConfig = {
   whitelist: ['user', 'auth', 'profileForm'],
 };
 
-const rootReducer = combineReducers({
+const combinedReducer = combineReducers({
   user: userReducer,
   auth: authReducer,
   profileForm: profileFormReducer,
   discovery: discoveryReducer,
 });
+
+const rootReducer = (state: any, action: any) => {
+  if (action.type === 'RESET_STORE') {
+    // We clear the state by passing undefined to the combined reducer
+    state = undefined;
+    // We also need to clear AsyncStorage if needed, but per-slice resets usually suffice
+    // except when Redux Persist re-hydrates. By setting state to undefined, 
+    // the combined reducer will return the initial state for all slices.
+  }
+  return combinedReducer(state, action);
+};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 

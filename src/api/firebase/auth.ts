@@ -163,6 +163,7 @@ export const handleLogout = async (
     // 1. Clear stored tokens from Keychain FIRST (crucial)
     try {
       await Keychain.resetGenericPassword();
+      console.log('✅ Keychain reset');
     } catch (error) {
       console.warn('Keychain reset failed:', error);
     }
@@ -170,6 +171,7 @@ export const handleLogout = async (
     // 2. Sign out from Firebase
     try {
       await auth().signOut();
+      console.log('✅ Firebase signed out');
     } catch (error) {
       console.warn('Firebase sign-out failed:', error);
     }
@@ -177,25 +179,20 @@ export const handleLogout = async (
     // 3. Sign out from Google
     try {
       await GoogleSignin.signOut();
+      console.log('✅ Google signed out');
     } catch (error) {
       console.warn('Google sign-out failed:', error);
     }
 
     // 4. Clear Redux state
-    // We clear auth state LAST to ensure other slices are reset 
-    // before the navigator swap happens in RootNavigator.
+    // We clear auth state to trigger RootNavigator re-render
     if (dispatch) {
-      dispatch(logout()); // from userSlice
-      dispatch(resetProfileForm());
-      // Small delay or ensure this is last
-      dispatch(resetAuth()); // from authSlice
+      console.log('Dispatching global RESET_STORE...');
+      dispatch({ type: 'RESET_STORE' });
+      console.log('Redux state reset dispatched.');
     }
 
-    // 5. Success feedback
-    // Note: RootNavigator will swap components immediately after resetAuth()
-    // Showing a Toast or Alert might be tricky across unmounting, 
-    // but clearing the state is the primary goal.
-    console.log('✅ Logout successful');
+    console.log('✅ Logout sequence complete');
 
   } catch (error) {
     console.error('Logout error:', error);

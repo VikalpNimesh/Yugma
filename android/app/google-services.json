@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "740740268985",
-    "project_id": "vivahsetu-4eec1",
-    "storage_bucket": "vivahsetu-4eec1.firebasestorage.app"
+    "project_number": "1095972468168",
+    "project_id": "comyugmamatch",
+    "storage_bucket": "comyugmamatch.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:740740268985:android:c420bd31a1ee0979afec68",
+        "mobilesdk_app_id": "1:1095972468168:android:f2b47e25f2cb4d106ffcfd",
         "android_client_info": {
-          "package_name": "com.vivahsetu"
+          "package_name": "com.yugmamatch"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "740740268985-bctaa1dutcq187lrc6i9bkeat3v3028c.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.vivahsetu",
-            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
-          }
-        },
-        {
-          "client_id": "740740268985-l0u2tug9pq87r4bms19bjj2tihfc81o4.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDdLo3BFkMO--95TZPuAF65-bpKfbknTQQ"
+          "current_key": "AIzaSyBgoFTAOSTb_1ueqpNAhlgciQL5DrXqR7Q"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "740740268985-l0u2tug9pq87r4bms19bjj2tihfc81o4.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

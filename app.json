@@ -1,4 +1,7 @@
 {
   "name": "Yugma",
-  "displayName": "Yugma"
+  "displayName": "Yugma",
+  "android": {
+    "package": "com.yugmamatch"
+  }
 }

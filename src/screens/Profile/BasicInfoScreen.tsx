@@ -18,6 +18,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateBasicInfo, setCurrentScreen } from "../../redux/slices/profileFormSlice";
+import { handleLogout } from "../../api/firebase/auth";
 
 export const BasicInfoScreen: React.FC = () => {
     const navigation = useNavigation();
@@ -247,7 +248,7 @@ export const BasicInfoScreen: React.FC = () => {
 
                         {/* Footer Buttons */}
                         <View style={styles.footer}>
-                            <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                            <TouchableOpacity style={styles.previousButton} onPress={() => handleLogout(navigation, dispatch)}>
                                 <Ionicons name="arrow-back" size={18} color="#000" />
                                 <Text style={styles.previousText}>Previous</Text>
                             </TouchableOpacity>
