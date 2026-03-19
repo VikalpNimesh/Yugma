@@ -62,7 +62,7 @@ export const fetchUserProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await profileService.getProfile();
-      // user request specified that we check if data is null
+      // The API returns { data: ... }
       console.log('Profile Response:', response);
       return response.data;
     } catch (error: any) {

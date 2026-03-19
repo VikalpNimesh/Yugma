@@ -61,8 +61,8 @@ const SplashScreen = () => {
             try {
                 if (isAuthenticated) {
                     // User is authenticated, check profile data
-                    if (profile !== null) {
-                        // Profile exists, go to BottomTabs
+                    if (profile !== null && profile.data !== null) {
+                        // Profile exists, go to HomeScreen (as per user request)
                         navigation.replace("BottomTabs");
                     } else {
                         // Profile is null, check for pending local profile steps or go to default root
