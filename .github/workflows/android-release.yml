@@ -40,8 +40,8 @@ jobs:
       - name: Grant gradlew permission
         run: chmod +x android/gradlew
 
-      - name: Build APK (assembleRelease)
+      - name: Build AAB (bundleRelease)
         run: |
           cd android
           export NODE_OPTIONS="--max-old-space-size=4096"
-          ./gradlew assembleRelease --no-daemon --stacktrace -x lint -x test
+          ./gradlew bundleRelease --no-daemon --stacktrace -x lint -x test
