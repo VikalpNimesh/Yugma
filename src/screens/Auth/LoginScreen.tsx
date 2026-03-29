@@ -16,9 +16,11 @@ import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
 import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 
 export default function LoginScreen() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const dispatch = useAppDispatch();
     const { isLoading, error: authError, isAuthenticated } = useAppSelector((state) => state.auth);
 
@@ -106,7 +108,7 @@ export default function LoginScreen() {
                         <Text style={styles.subtitle}>Login to your account</Text>
 
                         {/* Google Button */}
-                        {/* <TouchableOpacity
+                        <TouchableOpacity
                             style={[styles.googleBtn, googleLoading && styles.buttonDisabled]}
                             onPress={handleGoogleLogin}
                             disabled={googleLoading || isLoading}
@@ -116,13 +118,13 @@ export default function LoginScreen() {
                             ) : (
                                 <Text style={styles.googleText}>Continue with Google</Text>
                             )}
-                        </TouchableOpacity> */}
-{/* 
+                        </TouchableOpacity>
+
                         <View style={styles.divider}>
                             <View style={styles.dividerLine} />
                             <Text style={styles.orText}>OR</Text>
                             <View style={styles.dividerLine} />
-                        </View> */}
+                        </View>
 
                         {/* Email Input */}
                         <TextInput

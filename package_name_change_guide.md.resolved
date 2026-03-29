@@ -1,0 +1,134 @@
+# 📦 Package Name Change Guide — Yugma App
+
+> [!IMPORTANT]
+> Your app currently has **two names** in use:
+> - **Package/Bundle ID**: `com.yugmamatch` (Android)
+> - **iOS Bundle ID**: `org.reactjs.native.example.Yugma` (default — likely needs updating too)
+> - **RN App Name**: `Yugma` (in `app.json`)
+> - **NPM Package Name**: `VivahSetu` (in `package.json` — leftover from old name)
+
+---
+
+## What's Your New Package Name?
+
+Before starting, decide on your **new package name**. For example:
+- `com.newcompany.yugma`
+- `com.yugma.app`
+- etc.
+
+Tell me the new name and I can make all the changes for you!
+
+---
+
+## ✅ Complete Checklist of Files to Change
+
+### 1. Android — Code & Build Files
+
+| # | File | What to Change | Current Value |
+|---|------|---------------|---------------|
+| 1 | [build.gradle](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/android/app/build.gradle#L80) | `namespace` | `com.yugmamatch` |
+| 2 | [build.gradle](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/android/app/build.gradle#L82) | `applicationId` | `com.yugmamatch` |
+| 3 | [MainActivity.kt](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/android/app/src/main/java/com/yugmamatch/MainActivity.kt#L1) | `package` declaration | `com.yugmamatch` |
+| 4 | [MainApplication.kt](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/android/app/src/main/java/com/yugmamatch/MainApplication.kt#L1) | `package` declaration | `com.yugmamatch` |
+| 5 | **Folder structure** | Move Kotlin files to match new package | `android/app/src/main/java/com/yugmamatch/` → e.g. `android/app/src/main/java/com/newname/` |
+
+> [!WARNING]
+> The **folder path** under `android/app/src/main/java/` **must match** the new package name. For example, if the new package is `com.example.yugma`, the files must be at `android/app/src/main/java/com/example/yugma/`.
+
+---
+
+### 2. Android — Firebase
+
+| # | File | What to Change | Current Value |
+|---|------|---------------|---------------|
+| 6 | [google-services.json](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/android/app/google-services.json#L12) | `package_name` | `com.yugmamatch` |
+
+> [!CAUTION]
+> **DO NOT just edit this file manually!** You must:
+> 1. Go to [Firebase Console](https://console.firebase.google.com/) → Project `comyugmamatch`
+> 2. Add a **new Android app** with the new package name
+> 3. Download the **new `google-services.json`** and replace the existing one
+> 4. (Optional) Delete the old Android app entry from Firebase
+
+---
+
+### 3. iOS — Xcode Project
+
+| # | File/Setting | What to Change | Current Value |
+|---|-------------|---------------|---------------|
+| 7 | [project.pbxproj](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/ios/Yugma.xcodeproj/project.pbxproj#L274) | `PRODUCT_BUNDLE_IDENTIFIER` (Debug) | `org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)` |
+| 8 | [project.pbxproj](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/ios/Yugma.xcodeproj/project.pbxproj#L301) | `PRODUCT_BUNDLE_IDENTIFIER` (Release) | `org.reactjs.native.example.$(PRODUCT_NAME:rfc1034identifier)` |
+| 9 | [Info.plist](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/ios/Yugma/Info.plist#L9-L10) | `CFBundleDisplayName` | `Yugma` (change only if renaming the display name) |
+
+> [!TIP]
+> The easiest way to change the iOS bundle identifier is to open the project in **Xcode** → Select the target → **General** tab → Change "Bundle Identifier" directly.
+
+---
+
+### 4. iOS — If Renaming the App Target (e.g. Yugma → NewName)
+
+If you're also changing the **app name** (not just the package/bundle ID), these also need changes:
+
+| # | File/Folder | What to Change |
+|---|------------|---------------|
+| 10 | `ios/Yugma/` folder | Rename entire folder |
+| 11 | `ios/Yugma.xcodeproj/` | Rename project |
+| 12 | [Podfile](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/ios/Podfile#L17) | `target 'Yugma'` → new name |
+| 13 | `project.pbxproj` | ~40+ references to `Yugma` |
+
+> [!NOTE]
+> If you're **only** changing the bundle identifier (e.g., `com.yugmamatch` → `com.newname.yugma`) but keeping the app name as "Yugma", you **don't** need to touch items 10-13.
+
+---
+
+### 5. React Native Root Files
+
+| # | File | What to Change | Current Value |
+|---|------|---------------|---------------|
+| 14 | [app.json](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/app.json#L2-L5) | `name`, `displayName`, `android.package` | `Yugma`, `Yugma`, `com.yugmamatch` |
+| 15 | [package.json](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/package.json#L2) | `name` | `VivahSetu` (outdated!) |
+| 16 | [ReactotronConfig.js](file:///Users/vikalpnimesh/Desktop/Matpatra/Y/Yugma/src/ReactotronConfig.js#L10) | `name` field | `VivahSetu App` |
+
+---
+
+## 🔥 External Services to Update
+
+### Firebase Console
+- **URL**: https://console.firebase.google.com/
+- **Action**: Add new Android app with new package name → download new `google-services.json`
+- **Action**: Add new iOS app with new bundle ID → download new `GoogleService-Info.plist` (you don't currently have one — you'll need it if using Firebase on iOS)
+
+### Google Play Console
+- ⚠️ **You CANNOT change the package name of a published app on Google Play**
+- If already published with `com.yugmamatch`, you must create a **new app listing**
+
+### Apple Developer / App Store Connect
+- Update the **Bundle ID** in your Apple Developer account
+- If already registered, create a new App ID with the new bundle identifier
+
+### Google Sign-In
+- Update the OAuth client in [Google Cloud Console](https://console.cloud.google.com/) with the new package name / bundle ID
+- For Android: Update the SHA-1 fingerprint association with the new package name
+
+### RevenueCat (if you add it back)
+- No current RevenueCat config found, but if you re-add it, register the new package name/bundle ID there
+
+---
+
+## 📋 Summary — Quick Priority Order
+
+```
+1. Decide new package name (e.g., com.newcompany.yugma)
+2. Update Firebase Console → get new google-services.json
+3. Update Android files (build.gradle, Kotlin files, folder structure)
+4. Update iOS bundle identifier (via Xcode)
+5. Update app.json and package.json
+6. Update Google Cloud Console (OAuth / Sign-In)
+7. Update Google Play Console / App Store Connect
+8. Clean build → test
+```
+
+---
+
+> [!IMPORTANT]
+> Tell me your **new desired package name** and whether you also want to change the **app display name**, and I can make all the code changes for you automatically!

@@ -21,21 +21,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
         setLoading(true);
 
         try {
-            const googleUserData = await signInWithGoogle(dispatch);
-
-            // Initialize basic info with Google user data
-            if (googleUserData) {
-                const userData = {
-                    fullName: googleUserData.user?.name || '',
-                    email: googleUserData.user?.email || '',
-                };
-
-                dispatch(initializeBasicInfo(userData));
-
-                // Persist to AsyncStorage
-                await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
-            }
-
+            await signInWithGoogle(dispatch);
             navigation.replace("HomeScreen");
         } catch (err: any) {
             setError(err.message || "Google Sign-In failed. Please try again.");
@@ -81,7 +67,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                         <Text style={styles.buttonText}>Sign Up with Mobile</Text>
                     </TouchableOpacity> */}
 
-                    {/* <TouchableOpacity
+                    <TouchableOpacity
                         style={[styles.button, loading && styles.buttonDisabled]}
                         onPress={handleGoogleSignIn}
                         disabled={loading}
@@ -94,7 +80,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                                 <Text style={styles.buttonText}>Sign Up with Google</Text>
                             </>
                         )}
-                    </TouchableOpacity> */}
+                    </TouchableOpacity>
 
                     {error ? (
                         <View style={styles.errorContainer}>

@@ -1,5 +1,6 @@
 import { Alert } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import * as Keychain from 'react-native-keychain';
 import type { NavigationProp } from '@react-navigation/native';
@@ -9,8 +10,8 @@ import {
   getFirebaseErrorMessage,
 } from '../../utils/validators';
 import { setUser, logout } from '../../redux/slices/userSlice';
-import { resetProfileForm } from '../../redux/slices/profileFormSlice';
-import { resetAuth } from '../../redux/slices/authSlice';
+import { resetProfileForm, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
+import { resetAuth, setCredentials } from '../../redux/slices/authSlice';
 
 /**
  * Sign in with email and password
@@ -120,14 +121,63 @@ export const signInWithGoogle = async (dispatch?: any) => {
       throw new Error('Google Sign-In failed: No ID token returned');
     }
 
-    // Update Redux state if dispatch provided
-    if (dispatch) {
-      dispatch(setUser(userInfo.data));
-    }
-
     // Authenticate with Firebase
     const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-    await auth().signInWithCredential(googleCredential);
+    const userCredential = await auth().signInWithCredential(googleCredential);
+    
+    // 👈 Get the Firebase ID Token (this is what your backend expects)
+    const firebaseToken = await userCredential.user.getIdToken();
+
+    // Update Redux state if dispatch provided
+    if (dispatch) {
+      // 1. Update user data in userSlice with Firebase token mapping
+      dispatch(setUser({
+        id: userCredential.user.uid,
+        name: userInfo.data.user.name || userCredential.user.displayName || '',
+        email: userInfo.data.user.email || userCredential.user.email || '',
+        token: firebaseToken, // 👈 Using Firebase token here
+      }));
+      
+      // 2. Update authentication state in authSlice to trigger RootNavigator re-render
+      dispatch(setCredentials({
+        user: {
+          id: userCredential.user.uid,
+          email: userInfo.data.user.email || userCredential.user.email || '',
+          fullName: userInfo.data.user.name || userCredential.user.displayName || '',
+          accountMode: 'matrimony', // Default mode
+          isPremium: false,
+          isVerified: userCredential.user.emailVerified,
+        },
+        token: firebaseToken, // 👈 Using Firebase token here
+      }));
+
+      // 3. Persist tokens to Keychain for session longevity (crucial)
+      try {
+        await Keychain.setGenericPassword('auth_tokens', JSON.stringify({ 
+          access: firebaseToken, // 👈 Using Firebase token here
+          refresh: '' 
+        }));
+        console.log('✅ Firebase tokens persisted to Keychain');
+      } catch (error) {
+        console.warn('Failed to persist tokens to Keychain:', error);
+      }
+
+      // 4. Initialize profile form with Google user data
+      const userData = {
+        fullName: userInfo.data.user.name || userCredential.user.displayName || '',
+        email: userInfo.data.user.email || userCredential.user.email || '',
+      };
+      
+      dispatch(initializeBasicInfo(userData));
+
+      // 5. Persist to AsyncStorage (needed for BasicInfoScreen)
+      try {
+        await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
+        console.log('✅ User basic info persisted to AsyncStorage');
+      } catch (e) {
+        console.warn('Failed to persist user info to AsyncStorage:', e);
+      }
+    }
 
     console.log('✅ Google Sign-In successful');
     return userInfo.data;

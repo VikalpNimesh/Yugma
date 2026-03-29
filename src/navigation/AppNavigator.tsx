@@ -64,6 +64,10 @@ const AppNavigator = () => {
             <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="PremiumPlans" component={PremiumPlansScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="AppTypeSelection" component={AppTypeSelectionScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 };

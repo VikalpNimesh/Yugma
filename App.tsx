@@ -4,10 +4,11 @@ import { Provider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { ActivityIndicator, View } from "react-native";
 import { persistor, store } from "./src/redux/store";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import AppNavigator from "./src/navigation/AppNavigator";
 import AuthNavigator from "./src/navigation/AuthNavigator";
 import { NavigationContainer } from '@react-navigation/native';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 function RootNavigator() {
@@ -24,6 +25,13 @@ function RootNavigator() {
 }
 
 export default function App() {
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: "1095972468168-qjvu8mmdmvb4599mkbvsu4l76c6g63qq.apps.googleusercontent.com",
+      offlineAccess: false,
+    });
+  }, []);
+
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <Provider store={store}>

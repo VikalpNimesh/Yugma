@@ -42,11 +42,6 @@ const SplashScreen = () => {
     };
 
     useEffect(() => {
-        GoogleSignin.configure({
-            webClientId: "740740268985-l0u2tug9pq87r4bms19bjj2tihfc81o4.apps.googleusercontent.com",
-            offlineAccess: false,
-        });
-
         // Initialize auth state from Keychain only if not already authenticated
         if (!isAuthenticated) {
             dispatch(checkAuthState());

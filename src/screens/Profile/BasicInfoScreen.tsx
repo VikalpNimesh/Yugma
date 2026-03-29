@@ -116,7 +116,7 @@ export const BasicInfoScreen: React.FC = () => {
                                     onFocus={() => setFocusedField("fullName")}
                                     onBlur={() => setFocusedField(null)}
                                     isFocused={focusedField === "fullName"}
-                                    editable={false}
+                                    editable={!form.fullName}
                                 />
 
                                 <InputField
@@ -128,7 +128,7 @@ export const BasicInfoScreen: React.FC = () => {
                                     onBlur={() => setFocusedField(null)}
                                     isFocused={focusedField === "email"}
                                     keyboardType="email-address"
-                                    editable={false}
+                                    editable={!form.email}
                                 />
                             </View>
 
