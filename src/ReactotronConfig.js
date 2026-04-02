@@ -7,7 +7,7 @@ if (__DEV__) {
     reactotron = Reactotron
         .setAsyncStorageHandler(AsyncStorage) // for Reactotron state sync
         .configure({
-            name: 'VivahSetu App',
+            name: 'Yugma Dating App',
             host: 'localhost'
 
         })

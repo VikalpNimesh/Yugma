@@ -80,7 +80,6 @@ export default function LoginScreen() {
         try {
             const googleResponse = await signInWithGoogle(dispatch);
             console.log('googleResponse: ', googleResponse);
-            handleLogin()
             // Navigation will happen automatically via Redux state change
         } catch (err: any) {
             setLocalError(err.message || 'Google Sign-In failed. Please try again.');

@@ -1,6 +1,6 @@
 import axiosInstance from '../axios/axiosInstance';
 import { API_ENDPOINTS } from '../endpoints';
-import type { LoginRequest, LoginResponse, SignupRequest, SignupResponse, ApiError } from '../types/auth.types';
+import type { LoginRequest, LoginResponse, SignupRequest, SignupResponse, GoogleLoginRequest, ApiError } from '../types/auth.types';
 
 /**
  * Authentication Service
@@ -15,6 +15,21 @@ class AuthService {
             const response = await axiosInstance.post<LoginResponse>(
                 API_ENDPOINTS.AUTH.LOGIN,
                 credentials
+            );
+            return response.data;
+        } catch (error: any) {
+            throw this.handleError(error);
+        }
+    }
+
+    /**
+     * Google login
+     */
+    async googleLogin(data: GoogleLoginRequest): Promise<LoginResponse> {
+        try {
+            const response = await axiosInstance.post<LoginResponse>(
+                API_ENDPOINTS.AUTH.GOOGLE_LOGIN,
+                data
             );
             return response.data;
         } catch (error: any) {

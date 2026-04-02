@@ -1,4 +1,4 @@
-package com.yugmamatch
+package com.yugma.dating
 
 import android.app.Application
 import com.facebook.react.PackageList

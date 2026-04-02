@@ -56,7 +56,8 @@ const SplashScreen = () => {
             try {
                 if (isAuthenticated) {
                     // User is authenticated, check profile data
-                    if (profile !== null && profile.data !== null) {
+                    // 👈 FIX: profile in Redux is already the data object, so it won't have .data
+                    if (profile && (profile.id || Object.keys(profile).length > 0)) {
                         // Profile exists, go to HomeScreen (as per user request)
                         navigation.replace("BottomTabs");
                     } else {

@@ -1,41 +1,41 @@
 {
   "project_info": {
-    "project_number": "1095972468168",
-    "project_id": "comyugmamatch",
-    "storage_bucket": "comyugmamatch.firebasestorage.app"
+    "project_number": "719942063573",
+    "project_id": "com-yugma-dating",
+    "storage_bucket": "com-yugma-dating.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1095972468168:android:f2b47e25f2cb4d106ffcfd",
+        "mobilesdk_app_id": "1:719942063573:android:e475e06a6400d472fb995c",
         "android_client_info": {
-          "package_name": "com.yugmamatch"
+          "package_name": "com.yugma.dating"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1095972468168-o5m0q18bfh8opj8dmtamd7s1o4982dg3.apps.googleusercontent.com",
+          "client_id": "719942063573-c4b68hljqhj6h5mfr90hd9mis1djubgv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.yugmamatch",
+            "package_name": "com.yugma.dating",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
-          "client_id": "1095972468168-qjvu8mmdmvb4599mkbvsu4l76c6g63qq.apps.googleusercontent.com",
+          "client_id": "719942063573-votd1cg12nv5hti22v6oeks4kliuagbd.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBgoFTAOSTb_1ueqpNAhlgciQL5DrXqR7Q"
+          "current_key": "AIzaSyAHxY1pcrrY-xFvmGHiR3XP0PRyyXsJrWo"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "1095972468168-qjvu8mmdmvb4599mkbvsu4l76c6g63qq.apps.googleusercontent.com",
+              "client_id": "719942063573-votd1cg12nv5hti22v6oeks4kliuagbd.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

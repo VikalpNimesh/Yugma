@@ -140,10 +140,11 @@ const authSlice = createSlice({
     },
     setCredentials: (
       state,
-      action: PayloadAction<{ user: User; token: string }>,
+      action: PayloadAction<{ user: User; token: string; profile?: any }>,
     ) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.profile = action.payload.profile || null;
       state.isAuthenticated = true;
     },
     resetAuth: state => {

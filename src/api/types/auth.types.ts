@@ -26,6 +26,20 @@ export interface LoginResponse {
     };
 }
 
+export interface GoogleLoginRequest {
+    scopes: string[];
+    serverAuthCode: string | null;
+    idToken: string;
+    user: {
+        photo: string | null;
+        givenName: string | null;
+        familyName: string | null;
+        email: string;
+        name: string;
+        id: string;
+    };
+}
+
 export interface SignupRequest {
     email?: string;
     phone?: string;

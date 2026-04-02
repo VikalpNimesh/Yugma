@@ -9,9 +9,10 @@ import {
   validatePassword,
   getFirebaseErrorMessage,
 } from '../../utils/validators';
-import { setUser, logout } from '../../redux/slices/userSlice';
+import { setUser as setReduxUser, logout } from '../../redux/slices/userSlice';
 import { resetProfileForm, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
 import { resetAuth, setCredentials } from '../../redux/slices/authSlice';
+import authService from '../services/authService';
 
 /**
  * Sign in with email and password
@@ -116,70 +117,96 @@ export const signInWithGoogle = async (dispatch?: any) => {
       throw new Error('Google Sign-In failed: No user data returned');
     }
 
-    const { idToken } = userInfo.data;
+    const { idToken, serverAuthCode, scopes } = userInfo.data;
     if (!idToken) {
       throw new Error('Google Sign-In failed: No ID token returned');
     }
 
-    // Authenticate with Firebase
-    const googleCredential = auth.GoogleAuthProvider.credential(idToken);
-    const userCredential = await auth().signInWithCredential(googleCredential);
+    // 1. Authenticate with Firebase (keeping Firebase session as requested)
+    try {
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      await auth().signInWithCredential(googleCredential);
+    } catch (firebaseError) {
+      console.warn('Firebase authentication failed, continuing with backend:', firebaseError);
+    }
+
+    // 2. Exchange Google ID Token for Backend Tokens
+    const backendPayload = {
+      scopes: scopes || [],
+      serverAuthCode: serverAuthCode || null,
+      idToken: idToken,
+      user: {
+        photo: userInfo.data.user.photo || null,
+        givenName: userInfo.data.user.givenName || null,
+        familyName: userInfo.data.user.familyName || null,
+        email: userInfo.data.user.email,
+        name: userInfo.data.user.name || '',
+        id: userInfo.data.user.id,
+      }
+    };
+
+    console.log('🚀 Calling backend google-login with payload');
+    const backendResponse = await authService.googleLogin(backendPayload);
     
-    // 👈 Get the Firebase ID Token (this is what your backend expects)
-    const firebaseToken = await userCredential.user.getIdToken();
+    if (!backendResponse.success || !backendResponse.data) {
+      throw new Error(backendResponse.message || 'Backend Google Sign-In failed');
+    }
+
+    const { tokens: backendTokens, user: backendUser } = backendResponse.data;
 
     // Update Redux state if dispatch provided
     if (dispatch) {
-      // 1. Update user data in userSlice with Firebase token mapping
-      dispatch(setUser({
-        id: userCredential.user.uid,
-        name: userInfo.data.user.name || userCredential.user.displayName || '',
-        email: userInfo.data.user.email || userCredential.user.email || '',
-        token: firebaseToken, // 👈 Using Firebase token here
+      // 1. Update user data in userSlice with Backend user info
+      dispatch(setReduxUser({
+        id: backendUser.id,
+        name: backendUser.fullName,
+        email: backendUser.email,
+        token: backendTokens.access,
       }));
       
-      // 2. Update authentication state in authSlice to trigger RootNavigator re-render
+      // 2. Update authentication state in authSlice
       dispatch(setCredentials({
         user: {
-          id: userCredential.user.uid,
-          email: userInfo.data.user.email || userCredential.user.email || '',
-          fullName: userInfo.data.user.name || userCredential.user.displayName || '',
-          accountMode: 'matrimony', // Default mode
-          isPremium: false,
-          isVerified: userCredential.user.emailVerified,
+          id: backendUser.id,
+          email: backendUser.email,
+          fullName: backendUser.fullName,
+          accountMode: backendUser.accountMode || 'matrimony',
+          isPremium: backendUser.isPremium || false,
+          isVerified: backendUser.isVerified || false,
         },
-        token: firebaseToken, // 👈 Using Firebase token here
+        token: backendTokens.access,
+        profile: backendUser, // 👈 PASSING BACKEND PROFILE DATA
       }));
 
-      // 3. Persist tokens to Keychain for session longevity (crucial)
+      // 3. Persist BACKEND tokens to Keychain for session longevity
       try {
         await Keychain.setGenericPassword('auth_tokens', JSON.stringify({ 
-          access: firebaseToken, // 👈 Using Firebase token here
-          refresh: '' 
+          access: backendTokens.access,
+          refresh: backendTokens.refresh 
         }));
-        console.log('✅ Firebase tokens persisted to Keychain');
+        console.log('✅ Backend tokens persisted to Keychain');
       } catch (error) {
         console.warn('Failed to persist tokens to Keychain:', error);
       }
 
-      // 4. Initialize profile form with Google user data
-      const userData = {
-        fullName: userInfo.data.user.name || userCredential.user.displayName || '',
-        email: userInfo.data.user.email || userCredential.user.email || '',
+      // 4. Initialize profile form with Backend user data
+      const userDataPrefill = {
+        fullName: backendUser.fullName,
+        email: backendUser.email,
       };
       
-      dispatch(initializeBasicInfo(userData));
+      dispatch(initializeBasicInfo(userDataPrefill));
 
-      // 5. Persist to AsyncStorage (needed for BasicInfoScreen)
+      // 5. Persist to AsyncStorage
       try {
-        await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
+        await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userDataPrefill));
         console.log('✅ User basic info persisted to AsyncStorage');
       } catch (e) {
         console.warn('Failed to persist user info to AsyncStorage:', e);
       }
     }
 
-    console.log('✅ Google Sign-In successful');
+    console.log('✅ Google Sign-In with Backend successful');
     return userInfo.data;
   } catch (error: any) {
     console.error('❌ Google Sign-In error:', error);

@@ -27,7 +27,7 @@ function RootNavigator() {
 export default function App() {
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: "1095972468168-qjvu8mmdmvb4599mkbvsu4l76c6g63qq.apps.googleusercontent.com",
+      webClientId: "719942063573-votd1cg12nv5hti22v6oeks4kliuagbd.apps.googleusercontent.com",
       offlineAccess: false,
     });
   }, []);

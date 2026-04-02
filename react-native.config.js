@@ -1,7 +1,7 @@
 module.exports = {
   project: {
     android: {
-      packageName: 'com.yugmamatch',
+      packageName: 'com.yugma.dating',
     },
   },
 };
