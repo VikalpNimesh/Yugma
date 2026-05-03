@@ -44,7 +44,7 @@ const MessagesScreen = () => {
         navigation.navigate('ChatScreen', {
             userId: conversation.user.id,
             name: conversation.user.fullName || 'User',
-            avatar: conversation.user.previewPhoto || 'https://via.placeholder.com/150',
+            avatar: conversation.user.previewPhoto,
         });
     };
 
@@ -89,7 +89,7 @@ const MessagesScreen = () => {
                                 name={item.user.fullName || 'Unknown User'}
                                 message={item.lastMessage}
                                 time={dayjs(item.lastMessageTime).fromNow(true)}
-                                avatar={item.user.previewPhoto || 'https://via.placeholder.com/150'}
+                                avatar={item.user.previewPhoto}
                                 unreadCount={item.unreadCount}
                                 online={false} // Currently not provided by backend GET /messages
                                 onPress={() => navigateToChat(item)}

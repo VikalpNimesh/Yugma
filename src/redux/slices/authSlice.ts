@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import * as Keychain from 'react-native-keychain';
 import authService from '../../api/services/authService';
 import profileService from '../../api/services/profileService';
+import socialService from '../../api/services/socialService';
 import type {
   LoginRequest,
   SignupRequest,
@@ -85,6 +86,15 @@ export const loginUser = createAsyncThunk(
       // Fetch profile after login
       await dispatch(fetchUserProfile());
 
+      // Register in social graph (idempotent)
+      try {
+        console.log('Calling social/register-graph...');
+        const graphRes = await socialService.registerGraph();
+        console.log('Social Graph Reg Success:', graphRes);
+      } catch (err) {
+        console.error('Social Graph Reg Error:', err);
+      }
+
       return { user, token: tokens.access };
     } catch (error: any) {
       return rejectWithValue(
@@ -107,10 +117,51 @@ export const signupUser = createAsyncThunk(
 
       // Store tokens in Keychain
       await Keychain.setGenericPassword('auth_tokens', JSON.stringify(tokens));
+
+      // Register in social graph (idempotent)
+      try {
+        console.log('Calling social/register-graph...');
+        const graphRes = await socialService.registerGraph();
+        console.log('Social Graph Reg Success:', graphRes);
+      } catch (err) {
+        console.error('Social Graph Reg Error:', err);
+      }
+
       return { user, token: tokens.access };
     } catch (error: any) {
       return rejectWithValue(
         error.message || 'Signup failed. Please try again.',
+      );
+    }
+  },
+);
+
+export const googleLogin = createAsyncThunk(
+  'auth/googleLogin',
+  async (data: any, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await authService.googleLogin(data);
+      const { tokens, user } = response.data;
+
+      // Store tokens in Keychain
+      await Keychain.setGenericPassword('auth_tokens', JSON.stringify(tokens));
+
+      // Fetch profile after login
+      await dispatch(fetchUserProfile());
+
+      // Register in social graph (idempotent)
+      try {
+        console.log('Calling social/register-graph...');
+        const graphRes = await socialService.registerGraph();
+        console.log('Social Graph Reg Success:', graphRes);
+      } catch (err) {
+        console.error('Social Graph Reg Error:', err);
+      }
+
+      return { user, token: tokens.access };
+    } catch (error: any) {
+      return rejectWithValue(
+        error.message || 'Google login failed.',
       );
     }
   },
@@ -207,6 +258,27 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(signupUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+        state.user = null;
+        state.token = null;
+      });
+
+    // Google Login
+    builder
+      .addCase(googleLogin.pending, state => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.error = null;
+      })
+      .addCase(googleLogin.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;

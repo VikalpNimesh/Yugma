@@ -14,6 +14,7 @@ import { resetProfileForm, initializeBasicInfo } from '../../redux/slices/profil
 import { resetAuth, setCredentials, fetchUserProfile } from '../../redux/slices/authSlice';
 import authService from '../services/authService';
 import axiosInstance from '../axios/axiosInstance';
+import socialService from '../services/socialService';
 
 /**
  * Sign in with email and password
@@ -195,6 +196,15 @@ export const signInWithGoogle = async (dispatch?: any) => {
 
       // 5. Fetch full profile from backend to ensure state is synchronized
       await dispatch(fetchUserProfile());
+
+      // Register in social graph (idempotent)
+      try {
+        console.log('Calling social/register-graph...');
+        const graphRes = await socialService.registerGraph();
+        console.log('Social Graph Reg Success:', graphRes);
+      } catch (err) {
+        console.error('Social Graph Reg Error:', err);
+      }
 
       // 6. Initialize profile form with Backend user data
       const userDataPrefill = {

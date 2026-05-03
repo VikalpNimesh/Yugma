@@ -48,14 +48,14 @@ export interface ConversationDetailResponse {
 class MessageService {
   async getConversations(): Promise<ConversationItem[]> {
     const response = await axiosInstance.get('/messages');
-    return response.data;
+    return response.data.data;
   }
 
   async getConversation(otherUserId: string, limit: number = 50): Promise<ConversationDetailResponse> {
     const response = await axiosInstance.get(`/messages/conversation/${otherUserId}`, {
       params: { limit },
     });
-    return response.data;
+    return response.data.data;
   }
 
   async sendMessage(receiverId: string, content: string): Promise<MessageItem> {
@@ -63,12 +63,12 @@ class MessageService {
       receiverId,
       content,
     });
-    return response.data;
+    return response.data.data;
   }
 
   async markAsRead(conversationId: string): Promise<{ markedAsReadCount: number }> {
     const response = await axiosInstance.post(`/messages/mark-read/${conversationId}`);
-    return response.data;
+    return response.data.data;
   }
 }
 

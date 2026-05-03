@@ -19,11 +19,21 @@ const socialService = {
 
   respondToFriendRequest: async (requesterId: string, action: 'accepted' | 'rejected'): Promise<FriendRequestResponse> => {
     const response = await axiosInstance.patch('/social/friend-request/respond', { requesterId, action });
-    return response.data;
+    return response.data.data;
+  },
+
+  getIncomingRequests: async (): Promise<any[]> => {
+    const response = await axiosInstance.get('/social/friend-requests/incoming');
+    return response.data.data;
   },
 
   getFriends: async (): Promise<FriendItem[]> => {
     const response = await axiosInstance.get('/social/friends');
+    return response.data.data;
+  },
+
+  registerGraph: async (): Promise<{ message: string }> => {
+    const response = await axiosInstance.post('/social/register-graph');
     return response.data.data;
   },
 };

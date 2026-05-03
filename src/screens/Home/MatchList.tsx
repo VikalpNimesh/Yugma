@@ -1,4 +1,5 @@
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import Avatar from '../../components/common/Avatar';
 import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
@@ -19,8 +20,7 @@ const MatchList = ({ data }: any) => {
     const renderItem = ({ item }: any) => (
         <View style={styles.card}>
             <View style={styles.row}>
-                <Image source={{ uri: item.image }} style={styles.avatar} />
-
+                <Avatar uri={item.image} name={item.name} size={60} style={styles.avatar} />
             </View>
             <View style={{ flex: 1 }}>
                 <View style={styles.matchBadge}>

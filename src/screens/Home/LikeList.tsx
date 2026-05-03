@@ -1,18 +1,38 @@
-import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import Avatar from '../../components/common/Avatar';
 import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
 import Octicons from "react-native-vector-icons/Octicons";
 import Icon from "react-native-vector-icons/Ionicons";
+import socialService from '../../api/services/socialService';
+import Toast from 'react-native-toast-message';
 
 
-const LikeList = ({ data }: any) => {
+const LikeList = ({ data, onRefresh }: any) => {
+    const handleRespond = async (requesterId: string, action: 'accepted' | 'rejected') => {
+        try {
+            await socialService.respondToFriendRequest(requesterId, action);
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: `Request ${action} successfully`,
+            });
+            if (onRefresh) onRefresh();
+        } catch (error: any) {
+            console.error(`Error responding to request:`, error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: `Failed to ${action} request`,
+            });
+        }
+    };
 
     const renderItem = ({ item }: any) => (
         <View style={styles.card}>
             <View style={styles.row}>
-                <Image source={{ uri: item.image }} style={styles.avatar} />
-
+                <Avatar uri={item.image} name={item.name} size={60} style={styles.avatar} />
             </View>
             <View style={{ flex: 1 }}>
                 <View style={styles.matchBadge}>
@@ -27,26 +47,32 @@ const LikeList = ({ data }: any) => {
 
                 <Text style={styles.subText}><Ionicons name="location-outline" size={12} /> {item.location}</Text>
                 <Text style={styles.subText}>{item.job}</Text>
-                <View style={styles.dateMsg}>
 
-                    <Text style={styles.matchDate}><Ionicons name="calendar-clear-outline" size={14} />  Liked {item.matchedDays}</Text>
-                    <Pressable style={styles.messageBtn}>
-                        <Icon
-                            name={"heart-outline"}
-                            size={24}
-                            color={"black"}
-                        />
-                        <Text style={styles.messageText}>
-                            Like Back
-                        </Text>
-                    </Pressable>
+                <View style={styles.footer}>
+                    <View style={styles.dateContainer}>
+                        <Ionicons name="calendar-clear-outline" size={14} color="#999" />
+                        <Text style={styles.matchDate}>Liked {item.matchedDays}</Text>
+                    </View>
+                    <View style={styles.actionButtons}>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.rejectBtn]}
+                            onPress={() => handleRespond(item.id, 'rejected')}
+                            activeOpacity={0.7}
+                        >
+                            <Icon name="close" size={18} color="#ff3b30" />
+                            <Text style={styles.rejectText}>Reject</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.acceptBtn]}
+                            onPress={() => handleRespond(item.id, 'accepted')}
+                            activeOpacity={0.7}
+                        >
+                            <Icon name="checkmark" size={18} color="white" />
+                            <Text style={styles.acceptText}>Accept</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-
-
-
-
             </View>
-
         </View>
     );
     return (
@@ -126,10 +152,12 @@ const styles = StyleSheet.create({
     matchDate: {
         color: "#999",
         fontSize: 12,
-        marginTop: 2,
-        justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center"
+        marginLeft: 4,
+    },
+    dateContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
     },
     verifiedTag: {
         backgroundColor: "#d8f5dc",
@@ -194,11 +222,13 @@ const styles = StyleSheet.create({
         color: "black",
         fontWeight: "600",
     },
-    dateMsg: {
+    footer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        alignItems: "center"
-
+        alignItems: "center",
+        marginTop: 12,
+        flexWrap: 'wrap',
+        gap: 8,
     },
     percent: {
         borderWidth: 1,
@@ -206,5 +236,39 @@ const styles = StyleSheet.create({
         padding: 6,
         borderRadius: 8,
         paddingHorizontal: 10
+    },
+    actionButtons: {
+        flexDirection: 'row',
+        gap: 8,
+        justifyContent: 'flex-end',
+    },
+    actionBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 14,
+        borderRadius: 12,
+        gap: 4,
+        borderWidth: 1,
+        minWidth: 90,
+        justifyContent: 'center',
+    },
+    acceptBtn: {
+        backgroundColor: '#DD2476',
+        borderColor: '#DD2476',
+    },
+    rejectBtn: {
+        backgroundColor: 'white',
+        borderColor: '#ff3b30',
+    },
+    acceptText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    rejectText: {
+        color: '#ff3b30',
+        fontWeight: '600',
+        fontSize: 13,
     }
 })

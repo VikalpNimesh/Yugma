@@ -8,12 +8,12 @@ import {
     FlatList,
     KeyboardAvoidingView,
     Platform,
-    Image,
     SafeAreaView,
     ActivityIndicator,
     Keyboard,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Avatar from '../../components/common/Avatar';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import messageService, { MessageItem } from '../../api/services/messageService';
 import { useSocket } from '../../context/SocketContext';
@@ -31,12 +31,12 @@ const ChatScreen = () => {
     const route = useRoute();
     const navigation = useNavigation();
     const { userId: otherUserId, name, avatar } = route.params as RouteParams;
-    
+
     const [messages, setMessages] = useState<MessageItem[]>([]);
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [conversationId, setConversationId] = useState<string | null>(null);
-    
+
     const flatListRef = useRef<FlatList>(null);
     const { socket, isConnected } = useSocket();
     const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
@@ -46,10 +46,11 @@ const ChatScreen = () => {
         const fetchMessages = async () => {
             try {
                 const data = await messageService.getConversation(otherUserId);
+                console.log("data", data);
                 if (isMounted) {
                     setMessages(data.messages);
                     setConversationId(data.conversationId);
-                    
+
                     // Mark as read immediately when opening the chat
                     if (data.conversationId) {
                         messageService.markAsRead(data.conversationId).catch(console.error);
@@ -91,7 +92,7 @@ const ChatScreen = () => {
                 if (conversationId && newMessage.senderId === otherUserId) {
                     messageService.markAsRead(conversationId).catch(console.error);
                 }
-                
+
                 // Scroll to bottom
                 setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
             }
@@ -149,10 +150,10 @@ const ChatScreen = () => {
 
     const renderMessage = ({ item }: { item: MessageItem }) => {
         const isMine = item.isMine || item.senderId === currentUserId;
-        
+
         return (
             <View style={[styles.messageBubbleContainer, isMine ? styles.myMessageContainer : styles.theirMessageContainer]}>
-                {!isMine && <Image source={{ uri: avatar }} style={styles.messageAvatar} />}
+                {!isMine && <Avatar uri={avatar} name={name} size={28} style={styles.messageAvatar} />}
                 <View style={[styles.messageBubble, isMine ? styles.myBubble : styles.theirBubble]}>
                     <Text style={[styles.messageText, isMine ? styles.myText : styles.theirText]}>
                         {item.content}
@@ -167,8 +168,8 @@ const ChatScreen = () => {
 
     return (
         <SafeAreaView style={styles.safeArea}>
-            <KeyboardAvoidingView 
-                style={styles.container} 
+            <KeyboardAvoidingView
+                style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
             >
@@ -177,7 +178,7 @@ const ChatScreen = () => {
                     <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                         <Ionicons name="chevron-back" size={28} color="#333" />
                     </TouchableOpacity>
-                    <Image source={{ uri: avatar }} style={styles.headerAvatar} />
+                    <Avatar uri={avatar} name={name} size={40} style={styles.headerAvatar} />
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerName}>{name}</Text>
                         {/* Optionally add online status here */}
@@ -213,8 +214,8 @@ const ChatScreen = () => {
                         multiline
                         maxLength={500}
                     />
-                    <TouchableOpacity 
-                        style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]} 
+                    <TouchableOpacity
+                        style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
                         onPress={handleSend}
                         disabled={!inputText.trim()}
                     >

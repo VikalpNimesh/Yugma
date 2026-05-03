@@ -19,39 +19,60 @@ import dayjs from "dayjs";
 const MatchesScreen = () => {
     const [selectedTab, setSelectedTab] = useState("Friends");
     const [friends, setFriends] = useState<FriendItem[]>([]);
+    const [likes, setLikes] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchFriends = async () => {
-            try {
-                const data = await socialService.getFriends();
-                setFriends(data || []);
-            } catch (error: any) {
-                console.error("Error fetching friends:", error);
-                Toast.show({
-                    type: 'error',
-                    text1: 'Error',
-                    text2: 'Failed to load friends',
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        };
+    const fetchFriends = async () => {
+        try {
+            const data = await socialService.getFriends();
+            setFriends(data || []);
+        } catch (error: any) {
+            console.error("Error fetching friends:", error);
+        }
+    };
 
-        fetchFriends();
+    const fetchLikes = async () => {
+        try {
+            const data = await socialService.getIncomingRequests();
+            setLikes(data || []);
+        } catch (error: any) {
+            console.error("Error fetching likes:", error);
+        }
+    };
+
+    const loadData = async () => {
+        setIsLoading(true);
+        await Promise.all([fetchFriends(), fetchLikes()]);
+        setIsLoading(false);
+    };
+
+    useEffect(() => {
+        loadData();
     }, []);
 
     // Transform FriendItem to MatchList format
     const transformedFriends = friends.map(f => ({
         id: f.id,
         name: f.fullName || 'User',
-        age: 'N/A', // Age not in getFriends response yet
+        age: 'N/A',
         location: 'Hidden',
         job: 'N/A',
         matchedDays: dayjs(f.friendsSince).fromNow(),
         verified: true,
         matchPercent: "100%",
-        image: f.profilePhoto || "https://via.placeholder.com/150",
+        image: f.profilePhoto,
+    }));
+
+    const transformedLikes = likes.map(l => ({
+        id: l.id,
+        name: l.fullName || 'User',
+        age: 'N/A',
+        location: 'Hidden',
+        job: 'N/A',
+        matchedDays: dayjs(l.requestedAt).fromNow(),
+        verified: false,
+        matchPercent: "95%",
+        image: l.profilePhoto,
     }));
 
     return (
@@ -87,7 +108,7 @@ const MatchesScreen = () => {
                                 selectedTab === tab && styles.activeTabText,
                             ]}
                         >
-                            {tab} {tab === "Friends" ? `(${friends.length})` : "(0)"}
+                            {tab} {tab === "Friends" ? `(${friends.length})` : `(${likes.length})`}
                         </Text>
                     </Pressable>
                 ))}
@@ -100,7 +121,7 @@ const MatchesScreen = () => {
             ) : selectedTab === "Friends" ? (
                 <MatchList data={transformedFriends} />
             ) : (
-                <LikeList data={[]} />
+                <LikeList data={transformedLikes} onRefresh={loadData} />
             )}
         </View>
     );
