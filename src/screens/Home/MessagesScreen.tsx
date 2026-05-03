@@ -1,67 +1,61 @@
 // screens/MessagesScreen.tsx
-import React from 'react';
-import { StyleSheet, Text, View, ScrollView, FlatList } from 'react-native';
-// import MessageCard from '../components/MessageCard';
+import React, { useEffect, useState, useCallback } from 'react';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MessageCard from '../../components/MessageCard';
+import messageService, { ConversationItem } from '../../api/services/messageService';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 const MessagesScreen = () => {
-    const messages = [
-        {
-            id: 1,
-            name: 'Priya Sharma',
-            message: "That sounds like a great plan! I'd love to...",
-            time: '2 min ago',
-            avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-            unreadCount: 2,
-            online: true,
-        },
-        {
-            id: 2,
-            name: 'Arjun Patel',
-            message: 'Thanks for sharing those photos! Your family s...',
-            time: '1 hour ago',
-            avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-            unreadCount: 0,
-            online: false,
-        },
-        {
-            id: 3,
-            name: 'Sneha Gupta',
-            message: 'I really enjoyed our conversation yesterday.',
-            time: '1 day ago',
-            avatar: 'https://randomuser.me/api/portraits/women/47.jpg',
-            unreadCount: 0,
-            online: true,
-        },
-        {
-            id: 3,
-            name: 'Priya Sharma',
-            message: "That sounds like a great plan! I'd love to...",
-            time: '2 min ago',
-            avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-            unreadCount: 2,
-            online: true,
-        },
-        {
-            id: 5,
-            name: 'Arjun Patel',
-            message: 'Thanks for sharing those photos! Your family s...',
-            time: '1 hour ago',
-            avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-            unreadCount: 0,
-            online: false,
-        },
-        {
-            id: 34,
-            name: 'Sneha Gupta',
-            message: 'I really enjoyed our conversation yesterday.',
-            time: '1 day ago',
-            avatar: 'https://randomuser.me/api/portraits/women/47.jpg',
-            unreadCount: 0,
-            online: true,
-        },
-    ];
+    const navigation = useNavigation<any>();
+    const [conversations, setConversations] = useState<ConversationItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const fetchConversations = async (showLoading = true) => {
+        if (showLoading) setIsLoading(true);
+        try {
+            const data = await messageService.getConversations();
+            setConversations(data);
+        } catch (error) {
+            console.error('Error fetching conversations:', error);
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    };
+
+    useFocusEffect(
+        useCallback(() => {
+            fetchConversations(true);
+        }, [])
+    );
+
+    const handleRefresh = () => {
+        setIsRefreshing(true);
+        fetchConversations(false);
+    };
+
+    const navigateToChat = (conversation: ConversationItem) => {
+        navigation.navigate('ChatScreen', {
+            userId: conversation.user.id,
+            name: conversation.user.fullName || 'User',
+            avatar: conversation.user.previewPhoto || 'https://via.placeholder.com/150',
+        });
+    };
+
+    const renderHeader = () => (
+        <View style={styles.headerContainer}>
+            <Text style={styles.title}>Messages</Text>
+            <Text style={styles.subtitle}>
+                Connect with your matches and build meaningful relationships
+            </Text>
+        </View>
+    );
 
     return (
         <LinearGradient
@@ -70,22 +64,40 @@ const MessagesScreen = () => {
             end={{ x: 0, y: 1 }}
             style={styles.gradientContainer}
         >
-                <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-                    <Text style={styles.title}>Messages</Text>
-                    <Text style={styles.subtitle}>
-                        Connect with your matches and build meaningful relationships
-                    </Text>
-
+            <View style={styles.container}>
+                {isLoading && !isRefreshing ? (
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="#DD2476" />
+                    </View>
+                ) : (
                     <FlatList
+                        data={conversations}
+                        keyExtractor={(item) => item.conversationId}
                         contentContainerStyle={styles.list}
-                        data={messages}
+                        ListHeaderComponent={renderHeader}
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#DD2476" />
+                        }
+                        ListEmptyComponent={
+                            <View style={styles.emptyContainer}>
+                                <Text style={styles.emptyText}>No messages yet.</Text>
+                            </View>
+                        }
                         renderItem={({ item }) => (
-                            <MessageCard key={item.id} {...item} />
-
+                            <MessageCard
+                                name={item.user.fullName || 'Unknown User'}
+                                message={item.lastMessage}
+                                time={dayjs(item.lastMessageTime).fromNow(true)}
+                                avatar={item.user.previewPhoto || 'https://via.placeholder.com/150'}
+                                unreadCount={item.unreadCount}
+                                online={false} // Currently not provided by backend GET /messages
+                                onPress={() => navigateToChat(item)}
+                            />
                         )}
-
                     />
-                </ScrollView>
+                )}
+            </View>
         </LinearGradient>
     );
 };
@@ -117,5 +129,24 @@ const styles = StyleSheet.create({
     },
     list: {
         marginTop: 8,
+        paddingBottom: 20,
+    },
+    headerContainer: {
+        marginBottom: 16,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: 40,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#999',
     },
 });

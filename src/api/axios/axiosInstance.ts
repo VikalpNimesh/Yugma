@@ -2,8 +2,9 @@ import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosE
 import * as Keychain from 'react-native-keychain';
 
 // Base URL - Update this with your API base URL
-const BASE_URL = 'http://13.204.218.120:3001';
-// const BASE_URL = 'http://192.168.29.57:3001/api';
+// const BASE_URL = 'http://13.204.218.120:3001';
+// const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://192.168.29.27:3001';
 // const BASE_URL = 'http://13.204.218.120:3001';
 // const BASE_URL = 'Api.yugma.co';
 

@@ -1,96 +1,156 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
     StyleSheet,
     FlatList,
     TouchableOpacity,
-    SafeAreaView
+    RefreshControl,
+    ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
+import notificationService, { NotificationItem } from '../../api/services/notificationService';
+import socialService from '../../api/services/socialService';
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import Toast from 'react-native-toast-message';
 
-interface NotificationItem {
-    id: string;
-    title: string;
-    description: string;
-    time: string;
-    type: 'match' | 'message' | 'like' | 'system';
-    isRead: boolean;
-}
-
-const DUMMY_NOTIFICATIONS: NotificationItem[] = [
-    {
-        id: '1',
-        title: 'New Match!',
-        description: 'You have a new potential match with Priya. Check it out!',
-        time: '2 mins ago',
-        type: 'match',
-        isRead: false,
-    },
-    {
-        id: '2',
-        title: 'New Message',
-        description: 'Rahul sent you a message: "Hi, how are you doing?"',
-        time: '15 mins ago',
-        type: 'message',
-        isRead: false,
-    },
-    {
-        id: '3',
-        title: 'Someone Liked You',
-        description: 'Your profile got a new like from a user in Mumbai.',
-        time: '1 hour ago',
-        type: 'like',
-        isRead: true,
-    },
-    {
-        id: '4',
-        title: 'System Update',
-        description: 'Your profile verification is in progress.',
-        time: '3 hours ago',
-        type: 'system',
-        isRead: true,
-    },
-    {
-        id: '5',
-        title: 'Daily Reminder',
-        description: 'Don\'t forget to check your daily matches!',
-        time: '5 hours ago',
-        type: 'system',
-        isRead: true,
-    }
-];
+dayjs.extend(relativeTime);
 
 const NotificationsScreen = () => {
     const navigation = useNavigation();
+    const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const fetchNotifications = useCallback(async (showLoading = true) => {
+        if (showLoading) setIsLoading(true);
+        try {
+            const data = await notificationService.getNotifications();
+            setNotifications(data);
+        } catch (error: any) {
+            console.error('Error fetching notifications:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: error.message || 'Failed to fetch notifications',
+            });
+        } finally {
+            setIsLoading(false);
+            setIsRefreshing(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchNotifications();
+    }, [fetchNotifications]);
+
+    const onRefresh = () => {
+        setIsRefreshing(true);
+        fetchNotifications(false);
+    };
+
+    const handleMarkAsRead = async (notificationId: string) => {
+        try {
+            await notificationService.markAsRead(notificationId);
+            setNotifications(prev =>
+                prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+            );
+        } catch (error: any) {
+            console.error('Error marking as read:', error);
+        }
+    };
+
+    const handleMarkAllRead = async () => {
+        try {
+            await notificationService.markAllAsRead();
+            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            Toast.show({
+                type: 'success',
+                text1: 'Success',
+                text2: 'All notifications marked as read',
+            });
+        } catch (error: any) {
+            console.error('Error marking all as read:', error);
+            Toast.show({
+                type: 'error',
+                text1: 'Error',
+                text2: 'Failed to mark all as read',
+            });
+        }
+    };
+
+    const handleAcceptRequest = async (requesterId: string | undefined, notificationId: string) => {
+        if (!requesterId) return;
+        try {
+            await socialService.respondToFriendRequest(requesterId, 'accepted');
+            Toast.show({ type: 'success', text1: 'Request Accepted', text2: 'You are now friends!' });
+            await handleMarkAsRead(notificationId);
+        } catch (error: any) {
+            Toast.show({ type: 'error', text1: 'Failed to accept request', text2: error?.response?.data?.message || 'Something went wrong' });
+        }
+    };
+
+    const handleRejectRequest = async (requesterId: string | undefined, notificationId: string) => {
+        if (!requesterId) return;
+        try {
+            await socialService.respondToFriendRequest(requesterId, 'rejected');
+            Toast.show({ type: 'info', text1: 'Request Rejected' });
+            await handleMarkAsRead(notificationId);
+        } catch (error: any) {
+            Toast.show({ type: 'error', text1: 'Failed to reject request', text2: error?.response?.data?.message || 'Something went wrong' });
+        }
+    };
 
     const getIcon = (type: string) => {
         switch (type) {
             case 'match': return 'heart';
             case 'message': return 'chatbubble';
             case 'like': return 'thumbs-up';
+            case 'friend_request': return 'person-add';
             default: return 'notifications';
         }
     };
 
     const renderItem = ({ item }: { item: NotificationItem }) => (
-        <TouchableOpacity style={[styles.notificationItem, !item.isRead && styles.unreadItem]}>
+        <TouchableOpacity
+            style={[styles.notificationItem, !item.isRead && styles.unreadItem]}
+            onPress={() => handleMarkAsRead(item.id)}
+            disabled={item.type === 'friend_request' && !item.isRead}
+        >
             <View style={[styles.iconContainer, { backgroundColor: item.isRead ? '#f0f0f0' : '#FFE5EC' }]}>
-                <Ionicons 
-                    name={getIcon(item.type)} 
-                    size={24} 
-                    color={item.isRead ? '#666' : '#DD2476'} 
+                <Ionicons
+                    name={getIcon(item.type)}
+                    size={24}
+                    color={item.isRead ? '#666' : '#DD2476'}
                 />
             </View>
             <View style={styles.contentContainer}>
                 <View style={styles.headerRow}>
                     <Text style={styles.title}>{item.title}</Text>
-                    <Text style={styles.time}>{item.time}</Text>
+                    <Text style={styles.time}>{dayjs(item.createdAt).fromNow()}</Text>
                 </View>
                 <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
+                
+                {item.type === 'friend_request' && !item.isRead && (
+                    <View style={styles.actionButtonsContainer}>
+                        <TouchableOpacity 
+                            style={styles.acceptButton} 
+                            onPress={() => handleAcceptRequest(item.relatedUserId, item.id)}
+                        >
+                            <Text style={styles.acceptText}>Accept</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                            style={styles.rejectButton} 
+                            onPress={() => handleRejectRequest(item.relatedUserId, item.id)}
+                        >
+                            <Text style={styles.rejectText}>Reject</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
-            {!item.isRead && <View style={styles.unreadDot} />}
+            {!item.isRead && item.type !== 'friend_request' && <View style={styles.unreadDot} />}
         </TouchableOpacity>
     );
 
@@ -101,23 +161,32 @@ const NotificationsScreen = () => {
                     <Ionicons name="arrow-back" size={24} color="#000" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Notifications</Text>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={handleMarkAllRead}>
                     <Text style={styles.markReadText}>Mark all read</Text>
                 </TouchableOpacity>
             </View>
 
-            <FlatList
-                data={DUMMY_NOTIFICATIONS}
-                renderItem={renderItem}
-                keyExtractor={item => item.id}
-                contentContainerStyle={styles.listContainer}
-                ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Ionicons name="notifications-off-outline" size={64} color="#ccc" />
-                        <Text style={styles.emptyText}>No notifications yet</Text>
-                    </View>
-                }
-            />
+            {isLoading ? (
+                <View style={styles.loadingContainer}>
+                    <ActivityIndicator size="large" color="#DD2476" />
+                </View>
+            ) : (
+                <FlatList
+                    data={notifications}
+                    renderItem={renderItem}
+                    keyExtractor={item => item.id}
+                    contentContainerStyle={styles.listContainer}
+                    refreshControl={
+                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={['#DD2476']} />
+                    }
+                    ListEmptyComponent={
+                        <View style={styles.emptyContainer}>
+                            <Ionicons name="notifications-off-outline" size={64} color="#ccc" />
+                            <Text style={styles.emptyText}>No notifications yet</Text>
+                        </View>
+                    }
+                />
+            )}
         </View>
     );
 };
@@ -149,8 +218,14 @@ const styles = StyleSheet.create({
         color: '#DD2476',
         fontWeight: '600',
     },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     listContainer: {
         paddingBottom: 20,
+        flexGrow: 1,
     },
     notificationItem: {
         flexDirection: 'row',
@@ -210,6 +285,33 @@ const styles = StyleSheet.create({
         marginTop: 16,
         fontSize: 16,
         color: '#999',
+    },
+    actionButtonsContainer: {
+        flexDirection: 'row',
+        marginTop: 12,
+        gap: 10,
+    },
+    acceptButton: {
+        backgroundColor: '#DD2476',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+    },
+    rejectButton: {
+        backgroundColor: '#f0f0f0',
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 20,
+    },
+    acceptText: {
+        color: '#fff',
+        fontWeight: '600',
+        fontSize: 13,
+    },
+    rejectText: {
+        color: '#666',
+        fontWeight: '600',
+        fontSize: 13,
     },
 });
 

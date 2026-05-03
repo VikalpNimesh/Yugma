@@ -17,7 +17,9 @@ import Swiper from "react-native-deck-swiper";
 import ProfileCard from "../../components/ProfileCard";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../redux/store";
-import { fetchDiscoveryFeed, likeDiscoveryProfile, passDiscoveryProfile } from "../../redux/slices/discoverySlice";
+import { fetchDiscoveryFeed, passDiscoveryProfile, likeDiscoveryProfile } from "../../redux/slices/discoverySlice";
+import socialService from "../../api/services/socialService";
+import Toast from "react-native-toast-message";
 
 const { width, height } = Dimensions.get("window");
 
@@ -48,8 +50,25 @@ const DiscoverScreen = () => {
         dispatch(fetchDiscoveryFeed());
     }, [dispatch]);
 
-    const handleLike = (userId: string) => {
+    const handleLike = async (userId: string) => {
+        // Dispatch the like action to remove the card from the UI
         dispatch(likeDiscoveryProfile(userId));
+        
+        try {
+            // Send actual friend request
+            await socialService.sendFriendRequest(userId);
+            Toast.show({
+                type: 'success',
+                text1: 'Friend Request Sent!',
+                text2: 'They will be notified.',
+            });
+        } catch (error: any) {
+            Toast.show({
+                type: 'error',
+                text1: 'Failed to send request',
+                text2: error?.response?.data?.message || 'Something went wrong',
+            });
+        }
     };
 
     const handlePass = (userId: string) => {

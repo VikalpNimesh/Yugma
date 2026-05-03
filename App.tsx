@@ -10,6 +10,9 @@ import AuthNavigator from "./src/navigation/AuthNavigator";
 import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useRef } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SocketProvider } from './src/context/SocketContext';
+import { requestUserPermission, notificationListener } from './src/utils/notificationHelper';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 function RootNavigator() {
   const isLoggedIn = useSelector(
@@ -30,16 +33,28 @@ export default function App() {
       webClientId: "719942063573-votd1cg12nv5hti22v6oeks4kliuagbd.apps.googleusercontent.com",
       offlineAccess: false,
     });
+
+    // Initialize Push Notifications
+    requestUserPermission();
+    const unsubscribe = notificationListener();
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <Provider store={store}>
-        <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
-          <RootNavigator />
-          <Toast />
-        </PersistGate>
-      </Provider>
-    </SafeAreaView>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={{ flex: 1 }}>
+        <Provider store={store}>
+          <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
+            <SocketProvider>
+              <RootNavigator />
+            </SocketProvider>
+            <Toast />
+          </PersistGate>
+        </Provider>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 }

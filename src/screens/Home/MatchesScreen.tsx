@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
@@ -6,115 +6,63 @@ import {
     Image,
     Pressable,
     StyleSheet,
+    ActivityIndicator,
 } from "react-native";
 
 import MatchList from "./MatchList";
 import LikeList from "./LikeList";
 import Icon from "react-native-vector-icons/Ionicons";
-
-
-const matchesData = [
-    {
-        id: "1",
-        name: "Priya Sharma",
-        age: 26,
-        location: "Mumbai, Maharashtra",
-        job: "Software Engineer",
-        matchedDays: "2 days ago",
-        verified: true,
-        matchPercent: "94%",
-        image: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-        id: "2",
-        name: "Arjun Patel",
-        age: 29,
-        location: "Bangalore, Karnataka",
-        job: "Product Manager",
-        matchedDays: "1 week ago",
-        verified: true,
-        matchPercent: "87%",
-        image: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-    {
-        id: "1",
-        name: "Priya Sharma",
-        age: 26,
-        location: "Mumbai, Maharashtra",
-        job: "Software Engineer",
-        matchedDays: "2 days ago",
-        verified: true,
-        matchPercent: "94%",
-        image: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-        id: "2",
-        name: "Arjun Patel",
-        age: 29,
-        location: "Bangalore, Karnataka",
-        job: "Product Manager",
-        matchedDays: "1 week ago",
-        verified: true,
-        matchPercent: "87%",
-        image: "https://randomuser.me/api/portraits/men/32.jpg",
-    }, {
-        id: "1",
-        name: "Priya Sharma",
-        age: 26,
-        location: "Mumbai, Maharashtra",
-        job: "Software Engineer",
-        matchedDays: "2 days ago",
-        verified: true,
-        matchPercent: "94%",
-        image: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-        id: "2",
-        name: "Arjun Patel",
-        age: 29,
-        location: "Bangalore, Karnataka",
-        job: "Product Manager",
-        matchedDays: "1 week ago",
-        verified: true,
-        matchPercent: "87%",
-        image: "https://randomuser.me/api/portraits/men/32.jpg",
-    }, {
-        id: "1",
-        name: "Priya Sharma",
-        age: 26,
-        location: "Mumbai, Maharashtra",
-        job: "Software Engineer",
-        matchedDays: "2 days ago",
-        verified: true,
-        matchPercent: "94%",
-        image: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-        id: "2",
-        name: "Arjun Patel",
-        age: 29,
-        location: "Bangalore, Karnataka",
-        job: "Product Manager",
-        matchedDays: "1 week ago",
-        verified: true,
-        matchPercent: "87%",
-        image: "https://randomuser.me/api/portraits/men/32.jpg",
-    },
-];
+import socialService, { FriendItem } from "../../api/services/socialService";
+import Toast from "react-native-toast-message";
+import dayjs from "dayjs";
 
 const MatchesScreen = () => {
-    const [selectedTab, setSelectedTab] = useState("Matches");
+    const [selectedTab, setSelectedTab] = useState("Friends");
+    const [friends, setFriends] = useState<FriendItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchFriends = async () => {
+            try {
+                const data = await socialService.getFriends();
+                setFriends(data || []);
+            } catch (error: any) {
+                console.error("Error fetching friends:", error);
+                Toast.show({
+                    type: 'error',
+                    text1: 'Error',
+                    text2: 'Failed to load friends',
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchFriends();
+    }, []);
+
+    // Transform FriendItem to MatchList format
+    const transformedFriends = friends.map(f => ({
+        id: f.id,
+        name: f.fullName || 'User',
+        age: 'N/A', // Age not in getFriends response yet
+        location: 'Hidden',
+        job: 'N/A',
+        matchedDays: dayjs(f.friendsSince).fromNow(),
+        verified: true,
+        matchPercent: "100%",
+        image: f.profilePhoto || "https://via.placeholder.com/150",
+    }));
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Your Matches</Text>
+            <Text style={styles.header}>Your Connections</Text>
             <Text style={styles.subHeader}>
-                Connect with compatible partners who share your values
+                Connect with your friends and start chatting
             </Text>
 
-
             <View style={styles.tabContainer}>
-                {["Matches", "Likes"]?.map((tab) => (
+                {["Friends", "Likes"]?.map((tab) => (
                     <Pressable
                         key={tab}
                         style={[
@@ -123,8 +71,8 @@ const MatchesScreen = () => {
                         ]}
                         onPress={() => setSelectedTab(tab)}
                     >
-                        {tab === "Matches" ? <Icon
-                            name={"heart-outline"}
+                        {tab === "Friends" ? <Icon
+                            name={"people-outline"}
                             size={20}
                             color={"black"}
                         /> : <Icon
@@ -139,18 +87,21 @@ const MatchesScreen = () => {
                                 selectedTab === tab && styles.activeTabText,
                             ]}
                         >
-                            {tab} {tab === "Matches" ? "(3)" : "(2)"}
+                            {tab} {tab === "Friends" ? `(${friends.length})` : "(0)"}
                         </Text>
                     </Pressable>
                 ))}
             </View>
 
-            {selectedTab == "Matches" ? <MatchList data={matchesData} /> :
-
-                <LikeList data={matchesData} />
-            }
-
-
+            {isLoading ? (
+                <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                    <ActivityIndicator size="large" color="#DD2476" />
+                </View>
+            ) : selectedTab === "Friends" ? (
+                <MatchList data={transformedFriends} />
+            ) : (
+                <LikeList data={[]} />
+            )}
         </View>
     );
 };

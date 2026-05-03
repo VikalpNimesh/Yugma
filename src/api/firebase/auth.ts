@@ -11,8 +11,9 @@ import {
 } from '../../utils/validators';
 import { setUser as setReduxUser, logout } from '../../redux/slices/userSlice';
 import { resetProfileForm, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
-import { resetAuth, setCredentials } from '../../redux/slices/authSlice';
+import { resetAuth, setCredentials, fetchUserProfile } from '../../redux/slices/authSlice';
 import authService from '../services/authService';
+import axiosInstance from '../axios/axiosInstance';
 
 /**
  * Sign in with email and password
@@ -189,7 +190,13 @@ export const signInWithGoogle = async (dispatch?: any) => {
         console.warn('Failed to persist tokens to Keychain:', error);
       }
 
-      // 4. Initialize profile form with Backend user data
+      // 4. Manually set Axios header for immediate use in subsequent calls
+      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${backendTokens.access}`;
+
+      // 5. Fetch full profile from backend to ensure state is synchronized
+      await dispatch(fetchUserProfile());
+
+      // 6. Initialize profile form with Backend user data
       const userDataPrefill = {
         fullName: backendUser.fullName,
         email: backendUser.email,
@@ -197,7 +204,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
       
       dispatch(initializeBasicInfo(userDataPrefill));
 
-      // 5. Persist to AsyncStorage
+      // 7. Persist to AsyncStorage
       try {
         await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userDataPrefill));
         console.log('✅ User basic info persisted to AsyncStorage');

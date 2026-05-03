@@ -3,8 +3,18 @@ import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
 import Octicons from "react-native-vector-icons/Octicons";
+import { useNavigation } from '@react-navigation/native';
 
 const MatchList = ({ data }: any) => {
+    const navigation = useNavigation<any>();
+
+    const handleMessagePress = (item: any) => {
+        navigation.navigate('ChatScreen', {
+            userId: item.id,
+            name: item.name,
+            avatar: item.image,
+        });
+    };
 
     const renderItem = ({ item }: any) => (
         <View style={styles.card}>
@@ -28,7 +38,7 @@ const MatchList = ({ data }: any) => {
                 <View style={styles.dateMsg}>
 
                     <Text style={styles.matchDate}><Ionicons name="calendar-clear-outline" size={12} /> Matched {item.matchedDays}</Text>
-                    <Pressable style={styles.messageBtn}>
+                    <Pressable style={styles.messageBtn} onPress={() => handleMessagePress(item)}>
                         <Feather name="message-circle" size={24} color={"white"} />
                         <Text style={styles.messageText}>
                             {item.verified ? "Message" : "Reply"}

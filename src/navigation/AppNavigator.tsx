@@ -18,6 +18,7 @@ import SettingsScreen from "../screens/Settings/SettingsScreen";
 import NotificationsScreen from "../screens/Notifications/NotificationsScreen";
 import PremiumPlansScreen from "../screens/Premium/PremiumPlansScreen";
 import AppTypeSelectionScreen from "../screens/Auth/AppTypeSelectionScreen";
+import ChatScreen from "../screens/Home/ChatScreen";
 
 export type RootStackParamList = {
     Splash: undefined;
@@ -39,6 +40,7 @@ export type RootStackParamList = {
     Matrimonial: undefined;
     AppTypeSelection: undefined;
     SignupScreen: undefined;
+    ChatScreen: { userId: string, name: string, avatar: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -68,6 +70,7 @@ const AppNavigator = () => {
             <Stack.Screen name="SignupScreen" component={SignupScreen} options={{ headerShown: false }} />
             <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="AppTypeSelection" component={AppTypeSelectionScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false }} />
         </Stack.Navigator>
     );
 };

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { signupUser } from '../../redux/slices/authSlice';
 import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
 
@@ -22,6 +23,7 @@ export default function SignupScreen({ navigation }: any) {
     const [displayName, setDisplayName] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [isAdult, setIsAdult] = useState(false);
 
     const { appType } = useSelector((state: any) => state.user);
     const dispatch = useDispatch();
@@ -39,6 +41,11 @@ export default function SignupScreen({ navigation }: any) {
 
         if (password !== confirmPassword) {
             setError('Passwords do not match');
+            return;
+        }
+
+        if (!isAdult) {
+            setError('You must be 18+ to sign up');
             return;
         }
 
@@ -174,14 +181,32 @@ export default function SignupScreen({ navigation }: any) {
                             </View>
                         ) : null}
 
+                        {/* Age Verification Checkbox */}
+                        <TouchableOpacity
+                            style={styles.checkboxContainer}
+                            onPress={() => {
+                                setIsAdult(!isAdult);
+                                setError('');
+                            }}
+                            activeOpacity={0.7}
+                            disabled={loading}
+                        >
+                            <Ionicons
+                                name={isAdult ? "checkbox" : "square-outline"}
+                                size={22}
+                                color={isAdult ? "#00B2FF" : "#999"}
+                            />
+                            <Text style={styles.checkboxLabel}>I confirm that I am 18 years or older</Text>
+                        </TouchableOpacity>
+
                         {/* Signup Button */}
                         <TouchableOpacity
                             style={[
                                 styles.signupBtn,
-                                (loading || !email || !password || !confirmPassword) && styles.buttonDisabled
+                                (loading || !email || !password || !confirmPassword || !isAdult) && styles.buttonDisabled
                             ]}
                             onPress={handleSignup}
-                            disabled={loading || !email || !password || !confirmPassword}
+                            disabled={loading || !email || !password || !confirmPassword || !isAdult}
                         >
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
@@ -286,5 +311,16 @@ const styles = StyleSheet.create({
         color: '#00B2FF',
         fontWeight: '600',
         fontSize: 14,
+    },
+    checkboxContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 12,
+        paddingHorizontal: 4,
+    },
+    checkboxLabel: {
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#444',
     },
 });

@@ -1,6 +1,6 @@
 // components/MessageCard.tsx
 import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 interface MessageCardProps {
     name: string;
@@ -9,6 +9,7 @@ interface MessageCardProps {
     avatar: string;
     unreadCount?: number;
     online?: boolean;
+    onPress?: () => void;
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({
@@ -18,9 +19,10 @@ const MessageCard: React.FC<MessageCardProps> = ({
     avatar,
     unreadCount,
     online,
+    onPress,
 }) => {
     return (
-        <View style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8} disabled={!onPress}>
             {/* Avatar */}
             <View style={styles.avatarContainer}>
                 <Image source={{ uri: avatar }} style={styles.avatar} />
@@ -44,7 +46,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
                     <Text style={styles.unreadText}>{unreadCount}</Text>
                 </View>
             ) : null}
-        </View>
+        </TouchableOpacity>
     );
 };
 
