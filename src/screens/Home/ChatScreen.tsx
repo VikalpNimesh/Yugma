@@ -36,6 +36,8 @@ const ChatScreen = () => {
     const [inputText, setInputText] = useState('');
     const [isLoading, setIsLoading] = useState(true);
     const [conversationId, setConversationId] = useState<string | null>(null);
+    const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const flatListRef = useRef<FlatList>(null);
     const { socket, isConnected } = useSocket();
@@ -43,19 +45,24 @@ const ChatScreen = () => {
 
     useEffect(() => {
         let isMounted = true;
+
+        // Generate conversationId based on guide: [userId1, userId2].sort().join('-')
+        const ids = [currentUserId, otherUserId].sort();
+        const generatedId = ids.join('-');
+        setConversationId(generatedId);
+
         const fetchMessages = async () => {
             try {
                 const data = await messageService.getConversation(otherUserId);
-                console.log("data", data);
                 if (isMounted) {
                     setMessages(data.messages);
-                    setConversationId(data.conversationId);
-
+                    
                     // Mark as read immediately when opening the chat
-                    if (data.conversationId) {
-                        messageService.markAsRead(data.conversationId).catch(console.error);
+                    if (generatedId) {
+                        messageService.markAsRead(generatedId).catch(console.error);
                         if (socket) {
-                            socket.emit('join_conversation', { conversationId: data.conversationId });
+                            socket.emit('join_conversation', { conversationId: generatedId });
+                            socket.emit('mark_read', { conversationId: generatedId });
                         }
                     }
                 }
@@ -70,46 +77,107 @@ const ChatScreen = () => {
 
         return () => {
             isMounted = false;
-            if (conversationId && socket) {
-                socket.emit('leave_conversation', { conversationId });
+            if (generatedId && socket) {
+                socket.emit('leave_conversation', { conversationId: generatedId });
             }
         };
-    }, [otherUserId, socket]);
+    }, [otherUserId, socket, currentUserId]);
 
     useEffect(() => {
-        if (!socket) return;
+        if (!socket || !conversationId) return;
 
         const handleNewMessage = (newMessage: any) => {
-            // Only add the message if it belongs to the current conversation
-            if (newMessage.senderId === otherUserId || newMessage.receiverId === otherUserId) {
+            if (newMessage.conversationId === conversationId) {
                 setMessages(prev => {
-                    // Check if message already exists (e.g. from optimistic update)
+                    // 1. If message already exists by ID, do nothing
                     if (prev.some(m => m.id === newMessage.id)) return prev;
+
+                    // 2. If it's my message, try to replace the optimistic 'temp-' message
+                    if (newMessage.isMine) {
+                        const tempMessageIndex = prev.findIndex(m => 
+                            m.id.toString().startsWith('temp-') && 
+                            m.content === newMessage.content
+                        );
+
+                        if (tempMessageIndex !== -1) {
+                            const updatedMessages = [...prev];
+                            updatedMessages[tempMessageIndex] = newMessage;
+                            return updatedMessages;
+                        }
+                    }
+
+                    // 3. Otherwise, append the new message
                     return [...prev, newMessage];
                 });
 
-                // If we received a message while in this screen, mark it as read
-                if (conversationId && newMessage.senderId === otherUserId) {
-                    messageService.markAsRead(conversationId).catch(console.error);
+                if (newMessage.senderId === otherUserId) {
+                    socket.emit('mark_read', { conversationId });
                 }
 
-                // Scroll to bottom
                 setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
             }
         };
 
+        const handleTyping = (data: any) => {
+            if (data.conversationId === conversationId && data.senderId === otherUserId) {
+                setIsOtherUserTyping(true);
+            }
+        };
+
+        const handleStopTyping = (data: any) => {
+            if (data.conversationId === conversationId && data.senderId === otherUserId) {
+                setIsOtherUserTyping(false);
+            }
+        };
+
+        const handleMessagesRead = (data: any) => {
+            if (data.conversationId === conversationId && data.readBy === otherUserId) {
+                setMessages(prev => prev.map(m => ({ ...m, isRead: true })));
+            }
+        };
+
         socket.on('new_message', handleNewMessage);
+        socket.on('typing', handleTyping);
+        socket.on('stop_typing', handleStopTyping);
+        socket.on('messages_read', handleMessagesRead);
 
         return () => {
             socket.off('new_message', handleNewMessage);
+            socket.off('typing', handleTyping);
+            socket.off('stop_typing', handleStopTyping);
+            socket.off('messages_read', handleMessagesRead);
         };
     }, [socket, otherUserId, conversationId]);
+
+    const handleTypingBroadcast = (text: string) => {
+        setInputText(text);
+        if (!socket || !conversationId) return;
+
+        // Emit typing event
+        socket.emit('typing', { conversationId, receiverId: otherUserId });
+
+        // Clear existing timeout
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+        }
+
+        // Set timeout to emit stop_typing
+        typingTimeoutRef.current = setTimeout(() => {
+            socket.emit('stop_typing', { conversationId, receiverId: otherUserId });
+        }, 2000);
+    };
 
     const handleSend = async () => {
         if (!inputText.trim()) return;
 
         const tempContent = inputText.trim();
         setInputText('');
+        
+        // Immediately stop typing indicator when sending
+        if (typingTimeoutRef.current) {
+            clearTimeout(typingTimeoutRef.current);
+            socket?.emit('stop_typing', { conversationId, receiverId: otherUserId });
+        }
 
         // Optimistic update
         const tempMessage: MessageItem = {
@@ -128,9 +196,6 @@ const ChatScreen = () => {
         setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
 
         try {
-            // Using socket emit directly for real-time speed if connected,
-            // otherwise use REST API. The backend socket handler "send_message"
-            // automatically saves the message using MessageService.
             if (isConnected && socket) {
                 socket.emit('send_message', {
                     receiverId: otherUserId,
@@ -138,12 +203,10 @@ const ChatScreen = () => {
                 });
             } else {
                 const sentMessage = await messageService.sendMessage(otherUserId, tempContent);
-                // Replace temp message with actual message from server
                 setMessages(prev => prev.map(m => m.id === tempMessage.id ? sentMessage : m));
             }
         } catch (error) {
             console.error('Failed to send message:', error);
-            // Optionally, remove the temp message or mark it as failed
             setMessages(prev => prev.filter(m => m.id !== tempMessage.id));
         }
     };
@@ -181,7 +244,11 @@ const ChatScreen = () => {
                     <Avatar uri={avatar} name={name} size={40} style={styles.headerAvatar} />
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerName}>{name}</Text>
-                        {/* Optionally add online status here */}
+                        {isOtherUserTyping ? (
+                            <Text style={styles.typingIndicator}>typing...</Text>
+                        ) : (
+                            <Text style={styles.onlineStatus}>Online</Text>
+                        )}
                     </View>
                 </View>
 
@@ -210,7 +277,7 @@ const ChatScreen = () => {
                         placeholder="Type a message..."
                         placeholderTextColor="#999"
                         value={inputText}
-                        onChangeText={setInputText}
+                        onChangeText={handleTypingBroadcast}
                         multiline
                         maxLength={500}
                     />
@@ -262,6 +329,15 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         color: '#111',
+    },
+    typingIndicator: {
+        fontSize: 12,
+        color: '#DD2476',
+        fontWeight: '500',
+    },
+    onlineStatus: {
+        fontSize: 12,
+        color: '#4CAF50',
     },
     loadingContainer: {
         flex: 1,

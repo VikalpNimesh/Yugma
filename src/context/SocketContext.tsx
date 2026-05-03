@@ -61,15 +61,15 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         socketInstance.on('new_message', (data) => {
           console.log('📩 New message received:', data);
-          Toast.show({
-            type: 'info',
-            text1: `New message from ${data.senderName || 'User'}`,
-            text2: data.content,
-            onPress: () => {
-              // Navigation logic could go here
-              Toast.hide();
-            }
-          });
+          // Toast.show({
+          //   type: 'info',
+          //   text1: `New message from ${data.senderName || 'User'}`,
+          //   text2: data.content,
+          //   onPress: () => {
+
+          //     Toast.hide();
+          //   }
+          // });
         });
 
         socketInstance.on('new_notification', (data) => {
