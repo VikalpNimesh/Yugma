@@ -53,7 +53,7 @@ const DiscoverScreen = () => {
     const handleLike = async (userId: string) => {
         // Dispatch the like action to remove the card from the UI
         dispatch(likeDiscoveryProfile(userId));
-        
+
         try {
             // Send actual friend request
             await socialService.sendFriendRequest(userId);
@@ -103,13 +103,13 @@ const DiscoverScreen = () => {
                 {/* Header */}
                 <View style={styles.titleContainer}>
                     <Text style={styles.title}>Discover Partners</Text>
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={styles.filterButton}
                         onPress={() => setShowFilter(true)}
                     >
                         <Ionicons name="filter-outline" size={18} color="#000" />
                         <Text style={styles.filterText}>Filters</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
 
                 {/* Swiper / Content */}

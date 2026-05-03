@@ -60,13 +60,32 @@ const MatchList = ({ data }: any) => {
 
         </View>
     );
+    const renderEmpty = () => (
+        <View style={styles.emptyContainer}>
+            <View style={styles.iconCircle}>
+                <Ionicons name="people-outline" size={40} color="#DD2476" />
+            </View>
+            <Text style={styles.emptyTitle}>No Friends Yet</Text>
+            <Text style={styles.emptySubText}>
+                Your connections will appear here. Start swiping in Discover to find your perfect match!
+            </Text>
+            <Pressable 
+                style={styles.discoverBtn} 
+                onPress={() => navigation.navigate('Discover')}
+            >
+                <Text style={styles.discoverBtnText}>Go to Discover</Text>
+            </Pressable>
+        </View>
+    );
+
     return (
         <FlatList
             data={data}
             keyExtractor={(item) => item.id}
             renderItem={renderItem}
+            ListEmptyComponent={renderEmpty}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
+            contentContainerStyle={[{ paddingBottom: 40 }, data.length === 0 && { flex: 1, justifyContent: 'center' }]}
         />
     )
 }
@@ -183,5 +202,45 @@ const styles = StyleSheet.create({
         padding: 6,
         borderRadius: 8,
         paddingHorizontal: 10
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        paddingVertical: 60,
+    },
+    iconCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#FFF0F5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#222',
+        marginBottom: 10,
+    },
+    emptySubText: {
+        fontSize: 15,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: 24,
+    },
+    discoverBtn: {
+        backgroundColor: '#DD2476',
+        paddingVertical: 12,
+        paddingHorizontal: 30,
+        borderRadius: 25,
+    },
+    discoverBtnText: {
+        color: 'white',
+        fontWeight: '600',
+        fontSize: 16,
     }
 })

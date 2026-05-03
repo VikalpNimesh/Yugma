@@ -75,24 +75,35 @@ const LikeList = ({ data, onRefresh }: any) => {
             </View>
         </View>
     );
+
+    const renderEmpty = () => (
+        <View style={styles.emptyContainer}>
+            <View style={styles.iconCircle}>
+                <Ionicons name="heart-outline" size={40} color="#DD2476" />
+            </View>
+            <Text style={styles.emptyTitle}>No Likes Yet</Text>
+            <Text style={styles.emptySubText}>
+                When people like your profile, they'll appear here. Keep your profile updated to get more interest!
+            </Text>
+        </View>
+    );
     return (
         <View style={{ flex: 1 }}>
             <FlatList
-                ListHeaderComponent={() => (
+                ListHeaderComponent={data.length > 0 ? () => (
                     <View style={styles.headerCon}>
-
-                        <Text style={styles.header}>People who liked you
-                        </Text>
+                        <Text style={styles.header}>People who liked you</Text>
                         <Text style={styles.subHeader}>
                             These people have shown interest in your profile. Like them back to create a match!
                         </Text>
                     </View>
-                )}
+                ) : null}
                 data={data}
                 keyExtractor={(item) => item.id}
                 renderItem={renderItem}
+                ListEmptyComponent={renderEmpty}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 40 }}
+                contentContainerStyle={[{ paddingBottom: 40 }, data.length === 0 && { flex: 1, justifyContent: 'center' }]}
             />
         </View>
     )
@@ -270,5 +281,33 @@ const styles = StyleSheet.create({
         color: '#ff3b30',
         fontWeight: '600',
         fontSize: 13,
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 40,
+        paddingBottom: 100, // Offset for the tab bar/header
+    },
+    iconCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#FFF0F5',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#222',
+        marginBottom: 10,
+    },
+    emptySubText: {
+        fontSize: 15,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 22,
     }
 })
