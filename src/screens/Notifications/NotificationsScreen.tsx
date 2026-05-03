@@ -28,7 +28,7 @@ const NotificationsScreen = () => {
         if (showLoading) setIsLoading(true);
         try {
             const data = await notificationService.getNotifications();
-            setNotifications(data);
+            setNotifications(Array.isArray(data) ? data.filter(n => n && typeof n === 'object') : []);
         } catch (error: any) {
             console.error('Error fetching notifications:', error);
             Toast.show({
@@ -55,7 +55,9 @@ const NotificationsScreen = () => {
         try {
             await notificationService.markAsRead(notificationId);
             setNotifications(prev =>
-                prev.map(n => n.id === notificationId ? { ...n, isRead: true } : n)
+                Array.isArray(prev)
+                    ? prev.map(n => (n && n.id === notificationId ? { ...n, isRead: true } : n))
+                    : []
             );
         } catch (error: any) {
             console.error('Error marking as read:', error);
@@ -65,7 +67,11 @@ const NotificationsScreen = () => {
     const handleMarkAllRead = async () => {
         try {
             await notificationService.markAllAsRead();
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            setNotifications(prev =>
+                Array.isArray(prev)
+                    ? prev.map(n => (n ? { ...n, isRead: true } : n))
+                    : []
+            );
             Toast.show({
                 type: 'success',
                 text1: 'Success',

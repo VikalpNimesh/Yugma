@@ -6,8 +6,9 @@ export interface NotificationItem {
     description: string;
     time: string;
     createdAt: string;
-    type: 'match' | 'message' | 'like' | 'system';
+    type: 'like' | 'match' | 'message' | 'verification' | 'premium' | 'friend_request' | 'system';
     isRead: boolean;
+    relatedUserId?: string;
 }
 
 const notificationService = {
