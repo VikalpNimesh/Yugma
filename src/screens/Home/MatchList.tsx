@@ -46,15 +46,15 @@ const MatchList = ({ data }: any) => {
                     </Pressable>
                 </View>
 
-                <Pressable style={styles.verifyBtn}>
+                {/* <Pressable style={styles.verifyBtn}>
                     <Octicons name="shield-check" size={18} color={"black"} />
                     <Text style={styles.verifyBtnText}> Request Verification</Text>
-                </Pressable>
-                {item.verified && (
+                </Pressable> */}
+                {/* {item.verified && (
                     <View style={styles.verifiedTag}>
                         <Text style={styles.verifiedText}>Verified Profile</Text>
                     </View>
-                )}
+                )} */}
 
             </View>
 
@@ -69,8 +69,8 @@ const MatchList = ({ data }: any) => {
             <Text style={styles.emptySubText}>
                 Your connections will appear here. Start swiping in Discover to find your perfect match!
             </Text>
-            <Pressable 
-                style={styles.discoverBtn} 
+            <Pressable
+                style={styles.discoverBtn}
                 onPress={() => navigation.navigate('Discover')}
             >
                 <Text style={styles.discoverBtnText}>Go to Discover</Text>

@@ -16,8 +16,8 @@ const SocketContext = createContext<SocketContextType>({
 });
 
 export const useSocket = () => useContext(SocketContext);
-// const SOCKET_URL = 'ws://13.204.218.120:3001/chat';
-const SOCKET_URL = 'ws://192.168.29.27:3001/chat'; // Same IP as BASE_URL in axiosInstance, with /chat namespace
+const SOCKET_URL = 'ws://13.204.218.120:3001/chat';
+// const SOCKET_URL = 'ws://192.168.29.27:3001/chat'; // Same IP as BASE_URL in axiosInstance, with /chat namespace
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
