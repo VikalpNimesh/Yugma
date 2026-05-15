@@ -10,6 +10,7 @@ import {
     Platform,
     ScrollView,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector, useDispatch } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -30,31 +31,22 @@ export default function SignupScreen({ navigation }: any) {
 
     const handleSignup = async () => {
         if (loading) return;
-
         setError('');
-
-        // Client-side validation
         if (!email.trim() || !password || !confirmPassword) {
             setError('Please fill in all fields');
             return;
         }
-
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
         }
-
         if (!isAdult) {
             setError('You must be 18+ to sign up');
             return;
         }
-
         setLoading(true);
-
         try {
-            // Set the current screen to BasicInfo so the AppNavigator's Splash knows where to go
             dispatch(setCurrentScreen('BasicInfo'));
-
             const resultAction = await dispatch(signupUser({
                 email,
                 password,
@@ -63,45 +55,31 @@ export default function SignupScreen({ navigation }: any) {
             }) as any);
 
             if (signupUser.fulfilled.match(resultAction)) {
-                console.log('✅ User registered:', (resultAction.payload as any).user.email);
-
-                // Initialize basic info with user data
                 const userData = resultAction.payload as any;
                 if (userData.user) {
                     const basicInfo = {
                         fullName: userData.user.fullName || displayName || '',
                         email: userData.user.email || email.trim(),
                     };
-
                     dispatch(initializeBasicInfo(basicInfo));
-
-                    // Persist to AsyncStorage
                     await AsyncStorage.setItem('userBasicInfo', JSON.stringify(basicInfo));
                 }
-
-                // No need for navigation.replace('BasicInfo') here as the RootNavigator
-                // will swap to AppNavigator and Splash will handle the routing.
             } else {
-                if (resultAction.payload) {
-                    setError(resultAction.payload as string);
-                } else {
-                    setError('Unable to create account. Please try again.');
-                }
+                setError(resultAction.payload ? (resultAction.payload as string) : 'Unable to create account. Please try again.');
             }
         } catch (err: any) {
-            console.error(err);
             setError(err.message || 'Unable to create account. Please try again.');
         } finally {
             setLoading(false);
         }
     };
 
-    const handleLogin = () => {
-        navigation.navigate('LoginScreen');
-    };
-
     return (
         <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -114,74 +92,68 @@ export default function SignupScreen({ navigation }: any) {
                         <Text style={styles.title}>Create Account</Text>
                         <Text style={styles.subtitle}>Sign up to get started</Text>
 
-                        {/* Display Name Input (Optional) */}
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Full Name (Optional)"
-                            placeholderTextColor="#999"
-                            value={displayName}
-                            onChangeText={(text) => {
-                                setDisplayName(text);
-                                setError('');
-                            }}
-                            autoCapitalize="words"
-                            editable={!loading}
-                        />
+                        <View style={styles.inputSection}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Full Name"
+                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                value={displayName}
+                                onChangeText={(text) => {
+                                    setDisplayName(text);
+                                    setError('');
+                                }}
+                                autoCapitalize="words"
+                                editable={!loading}
+                            />
 
-                        {/* Email Input */}
-                        <TextInput
-                            style={[styles.input, error && styles.inputError]}
-                            placeholder="Email ID"
-                            placeholderTextColor="#999"
-                            value={email}
-                            onChangeText={(text) => {
-                                setEmail(text);
-                                setError('');
-                            }}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            editable={!loading}
-                        />
+                            <TextInput
+                                style={[styles.input, error && styles.inputError]}
+                                placeholder="Email ID"
+                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                value={email}
+                                onChangeText={(text) => {
+                                    setEmail(text);
+                                    setError('');
+                                }}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                editable={!loading}
+                            />
 
-                        {/* Password Input */}
-                        <TextInput
-                            style={[styles.input, error && styles.inputError]}
-                            placeholder="Password (min. 6 characters)"
-                            placeholderTextColor="#999"
-                            value={password}
-                            onChangeText={(text) => {
-                                setPassword(text);
-                                setError('');
-                            }}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            editable={!loading}
-                        />
+                            <TextInput
+                                style={[styles.input, error && styles.inputError]}
+                                placeholder="Password"
+                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                value={password}
+                                onChangeText={(text) => {
+                                    setPassword(text);
+                                    setError('');
+                                }}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                editable={!loading}
+                            />
 
-                        {/* Confirm Password Input */}
-                        <TextInput
-                            style={[styles.input, error && styles.inputError]}
-                            placeholder="Confirm Password"
-                            placeholderTextColor="#999"
-                            value={confirmPassword}
-                            onChangeText={(text) => {
-                                setConfirmPassword(text);
-                                setError('');
-                            }}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            editable={!loading}
-                        />
+                            <TextInput
+                                style={[styles.input, error && styles.inputError]}
+                                placeholder="Confirm Password"
+                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                value={confirmPassword}
+                                onChangeText={(text) => {
+                                    setConfirmPassword(text);
+                                    setError('');
+                                }}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                editable={!loading}
+                            />
+                        </View>
 
-                        {/* Error Message */}
                         {error ? (
-                            <View style={styles.errorContainer}>
-                                <Text style={styles.errorText}>{error}</Text>
-                            </View>
+                            <Text style={styles.errorText}>{error}</Text>
                         ) : null}
 
-                        {/* Age Verification Checkbox */}
                         <TouchableOpacity
                             style={styles.checkboxContainer}
                             onPress={() => {
@@ -194,12 +166,11 @@ export default function SignupScreen({ navigation }: any) {
                             <Ionicons
                                 name={isAdult ? "checkbox" : "square-outline"}
                                 size={22}
-                                color={isAdult ? "#00B2FF" : "#999"}
+                                color="#FFFFFF"
                             />
                             <Text style={styles.checkboxLabel}>I confirm that I am 18 years or older</Text>
                         </TouchableOpacity>
 
-                        {/* Signup Button */}
                         <TouchableOpacity
                             style={[
                                 styles.signupBtn,
@@ -209,16 +180,15 @@ export default function SignupScreen({ navigation }: any) {
                             disabled={loading || !email || !password || !confirmPassword || !isAdult}
                         >
                             {loading ? (
-                                <ActivityIndicator color="#fff" />
+                                <ActivityIndicator color="#FF3366" />
                             ) : (
                                 <Text style={styles.signupText}>Create Account</Text>
                             )}
                         </TouchableOpacity>
 
-                        {/* Footer */}
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>Already have an account?</Text>
-                            <TouchableOpacity onPress={handleLogin} disabled={loading}>
+                            <TouchableOpacity onPress={() => navigation.navigate('LoginScreen')} disabled={loading}>
                                 <Text style={styles.loginText}> Login</Text>
                             </TouchableOpacity>
                         </View>
@@ -232,7 +202,6 @@ export default function SignupScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
     },
     keyboardView: {
         flex: 1,
@@ -242,85 +211,90 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     inner: {
-        paddingHorizontal: 24,
+        paddingHorizontal: 30,
         paddingVertical: 20,
     },
     title: {
-        fontSize: 26,
-        fontWeight: '700',
+        fontSize: 36,
+        fontWeight: '800',
         textAlign: 'center',
-        color: '#111',
-        marginBottom: 4,
+        color: '#FFFFFF',
+        marginBottom: 8,
     },
     subtitle: {
         textAlign: 'center',
-        color: '#666',
+        color: 'rgba(255, 255, 255, 0.9)',
         marginBottom: 30,
-        fontSize: 14,
+        fontSize: 16,
+    },
+    inputSection: {
+        width: '100%',
+        gap: 12,
     },
     input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        marginVertical: 8,
-        color: '#000',
+        height: 54,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 27,
+        paddingHorizontal: 25,
+        color: '#FFFFFF',
         fontSize: 15,
-        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     inputError: {
-        borderColor: '#ff3b3b',
-    },
-    errorContainer: {
-        marginTop: 8,
-        marginBottom: 4,
+        borderColor: '#FFD700',
     },
     errorText: {
-        color: '#ff3b3b',
+        color: '#FFD700',
         fontSize: 13,
         textAlign: 'center',
-    },
-    signupBtn: {
-        backgroundColor: '#00B2FF',
-        borderRadius: 8,
-        paddingVertical: 14,
         marginTop: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 48,
-    },
-    buttonDisabled: {
-        opacity: 0.6,
-    },
-    signupText: {
-        color: '#fff',
-        fontSize: 16,
-        fontWeight: '600',
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginTop: 24,
-    },
-    footerText: {
-        color: '#666',
-        fontSize: 14,
-    },
-    loginText: {
-        color: '#00B2FF',
-        fontWeight: '600',
-        fontSize: 14,
     },
     checkboxContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 12,
-        paddingHorizontal: 4,
+        marginVertical: 20,
+        paddingHorizontal: 5,
     },
     checkboxLabel: {
-        marginLeft: 8,
+        marginLeft: 10,
         fontSize: 14,
-        color: '#444',
+        color: '#FFFFFF',
+        fontWeight: '500',
+    },
+    signupBtn: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 27,
+        height: 54,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    buttonDisabled: {
+        opacity: 0.7,
+    },
+    signupText: {
+        color: '#FF3366',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    footer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 30,
+    },
+    footerText: {
+        color: 'rgba(255, 255, 255, 0.8)',
+        fontSize: 14,
+    },
+    loginText: {
+        color: '#FFFFFF',
+        fontWeight: '700',
+        fontSize: 14,
+        textDecorationLine: 'underline',
     },
 });

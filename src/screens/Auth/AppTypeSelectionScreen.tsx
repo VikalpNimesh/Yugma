@@ -4,7 +4,6 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    ImageBackground,
     Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -22,7 +21,6 @@ const AppTypeSelectionScreen = () => {
     const handleSelection = async (type: 'dating' | 'matrimonial') => {
         try {
             await AsyncStorage.setItem('hasLaunched', 'true');
-            // Store the selected type in Redux
             dispatch(updateUser({ appType: type }));
             navigation.reset({
                 index: 0,
@@ -36,52 +34,49 @@ const AppTypeSelectionScreen = () => {
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={['#FFF9F6', '#FFF0E6']}
-                style={styles.background}
-            >
-                <View style={styles.content}>
-                    <Text style={styles.title}>Welcome to Yugma</Text>
-                    <Text style={styles.subtitle}>Choose your journey</Text>
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
+            <View style={styles.content}>
+                <Text style={styles.title}>Welcome to Yugma</Text>
+                <Text style={styles.subtitle}>Choose your journey</Text>
 
-                    <View style={styles.cardsContainer}>
-                        {/* Dating Option */}
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={() => handleSelection('dating')}
-                            activeOpacity={0.9}
-                        >
-                            <LinearGradient
-                                colors={['#FF9A9E', '#FECFEF']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                                style={styles.cardGradient}
-                            >
+                <View style={styles.cardsContainer}>
+                    {/* Dating Option */}
+                    <TouchableOpacity
+                        style={styles.card}
+                        onPress={() => handleSelection('dating')}
+                        activeOpacity={0.9}
+                    >
+                        <View style={styles.cardContent}>
+                            <View style={styles.iconCircle}>
                                 <Text style={styles.cardIcon}>💘</Text>
+                            </View>
+                            <View style={styles.cardTextContainer}>
                                 <Text style={styles.cardTitle}>Dating</Text>
                                 <Text style={styles.cardDesc}>Find love and meaningful connections</Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
 
-                        {/* Matrimony Option */}
-                        <TouchableOpacity
-                            style={styles.card}
-                            onPress={() => handleSelection('matrimonial')}
-                            activeOpacity={0.9}
-                        >
-                            <LinearGradient
-                                colors={['#a18cd1', '#fbc2eb']}
-                                start={{ x: 0, y: 0 }}
-                                end={{ x: 1, y: 1 }}
-                                style={styles.cardGradient}
-                            >
+                    {/* Matrimony Option */}
+                    <TouchableOpacity
+                        style={styles.card}
+                        onPress={() => handleSelection('matrimonial')}
+                        activeOpacity={0.9}
+                    >
+                        <View style={styles.cardContent}>
+                            <View style={styles.iconCircle}>
                                 <Text style={styles.cardIcon}>💍</Text>
+                            </View>
+                            <View style={styles.cardTextContainer}>
                                 <Text style={styles.cardTitle}>Matrimonial</Text>
                                 <Text style={styles.cardDesc}>Find your perfect life partner</Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                    </View>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
                 </View>
-            </LinearGradient>
+            </View>
         </View>
     );
 };
@@ -90,25 +85,23 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
-    background: {
+    content: {
         flex: 1,
+        padding: 30,
+        alignItems: 'center',
         justifyContent: 'center',
     },
-    content: {
-        padding: 24,
-        alignItems: 'center',
-    },
     title: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#1a1a1a',
+        fontSize: 36,
+        fontWeight: '800',
+        color: '#FFFFFF',
         marginBottom: 8,
         textAlign: 'center',
     },
     subtitle: {
         fontSize: 18,
-        color: '#666',
-        marginBottom: 40,
+        color: 'rgba(255, 255, 255, 0.9)',
+        marginBottom: 50,
         textAlign: 'center',
     },
     cardsContainer: {
@@ -117,35 +110,48 @@ const styles = StyleSheet.create({
     },
     card: {
         width: '100%',
-        height: 160,
-        borderRadius: 20,
-        elevation: 5,
-        shadowColor: '#000',
+        height: 140,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 25,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
+        overflow: 'hidden',
+    },
+    cardContent: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    iconCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#FFFFFF',
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 8,
-    },
-    cardGradient: {
-        flex: 1,
-        borderRadius: 20,
-        padding: 24,
-        justifyContent: 'center',
-        alignItems: 'center',
+        shadowRadius: 10,
+        elevation: 5,
     },
     cardIcon: {
-        fontSize: 40,
-        marginBottom: 12,
+        fontSize: 36,
+    },
+    cardTextContainer: {
+        flex: 1,
+        marginLeft: 20,
     },
     cardTitle: {
         fontSize: 24,
         fontWeight: '700',
-        color: '#fff',
-        marginBottom: 8,
+        color: '#FFFFFF',
+        marginBottom: 4,
     },
     cardDesc: {
         fontSize: 14,
-        color: 'rgba(255,255,255,0.9)',
-        textAlign: 'center',
+        color: 'rgba(255, 255, 255, 0.8)',
     },
 });
 

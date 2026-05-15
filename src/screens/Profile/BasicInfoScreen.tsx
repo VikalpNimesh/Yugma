@@ -7,41 +7,42 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    Dimensions,
+    TextInput,
 } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
-import { Provider, TextInput } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
-import { RootState } from "../../redux/store";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateBasicInfo, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 import { handleLogout } from "../../api/firebase/auth";
 
+const { width } = Dimensions.get("window");
+
 export const BasicInfoScreen: React.FC = () => {
     const navigation = useNavigation();
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.basicInfo);
-    const [focusedField, setFocusedField] = useState<string | null>(null);
 
     React.useEffect(() => {
         dispatch(setCurrentScreen('BasicInfo'));
-
-        // Load user data from AsyncStorage
         const loadUserData = async () => {
             try {
                 const storedData = await AsyncStorage.getItem('userBasicInfo');
                 if (storedData) {
                     const userData = JSON.parse(storedData);
-                    dispatch(updateBasicInfo(userData));
+                    dispatch(updateBasicInfo({ ...userData, region: 'Brahmin' }));
+                } else {
+                    dispatch(updateBasicInfo({ region: 'Brahmin' }));
                 }
             } catch (error) {
                 console.error('Failed to load user data from AsyncStorage:', error);
+                dispatch(updateBasicInfo({ region: 'Brahmin' }));
             }
         };
-
         loadUserData();
     }, [dispatch]);
 
@@ -50,8 +51,7 @@ export const BasicInfoScreen: React.FC = () => {
     };
 
     const handleNext = () => {
-        const { fullName, email, age, location, profession, education, region, areaCover } = form;
-
+        const { fullName, email, age, location, profession, education, region } = form;
         if (!fullName || !email || !age || !location || !profession || !education || !region) {
             Toast.show({
                 type: 'error',
@@ -60,213 +60,133 @@ export const BasicInfoScreen: React.FC = () => {
             });
             return;
         }
-
-        if (fullName.trim().length < 3) {
-            Toast.show({
-                type: 'error',
-                text1: 'Invalid Name',
-                text2: 'Full Name must be at least 3 characters long.',
-            });
-            return;
-        }
-
-        if (isNaN(Number(age))) {
-            Toast.show({
-                type: 'error',
-                text1: 'Invalid Age',
-                text2: 'Age must be a valid number.',
-            });
-            return;
-        }
-
         navigation.navigate("AboutYouStep" as never);
     };
 
     return (
-        <Provider>
-            <View style={{ flex: 1, backgroundColor: "#FFF" }}>
-                <KeyboardAvoidingView
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    style={{ flex: 1 }}
-                >
-                    <ScrollView contentContainerStyle={styles.container}>
-                        {/* Header */}
-                        <View style={styles.headerRow}>
-                            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                                {/* <Ionicons name="arrow-back" size={20} color="#000" />
-                                <Text style={styles.backText}>Back</Text> */}
-                            </TouchableOpacity>
-                            <Text style={styles.stepText}>Step 1 of 4</Text>
-                        </View>
-
-                        {/* Progress Bar */}
+        <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
+            <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={{ flex: 1 }}
+            >
+                <ScrollView contentContainerStyle={styles.scrollContent}>
+                    {/* Header */}
+                    <View style={styles.headerRow}>
+                        <Text style={styles.stepText}>Step 1 of 4</Text>
                         <View style={styles.progressBarContainer}>
                             <View style={[styles.progressBarFill, { width: "25%" }]} />
                         </View>
+                    </View>
 
-                        <Text style={styles.title}>Basic Information</Text>
+                    <Text style={styles.title}>Basic Information</Text>
 
-                        <View style={styles.card}>
-                            <View style={styles.row}>
-                                <InputField
-                                    label="Full Name"
-                                    placeholder="Enter your full name"
-                                    value={form.fullName}
-                                    onChangeText={(text) => handleChange("fullName", text)}
-                                    onFocus={() => setFocusedField("fullName")}
-                                    onBlur={() => setFocusedField(null)}
-                                    isFocused={focusedField === "fullName"}
-                                    editable={!form.fullName}
-                                />
+                    <View style={styles.inputSection}>
+                        <InputField
+                            label="Full Name"
+                            placeholder="Enter your full name"
+                            value={form.fullName}
+                            onChangeText={(text) => handleChange("fullName", text)}
+                            editable={!form.fullName}
+                        />
 
-                                <InputField
-                                    label="Email"
-                                    placeholder="Your email"
-                                    value={form.email}
-                                    onChangeText={(text) => handleChange("email", text)}
-                                    onFocus={() => setFocusedField("email")}
-                                    onBlur={() => setFocusedField(null)}
-                                    isFocused={focusedField === "email"}
-                                    keyboardType="email-address"
-                                    editable={!form.email}
-                                />
-                            </View>
+                        <InputField
+                            label="Email"
+                            placeholder="Your email"
+                            value={form.email}
+                            onChangeText={(text) => handleChange("email", text)}
+                            keyboardType="email-address"
+                            editable={!form.email}
+                        />
 
-                            <View style={styles.row}>
+                        <View style={styles.row}>
+                            <View style={{ flex: 1, marginRight: 10 }}>
                                 <InputField
                                     label="Age"
-                                    placeholder="Your age"
+                                    placeholder="Age"
                                     value={form.age}
                                     onChangeText={(text) => handleChange("age", text)}
-                                    onFocus={() => setFocusedField("age")}
-                                    onBlur={() => setFocusedField(null)}
-                                    isFocused={focusedField === "age"}
                                     keyboardType="numeric"
                                 />
                             </View>
-
-                            <View style={styles.row}>
+                            <View style={{ flex: 2 }}>
                                 <InputField
                                     label="Location"
                                     placeholder="City, State"
                                     value={form.location}
                                     onChangeText={(text) => handleChange("location", text)}
-                                    onFocus={() => setFocusedField("location")}
-                                    onBlur={() => setFocusedField(null)}
-                                    isFocused={focusedField === "location"}
-                                />
-                                <InputField
-                                    label="Profession"
-                                    placeholder="Your profession"
-                                    value={form.profession}
-                                    onChangeText={(text) => handleChange("profession", text)}
-                                    onFocus={() => setFocusedField("profession")}
-                                    onBlur={() => setFocusedField(null)}
-                                    isFocused={focusedField === "profession"}
                                 />
                             </View>
-
-                            <View style={styles.row}>
-                                {/* Education Dropdown */}
-                                <View style={[styles.inputContainer, { flex: 1, margin: 6 }]}>
-                                    <Text style={styles.label}>Education</Text>
-                                    <Dropdown
-                                        data={[
-                                            { label: "High School", value: "High School" },
-                                            { label: "Bachelor's", value: "Bachelor's" },
-                                            { label: "Master's", value: "Master's" },
-                                            { label: "PhD", value: "PhD" },
-                                            { label: "Professional Degree", value: "Professional Degree" },
-                                        ]}
-                                        labelField="label"
-                                        valueField="value"
-                                        placeholder="Select education level"
-                                        value={form.education}
-                                        onChange={(item) => handleChange("education", item.value)}
-                                        style={[
-                                            styles.dropdown,
-                                            form.education ? styles.dropdownFilled : {},
-                                        ]}
-                                        placeholderStyle={styles.placeholderStyle}
-                                        selectedTextStyle={styles.selectedTextStyle}
-                                        itemTextStyle={{ color: "#333" }}
-                                        activeColor="#f4f4f4"
-                                        renderRightIcon={() => null}
-                                    />
-                                </View>
-                            </View>
-
-                            <View style={styles.row}>
-                                <InputField
-                                    label="Region"
-                                    placeholder="Your region"
-                                    value={form.region}
-                                    onChangeText={(text) => handleChange("region", text)}
-                                    onFocus={() => setFocusedField("region")}
-                                    onBlur={() => setFocusedField(null)}
-                                    isFocused={focusedField === "region"}
-                                />
-
-                                <View style={styles.inputContainer}>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                        <Text style={styles.label}>Area Cover</Text>
-                                        <View style={styles.premiumBadge}>
-                                            <Ionicons name="star" size={12} color="#FFD700" />
-                                            <Text style={styles.premiumText}>Premium</Text>
-                                        </View>
-                                    </View>
-                                    <TextInput
-                                        mode="outlined"
-                                        placeholder="Coverage area (Premium)"
-                                        placeholderTextColor={"#999"}
-                                        value={form.areaCover}
-                                        onChangeText={(text) => handleChange("areaCover", text)}
-                                        onFocus={() => setFocusedField("areaCover")}
-                                        onBlur={() => setFocusedField(null)}
-                                        outlineColor="#ddd"
-                                        activeOutlineColor="#dadada"
-                                        style={[
-                                            styles.paperInput,
-                                            focusedField === "areaCover" && { borderColor: "#E94057" },
-                                        ]}
-                                        textColor='#000'
-                                        theme={{
-                                            roundness: 10,
-                                            colors: {
-                                                text: "#000",
-                                                placeholder: "#999",
-                                                primary: "#E94057",
-                                                background: "#fff",
-                                            },
-                                        }}
-                                    />
-                                </View>
-                            </View>
-
-
                         </View>
 
-                        {/* Footer Buttons */}
-                        <View style={styles.footer}>
-                            <TouchableOpacity style={styles.previousButton} onPress={() => handleLogout(navigation, dispatch)}>
-                                <Ionicons name="arrow-back" size={18} color="#000" />
-                                <Text style={styles.previousText}>Previous</Text>
-                            </TouchableOpacity>
+                        <InputField
+                            label="Profession"
+                            placeholder="Your profession"
+                            value={form.profession}
+                            onChangeText={(text) => handleChange("profession", text)}
+                        />
 
-                            <TouchableOpacity onPress={handleNext}>
-                                <LinearGradient
-                                    colors={["#FF512F", "#DD2476"]}
-                                    style={styles.nextButton}
-                                >
-                                    <Text style={styles.nextText}>Next</Text>
-                                    <Ionicons name="arrow-forward" size={18} color="#fff" />
-                                </LinearGradient>
-                            </TouchableOpacity>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Education</Text>
+                            <Dropdown
+                                data={[
+                                    { label: "High School", value: "High School" },
+                                    { label: "Bachelor's", value: "Bachelor's" },
+                                    { label: "Master's", value: "Master's" },
+                                    { label: "PhD", value: "PhD" },
+                                    { label: "Professional Degree", value: "Professional Degree" },
+                                ]}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Select education level"
+                                value={form.education}
+                                onChange={(item) => handleChange("education", item.value)}
+                                style={styles.dropdown}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                itemTextStyle={{ color: "#333" }}
+                                activeColor="#f4f4f4"
+                                renderRightIcon={() => (
+                                    <Ionicons name="chevron-down" size={20} color="rgba(255, 255, 255, 0.7)" />
+                                )}
+                            />
                         </View>
-                    </ScrollView>
-                </KeyboardAvoidingView>
-            </View>
-        </Provider>
+
+                        <InputField
+                            label="Religion"
+                            placeholder="Religion"
+                            value="Brahmin"
+                            onChangeText={() => {}}
+                            editable={false}
+                        />
+
+                        <InputField
+                            label="Area Cover (Premium)"
+                            placeholder="Coverage area"
+                            value={form.areaCover}
+                            onChangeText={(text) => handleChange("areaCover", text)}
+                            isPremium
+                        />
+                    </View>
+
+                    {/* Footer Buttons */}
+                    <View style={styles.footer}>
+                        {/* <TouchableOpacity style={styles.previousButton} onPress={() => handleLogout(navigation, dispatch)}>
+                            <Ionicons name="log-out-outline" size={22} color="#FFFFFF" />
+                            <Text style={styles.previousText}>Logout</Text>
+                        </TouchableOpacity> */}
+
+                        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+                            <Text style={styles.nextText}>Next Step</Text>
+                            <Ionicons name="arrow-forward" size={20} color="#FF3366" />
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </View>
     );
 };
 
@@ -275,11 +195,9 @@ type InputFieldProps = {
     placeholder: string;
     value: string;
     onChangeText: (text: string) => void;
-    onFocus: () => void;
-    onBlur: () => void;
-    isFocused: boolean;
     keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
     editable?: boolean;
+    isPremium?: boolean;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -287,39 +205,29 @@ const InputField: React.FC<InputFieldProps> = ({
     placeholder,
     value,
     onChangeText,
-    onFocus,
-    onBlur,
-    isFocused,
     keyboardType = "default",
     editable = true,
+    isPremium = false,
 }) => (
     <View style={styles.inputContainer}>
-        <Text style={styles.label}>{label}</Text>
+        <View style={styles.labelRow}>
+            <Text style={styles.label}>{label}</Text>
+            {isPremium && (
+                <View style={styles.premiumBadge}>
+                    <Ionicons name="star" size={12} color="#FFD700" />
+                    <Text style={styles.premiumText}>PREMIUM</Text>
+                </View>
+            )}
+        </View>
         <TextInput
-            mode="outlined"
+            style={[
+                styles.input,
+                !editable && styles.inputDisabled
+            ]}
             placeholder={placeholder}
-            placeholderTextColor={"#000"}
+            placeholderTextColor="rgba(255, 255, 255, 0.7)"
             value={value}
             onChangeText={onChangeText}
-            onFocus={onFocus}
-            onBlur={onBlur}
-            outlineColor="#ddd"
-            activeOutlineColor="#dadada"
-            style={[
-                styles.paperInput,
-                isFocused && { borderColor: "#E94057" },
-                !editable && { backgroundColor: "#f0f0f0", opacity: 0.7 },
-            ]}
-            textColor='#000'
-            theme={{
-                roundness: 10,
-                colors: {
-                    text: "#000",            // 👈 Text color stays black
-                    placeholder: "#999",     // 👈 Placeholder color
-                    primary: "#E94057",      // 👈 Border color on focus
-                    background: editable ? "#fff" : "#f0f0f0",      // 👈 Input background
-                },
-            }}
             keyboardType={keyboardType}
             editable={editable}
         />
@@ -328,144 +236,142 @@ const InputField: React.FC<InputFieldProps> = ({
 
 const styles = StyleSheet.create({
     container: {
-        padding: 10,
+        flex: 1,
+    },
+    scrollContent: {
+        paddingHorizontal: 30,
+        paddingTop: 50,
+        paddingBottom: 30,
     },
     headerRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 12,
-    },
-    backButton: {
-        flexDirection: "row",
         alignItems: "center",
-    },
-    backText: {
-        fontSize: 16,
-        fontWeight: "500",
-        marginLeft: 4,
-        color: "#000",
+        justifyContent: "space-between",
+        marginBottom: 30,
     },
     stepText: {
-        color: "#555",
+        color: "rgba(255, 255, 255, 0.8)",
         fontSize: 14,
+        fontWeight: "600",
     },
     progressBarContainer: {
         height: 6,
-        backgroundColor: "#eee",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
         borderRadius: 3,
+        width: 100,
         overflow: "hidden",
     },
     progressBarFill: {
         height: "100%",
-        backgroundColor: "#E94057",
+        backgroundColor: "#FFFFFF",
     },
     title: {
-        fontSize: 18,
-        fontWeight: "700",
-        marginVertical: 16,
-        color: "#222",
+        fontSize: 32,
+        fontWeight: "800",
+        color: "#FFFFFF",
+        marginBottom: 30,
     },
-    card: {
-        backgroundColor: "#fff",
-        padding: 16,
-        borderRadius: 12,
+    inputSection: {
+        gap: 20,
+    },
+    inputContainer: {
+        width: "100%",
+    },
+    labelRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 8,
+        marginLeft: 5,
+    },
+    label: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "rgba(255, 255, 255, 0.9)",
+    },
+    input: {
+        height: 56,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 28,
+        paddingHorizontal: 25,
+        color: "#FFFFFF",
+        fontSize: 16,
         borderWidth: 1,
-        borderColor: "#eee",
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+    },
+    inputDisabled: {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        opacity: 0.7,
     },
     row: {
         flexDirection: "row",
-        justifyContent: "space-between",
-    },
-    inputContainer: {
-        flex: 1,
-        margin: 4,
-    },
-    label: {
-        fontWeight: "600",
-        color: "#333",
-        marginBottom: 6,
-    },
-    paperInput: {
-        backgroundColor: "#F9F9F9",
-        fontSize: 14,
-        padding: 0,
-    },
-    dropdownBtn: {
-        borderColor: "#ddd",
-        borderWidth: 1,
-        borderRadius: 10,
-        backgroundColor: "#F9F9F9",
-    },
-    footer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginTop: 24,
-    },
-    previousButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#E6E6E6",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        backgroundColor: "#fff",
-    },
-    previousText: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: "#000",
-        marginLeft: 6,
-    },
-    nextButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
-    },
-    nextText: {
-        color: "#fff",
-        fontSize: 15,
-        fontWeight: "500",
-        marginRight: 6,
     },
     dropdown: {
+        height: 56,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 28,
+        paddingHorizontal: 25,
         borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 10,
-        backgroundColor: "#F9F9F9",
-        paddingHorizontal: 12,
-        height: 50,
-    },
-    dropdownFilled: {
-        borderColor: "#dadada",
+        borderColor: "rgba(255, 255, 255, 0.3)",
     },
     placeholderStyle: {
-        color: "#999",
-        fontSize: 14,
+        color: "rgba(255, 255, 255, 0.7)",
+        fontSize: 16,
     },
     selectedTextStyle: {
-        color: "#000",
-        fontSize: 14,
+        color: "#FFFFFF",
+        fontSize: 16,
     },
     premiumBadge: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#FFF9E6",
-        paddingHorizontal: 6,
+        backgroundColor: "rgba(255, 215, 0, 0.2)",
+        paddingHorizontal: 8,
         paddingVertical: 2,
-        borderRadius: 4,
-        marginLeft: 6,
+        borderRadius: 10,
+        marginLeft: 10,
     },
     premiumText: {
         fontSize: 10,
+        fontWeight: "800",
+        color: "#FFD700",
+        marginLeft: 4,
+    },
+    footer: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginTop: 50,
+        width: "100%"
+    },
+    previousButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    previousText: {
+        fontSize: 16,
         fontWeight: "600",
-        color: "#FFB800",
-        marginLeft: 2,
+        color: "#FFFFFF",
+    },
+    nextButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "#FFFFFF",
+        paddingHorizontal: 25,
+        paddingVertical: 15,
+        borderRadius: 30,
+        gap: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+        width: "100%",
+        justifyContent: "center"
+    },
+    nextText: {
+        color: "#FF3366",
+        fontSize: 16,
+        fontWeight: "700",
     },
 });

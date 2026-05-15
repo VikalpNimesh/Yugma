@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { Alert, Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
@@ -109,10 +109,25 @@ export const createUserWithEmailPassword = async (
  */
 export const signInWithGoogle = async (dispatch?: any) => {
   try {
-    // Check if Google Play Services is available
-    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    console.log('🔄 Starting Google Sign-In process...');
+    
+    // 1. Configure
+    GoogleSignin.configure({
+      webClientId: "719942063573-votd1cg12nv5hti22v6oeks4kliuagbd.apps.googleusercontent.com",
+      offlineAccess: false,
+    });
 
-    // Sign in with Google
+    // 2. Check for Play Services
+    await GoogleSignin.hasPlayServices();
+
+    // 3. Robust delay for Android to ensure activity is attached
+    if (Platform.OS === 'android') {
+      console.log('⏳ Android detected, waiting for activity...');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // 4. Sign in
+    console.log('📱 Calling GoogleSignin.signIn()...');
     const userInfo = await GoogleSignin.signIn();
 
     if (!userInfo?.data) {
@@ -149,7 +164,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
 
     console.log('🚀 Calling backend google-login with payload');
     const backendResponse = await authService.googleLogin(backendPayload);
-    
+
     if (!backendResponse.success || !backendResponse.data) {
       throw new Error(backendResponse.message || 'Backend Google Sign-In failed');
     }
@@ -165,7 +180,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
         email: backendUser.email,
         token: backendTokens.access,
       }));
-      
+
       // 2. Update authentication state in authSlice
       dispatch(setCredentials({
         user: {
@@ -182,9 +197,9 @@ export const signInWithGoogle = async (dispatch?: any) => {
 
       // 3. Persist BACKEND tokens to Keychain for session longevity
       try {
-        await Keychain.setGenericPassword('auth_tokens', JSON.stringify({ 
+        await Keychain.setGenericPassword('auth_tokens', JSON.stringify({
           access: backendTokens.access,
-          refresh: backendTokens.refresh 
+          refresh: backendTokens.refresh
         }));
         console.log('✅ Backend tokens persisted to Keychain');
       } catch (error) {
@@ -211,7 +226,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
         fullName: backendUser.fullName,
         email: backendUser.email,
       };
-      
+
       dispatch(initializeBasicInfo(userDataPrefill));
 
       // 7. Persist to AsyncStorage
@@ -272,10 +287,14 @@ export const handleLogout = async (
 
     // 3. Sign out from Google
     try {
+      if (Platform.OS === 'android') {
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
       await GoogleSignin.signOut();
       console.log('✅ Google signed out');
-    } catch (error) {
-      console.warn('Google sign-out failed:', error);
+    } catch (error: any) {
+      // If it fails with "activity is null", we can still continue with the logout sequence
+      console.warn('Google sign-out failed or activity was null:', error.message);
     }
 
     // 4. Clear Redux state

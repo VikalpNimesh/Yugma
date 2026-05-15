@@ -8,11 +8,11 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    TextInput,
 } from "react-native";
-import { TextInput, Chip } from "react-native-paper";
+import { Chip } from "react-native-paper";
 import { launchImageLibrary } from "react-native-image-picker";
 import { useNavigation } from "@react-navigation/native";
-import { RootState } from "../../redux/store";
 import Toast from 'react-native-toast-message';
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
@@ -36,20 +36,8 @@ export const AboutYouStep: React.FC = () => {
     }, [dispatch]);
 
     const interestOptions = [
-        "Travel",
-        "Music",
-        "Reading",
-        "Cooking",
-        "Movies",
-        "Sports",
-        "Art",
-        "Dancing",
-        "Yoga",
-        "Photography",
-        "Technology",
-        "Fitness",
-        "Nature",
-        "Spirituality",
+        "Travel", "Music", "Reading", "Cooking", "Movies", "Sports", "Art", 
+        "Dancing", "Yoga", "Photography", "Technology", "Fitness", "Nature", "Spirituality",
     ];
 
     const toggleInterest = (interest: string) => {
@@ -68,13 +56,8 @@ export const AboutYouStep: React.FC = () => {
 
         if (result.assets) {
             const uris = result.assets.map((a) => a.uri!) as string[];
-            // Check if adding these exceeds the limit of 6 photos
             if (photos.length + uris.length > 6) {
-                // Show toast notification
-                Toast.show({
-                    type: 'error',
-                    text1: 'Maximum 6 photos allowed',
-                });
+                Toast.show({ type: 'error', text1: 'Maximum 6 photos allowed' });
                 return;
             }
             dispatch(updateAboutYou({ photos: [...photos, ...uris] }));
@@ -83,82 +66,59 @@ export const AboutYouStep: React.FC = () => {
 
     const handleNext = () => {
         if (!bio || bio.trim().length < 10) {
-            Toast.show({
-                type: 'error',
-                text1: 'Invalid Bio',
-                text2: 'Please write at least 10 characters about yourself.',
-            });
+            Toast.show({ type: 'error', text1: 'Invalid Bio', text2: 'Please write at least 10 characters.' });
             return;
         }
-
         if (interests.length === 0) {
-            Toast.show({
-                type: 'error',
-                text1: 'Select Interests',
-                text2: 'Please select at least one interest.',
-            });
+            Toast.show({ type: 'error', text1: 'Select Interests', text2: 'Please select at least one interest.' });
             return;
         }
-
         if (photos.length < 2) {
-            Toast.show({
-                type: 'error',
-                text1: 'Upload Photos',
-                text2: 'Please upload at least 2 photos.',
-            });
+            Toast.show({ type: 'error', text1: 'Upload Photos', text2: 'Please upload at least 2 photos.' });
             return;
         }
-
         navigation.navigate("FamilyDetailsStep" as never);
     };
 
     return (
-        <View style={{ flex: 1, backgroundColor: "#FFF" }}>
+        <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <ScrollView contentContainerStyle={styles.container}>
+                <ScrollView contentContainerStyle={styles.scrollContent}>
                     {/* Header */}
                     <View style={styles.headerRow}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={20} color="#000" />
-                            <Text style={styles.backText}>Back</Text>
-                        </TouchableOpacity>
                         <Text style={styles.stepText}>Step 2 of 4</Text>
+                        <View style={styles.progressBarContainer}>
+                            <View style={[styles.progressBarFill, { width: "50%" }]} />
+                        </View>
                     </View>
 
-                    {/* Progress Bar */}
-                    <View style={styles.progressBarContainer}>
-                        <View style={[styles.progressBarFill, { width: "50%" }]} />
-                    </View>
+                    <Text style={styles.title}>About You</Text>
 
-                    {/* About You Section */}
-                    <View style={styles.card}>
-                        <Text style={styles.sectionTitle}>About You</Text>
-
+                    {/* Bio Section */}
+                    <View style={styles.section}>
                         <Text style={styles.label}>Bio</Text>
                         <TextInput
-                            mode="outlined"
-                            placeholder="Tell us about yourself, your values, and what you're looking for in a life partner..."
-                            placeholderTextColor="#999"
+                            placeholder="Tell us about yourself, your values, and what you're looking for..."
+                            placeholderTextColor="rgba(255, 255, 255, 0.7)"
                             multiline
                             numberOfLines={5}
                             value={bio}
                             onChangeText={(text) => dispatch(updateAboutYou({ bio: text }))}
                             style={styles.textArea}
-                            theme={{
-                                roundness: 10,
-                                colors: { text: "#000", placeholder: "#999" },
-                            }}
                         />
+                    </View>
 
-                        {/* Interests */}
-                        <Text style={[styles.label, { marginTop: 20 }]}>
-                            Interests & Hobbies
-                        </Text>
+                    {/* Interests Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.label}>Interests & Hobbies</Text>
                         <Text style={styles.subText}>Select interests that describe you</Text>
-
                         <View style={styles.chipContainer}>
                             {interestOptions.map((interest) => (
                                 <Chip
@@ -179,63 +139,47 @@ export const AboutYouStep: React.FC = () => {
                                 </Chip>
                             ))}
                         </View>
+                    </View>
 
-                        {/* Photos */}
-                        <Text style={[styles.label, { marginTop: 20 }]}>Photos</Text>
-                        <View style={styles.uploadBox}>
-                            {photos.length === 0 ? (
-                                <>
-                                    <Text style={styles.uploadIcon}>⬆️</Text>
-                                    <Text style={styles.uploadText}>Upload your photos</Text>
-                                    <Text style={styles.subText}>
-                                        Add at least 2 photos to get better matches
-                                    </Text>
+                    {/* Photos Section */}
+                    <View style={styles.section}>
+                        <Text style={styles.label}>Photos</Text>
+                        <Text style={styles.subText}>Add at least 2 photos to get better matches</Text>
+                        
+                        <View style={styles.photoGrid}>
+                            {photos.map((uri, index) => (
+                                <View key={index} style={styles.photoWrapper}>
+                                    <Image source={{ uri }} style={styles.photoPreview} />
                                     <TouchableOpacity
-                                        onPress={handleAddPhotos}
-                                        style={styles.addPhotoBtn}
+                                        style={styles.deleteIcon}
+                                        onPress={() => handleDeletePhoto(index)}
                                     >
-                                        <Text style={styles.addPhotoText}>+ Add Photos</Text>
-                                    </TouchableOpacity>
-                                </>
-                            ) : (
-                                <View style={styles.photoGrid}>
-                                    {photos.map((uri, index) => (
-                                        <View key={index} style={styles.photoContainer}>
-                                            <Image source={{ uri }} style={styles.photoPreview} />
-                                            <TouchableOpacity
-                                                style={styles.deleteIcon}
-                                                onPress={() => handleDeletePhoto(index)}
-                                            >
-                                                <Ionicons name="trash" size={20} color="#fff" />
-                                            </TouchableOpacity>
-                                        </View>
-                                    ))}
-                                    <TouchableOpacity
-                                        style={[styles.addPhotoBtn, { alignSelf: "center" }]}
-                                        onPress={handleAddPhotos}
-                                    >
-                                        <Text style={styles.addPhotoText}>+ Add More</Text>
+                                        <Ionicons name="close-circle" size={24} color="#FF3366" />
                                     </TouchableOpacity>
                                 </View>
+                            ))}
+                            {photos.length < 6 && (
+                                <TouchableOpacity
+                                    onPress={handleAddPhotos}
+                                    style={styles.uploadPlaceholder}
+                                >
+                                    <Ionicons name="camera-outline" size={32} color="#FFFFFF" />
+                                    <Text style={styles.uploadText}>Add Photo</Text>
+                                </TouchableOpacity>
                             )}
                         </View>
                     </View>
 
-                    {/* Footer */}
+                    {/* Footer Buttons */}
                     <View style={styles.footer}>
                         <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
-                            <Ionicons name="arrow-back" size={18} color="#000" />
-                            <Text style={styles.previousText}>Previous</Text>
+                            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+                            <Text style={styles.previousText}>Back</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={handleNext}>
-                            <LinearGradient
-                                colors={["#FF512F", "#DD2476"]}
-                                style={styles.nextButton}
-                            >
-                                <Text style={styles.nextText}>Next</Text>
-                                <Ionicons name="arrow-forward" size={18} color="#fff" />
-                            </LinearGradient>
+                        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+                            <Text style={styles.nextText}>Next Step</Text>
+                            <Ionicons name="arrow-forward" size={20} color="#FF3366" />
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -245,165 +189,162 @@ export const AboutYouStep: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-    container: { padding: 20 },
+    container: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingHorizontal: 30,
+        paddingTop: 50,
+        paddingBottom: 30,
+    },
     headerRow: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 12,
-    },
-    backButton: {
-        flexDirection: "row",
         alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: 30,
     },
-    backText: {
-        fontSize: 16,
-        fontWeight: "500",
-        marginLeft: 4,
-        color: "#000",
+    stepText: {
+        color: "rgba(255, 255, 255, 0.8)",
+        fontSize: 14,
+        fontWeight: "600",
     },
-    stepText: { color: "#555", fontSize: 14 },
     progressBarContainer: {
         height: 6,
-        backgroundColor: "#eee",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
         borderRadius: 3,
+        width: 100,
         overflow: "hidden",
-        marginBottom: 20,
     },
-    progressBarFill: { height: "100%", backgroundColor: "#E94057" },
-    card: {
-        backgroundColor: "#fff",
-        padding: 16,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: "#eee",
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
-        elevation: 2,
+    progressBarFill: {
+        height: "100%",
+        backgroundColor: "#FFFFFF",
     },
-    sectionTitle: {
-        fontSize: 18,
-        fontWeight: "700",
-        marginBottom: 12,
-        color: "#222",
+    title: {
+        fontSize: 32,
+        fontWeight: "800",
+        color: "#FFFFFF",
+        marginBottom: 30,
+    },
+    section: {
+        marginBottom: 30,
     },
     label: {
-        fontWeight: "600",
-        color: "#333",
-        marginBottom: 6,
-    },
-    subText: {
-        color: "#777",
-        fontSize: 12,
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#FFFFFF",
         marginBottom: 8,
     },
+    subText: {
+        color: "rgba(255, 255, 255, 0.7)",
+        fontSize: 14,
+        marginBottom: 15,
+    },
     textArea: {
-        backgroundColor: "#F9F9F9",
-        borderRadius: 10,
-        paddingTop: 10, // Add padding for multiline input
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 20,
+        padding: 20,
+        color: "#FFFFFF",
+        fontSize: 16,
+        minHeight: 120,
+        textAlignVertical: 'top',
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.3)",
     },
     chipContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 8,
-        marginTop: 8,
+        gap: 10,
     },
     chip: {
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        borderRadius: 20,
         borderWidth: 1,
-        borderColor: "#ddd",
-        backgroundColor: "#fff",
+        borderColor: "rgba(255, 255, 255, 0.2)",
     },
     selectedChip: {
-        backgroundColor: "#E94057",
+        backgroundColor: "#FFFFFF",
     },
     chipText: {
-        color: "#000",
+        color: "#FFFFFF",
+        fontSize: 13,
     },
     selectedChipText: {
-        color: "#fff",
+        color: "#FF3366",
+        fontWeight: "700",
     },
-    uploadBox: {
-        borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 12,
-        padding: 16,
-        alignItems: "center",
-        borderStyle: "dashed",
-        marginTop: 8,
-    },
-    uploadIcon: {
-        fontSize: 32,
-        color: "#999",
-        marginBottom: 8,
-    },
-    uploadText: {
-        fontWeight: "600",
-        color: "#333",
-        marginBottom: 4,
-    },
-    addPhotoBtn: {
-        marginTop: 10,
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderWidth: 1,
-        borderColor: "#ddd",
-        borderRadius: 10,
-    },
-    addPhotoText: { color: "#E94057", fontWeight: "600" },
     photoGrid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 10,
-        justifyContent: "center",
+        gap: 15,
+    },
+    photoWrapper: {
+        width: (Platform.OS === 'ios' ? 95 : 90),
+        height: (Platform.OS === 'ios' ? 95 : 90),
+        borderRadius: 15,
+        position: 'relative',
     },
     photoPreview: {
-        width: 90,
-        height: 90,
-        borderRadius: 10,
-    },
-    photoContainer: {
-        position: 'relative',
+        width: '100%',
+        height: '100%',
+        borderRadius: 15,
     },
     deleteIcon: {
         position: 'absolute',
-        top: 4,
-        right: 4,
-        backgroundColor: 'rgba(0,0,0,0.6)',
+        top: -8,
+        right: -8,
+        backgroundColor: '#FFFFFF',
         borderRadius: 12,
-        padding: 2,
+    },
+    uploadPlaceholder: {
+        width: (Platform.OS === 'ios' ? 95 : 90),
+        height: (Platform.OS === 'ios' ? 95 : 90),
+        borderRadius: 15,
+        backgroundColor: "rgba(255, 255, 255, 0.15)",
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.3)",
+        borderStyle: 'dashed',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    uploadText: {
+        color: "#FFFFFF",
+        fontSize: 11,
+        fontWeight: "600",
+        marginTop: 5,
     },
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 24,
+        alignItems: "center",
+        marginTop: 20,
     },
     previousButton: {
         flexDirection: "row",
         alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#E6E6E6",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        backgroundColor: "#fff",
+        gap: 8,
     },
     previousText: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: "#000",
-        marginLeft: 6,
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#FFFFFF",
     },
     nextButton: {
         flexDirection: "row",
         alignItems: "center",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        backgroundColor: "#FFFFFF",
+        paddingHorizontal: 25,
+        paddingVertical: 15,
+        borderRadius: 30,
+        gap: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
     },
     nextText: {
-        color: "#fff",
-        fontSize: 15,
-        fontWeight: "500",
-        marginRight: 6,
+        color: "#FF3366",
+        fontSize: 16,
+        fontWeight: "700",
     },
 });

@@ -80,13 +80,14 @@ const SplashScreen = () => {
     }, [navigation, currentScreen, isAuthenticated, isAuthLoading, profile]);
 
     return (
-        <LinearGradient
-            colors={["#FF5F6D", "#FF3366"]}
-            style={styles.container}
-        >
+        <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <View style={styles.logoWrapper}>
                 <Image
-                    source={require("../assets/yugmaNew.png")}
+                    source={require("../assets/new_yugma.png")}
                     style={styles.logo}
                     resizeMode="contain"
                     tintColor="#FFFFFF"
@@ -100,7 +101,7 @@ const SplashScreen = () => {
                     </View>
                 </View>
             </View>
-        </LinearGradient>
+        </View>
     );
 };
 

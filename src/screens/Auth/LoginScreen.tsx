@@ -9,27 +9,31 @@ import {
     KeyboardAvoidingView,
     Platform,
     ScrollView,
+    Dimensions,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signInWithGoogle } from '../../api/firebase/auth';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
-import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
+import { initializeBasicInfo } from '../../redux/slices/profileFormSlice';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
+import AntDesign from "react-native-vector-icons/AntDesign";
+
+const { width } = Dimensions.get('window');
 
 export default function LoginScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
     const dispatch = useAppDispatch();
-    const { isLoading, error: authError, isAuthenticated } = useAppSelector((state) => state.auth);
+    const { isLoading, error: authError } = useAppSelector((state) => state.auth);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [localError, setLocalError] = useState('');
     const [googleLoading, setGoogleLoading] = useState(false);
 
-    // Clear error when component mounts or when authError changes
     useEffect(() => {
         if (authError) {
             setLocalError(authError);
@@ -37,50 +41,32 @@ export default function LoginScreen() {
         }
     }, [authError, dispatch]);
 
-    // Navigate to home screen when authenticated
-    // Navigation happens automatically in AppNavigator via isAuthenticated check
-
     const handleLogin = async () => {
         if (isLoading) return;
-
-        // Basic validation
         if (!email.trim() || !password.trim()) {
             setLocalError('Please enter both email and password');
             return;
         }
-
         try {
             const result = await dispatch(loginUser({ emailOrPhone: email.trim(), password })).unwrap();
-
-            // Initialize basic info with user data
             if (result.user) {
                 const userData = {
                     fullName: result.user.fullName || '',
                     email: result.user.email || email.trim(),
                 };
-
                 dispatch(initializeBasicInfo(userData));
-
-                // Persist to AsyncStorage
                 await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userData));
             }
-
-            console.log('✅ Login successful');
         } catch (err: any) {
-            console.log('err: ', err);
             setLocalError(err || 'Unable to login. Please try again.');
         }
     };
 
     const handleGoogleLogin = async () => {
         if (googleLoading) return;
-
         setGoogleLoading(true);
-
         try {
-            const googleResponse = await signInWithGoogle(dispatch);
-            console.log('googleResponse: ', googleResponse);
-            // Navigation will happen automatically via Redux state change
+            await signInWithGoogle(dispatch);
         } catch (err: any) {
             setLocalError(err.message || 'Google Sign-In failed. Please try again.');
         } finally {
@@ -88,12 +74,12 @@ export default function LoginScreen() {
         }
     };
 
-    const handleSignup = () => {
-        navigation.navigate('SignupScreen');
-    };
-
     return (
         <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -103,8 +89,66 @@ export default function LoginScreen() {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={styles.inner}>
-                        <Text style={styles.title}>Welcome back</Text>
+                        <Text style={styles.title}>Welcome Back</Text>
                         <Text style={styles.subtitle}>Login to your account</Text>
+
+                        {/* Inputs Container */}
+                        <View style={styles.inputSection}>
+                            <TextInput
+                                style={[styles.input, (localError || authError) && styles.inputError]}
+                                placeholder="Email ID"
+                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                value={email}
+                                onChangeText={(text) => {
+                                    setEmail(text);
+                                    setLocalError('');
+                                    if (authError) dispatch(clearError());
+                                }}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                autoCorrect={false}
+                                editable={!isLoading && !googleLoading}
+                            />
+
+                            <TextInput
+                                style={[styles.input, (localError || authError) && styles.inputError]}
+                                placeholder="Password"
+                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                value={password}
+                                onChangeText={(text) => {
+                                    setPassword(text);
+                                    setLocalError('');
+                                    if (authError) dispatch(clearError());
+                                }}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                editable={!isLoading && !googleLoading}
+                            />
+                        </View>
+
+                        {/* Error Message */}
+                        { (localError || authError) ? (
+                            <Text style={styles.errorText}>{localError || authError}</Text>
+                        ) : null}
+
+                        {/* Login Button */}
+                        <TouchableOpacity
+                            style={[styles.loginBtn, (isLoading || !email || !password) && styles.buttonDisabled]}
+                            onPress={handleLogin}
+                            disabled={isLoading || googleLoading || !email || !password}
+                        >
+                            {isLoading ? (
+                                <ActivityIndicator color="#FF3366" />
+                            ) : (
+                                <Text style={styles.loginText}>Login</Text>
+                            )}
+                        </TouchableOpacity>
+
+                        <View style={styles.divider}>
+                            <View style={styles.dividerLine} />
+                            <Text style={styles.orText}>OR</Text>
+                            <View style={styles.dividerLine} />
+                        </View>
 
                         {/* Google Button */}
                         <TouchableOpacity
@@ -115,71 +159,17 @@ export default function LoginScreen() {
                             {googleLoading ? (
                                 <ActivityIndicator color="#000" />
                             ) : (
-                                <Text style={styles.googleText}>Continue with Google</Text>
-                            )}
-                        </TouchableOpacity>
-
-                        <View style={styles.divider}>
-                            <View style={styles.dividerLine} />
-                            <Text style={styles.orText}>OR</Text>
-                            <View style={styles.dividerLine} />
-                        </View>
-
-                        {/* Email Input */}
-                        <TextInput
-                            style={[styles.input, (localError || authError) && styles.inputError]}
-                            placeholder="Email ID"
-                            placeholderTextColor="#999"
-                            value={email}
-                            onChangeText={(text) => {
-                                setEmail(text);
-                                setLocalError('');
-                                if (authError) dispatch(clearError());
-                            }}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            autoCorrect={false}
-                            editable={!isLoading && !googleLoading}
-                        />
-
-                        {/* Password Input */}
-                        <TextInput
-                            style={[styles.input, (localError || authError) && styles.inputError]}
-                            placeholder="Password"
-                            placeholderTextColor="#999"
-                            value={password}
-                            onChangeText={(text) => {
-                                setPassword(text);
-                                setLocalError('');
-                                if (authError) dispatch(clearError());
-                            }}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            editable={!isLoading && !googleLoading}
-                        />
-
-                        {/* Error Message */}
-                        <View style={[styles.errorContainer, !(localError || authError) && { opacity: 0 }]}>
-                            <Text style={styles.errorText}>{localError || authError || ' '}</Text>
-                        </View>
-
-                        {/* Login Button */}
-                        <TouchableOpacity
-                            style={[styles.loginBtn, (isLoading || !email || !password) && styles.buttonDisabled]}
-                            onPress={handleLogin}
-                            disabled={isLoading || googleLoading || !email || !password}
-                        >
-                            {isLoading ? (
-                                <ActivityIndicator color="#fff" size={"small"} />
-                            ) : (
-                                <Text style={styles.loginText}>Login</Text>
+                                <View style={styles.row}>
+                                    <AntDesign name="google" size={20} color="#EA4335" />
+                                    <Text style={styles.googleText}>Continue with Google</Text>
+                                </View>
                             )}
                         </TouchableOpacity>
 
                         {/* Footer */}
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>Don't have an account?</Text>
-                            <TouchableOpacity onPress={handleSignup} disabled={isLoading || googleLoading}>
+                            <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')} disabled={isLoading || googleLoading}>
                                 <Text style={styles.signupText}> Sign Up Free</Text>
                             </TouchableOpacity>
                         </View>
@@ -193,7 +183,6 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
     },
     keyboardView: {
         flex: 1,
@@ -203,105 +192,119 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     inner: {
-        paddingHorizontal: 24,
+        paddingHorizontal: 30,
         paddingVertical: 20,
     },
     title: {
-        fontSize: 26,
-        fontWeight: '700',
+        fontSize: 36,
+        fontWeight: '800',
         textAlign: 'center',
-        color: '#111',
-        marginBottom: 4,
+        color: '#FFFFFF',
+        marginBottom: 8,
     },
     subtitle: {
         textAlign: 'center',
-        color: '#666',
-        marginBottom: 30,
-        fontSize: 14,
+        color: 'rgba(255, 255, 255, 0.9)',
+        marginBottom: 40,
+        fontSize: 16,
     },
-    googleBtn: {
+    inputSection: {
+        width: '100%',
+        gap: 15,
+        marginBottom: 10,
+    },
+    input: {
+        height: 56,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderRadius: 28,
+        paddingHorizontal: 25,
+        color: '#FFFFFF',
+        fontSize: 16,
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        paddingVertical: 14,
-        alignItems: 'center',
-        marginBottom: 16,
-        backgroundColor: '#fff',
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
-    googleText: {
-        color: '#000',
-        fontWeight: '500',
-        fontSize: 15,
+    inputError: {
+        borderColor: '#FFD700',
+    },
+    errorText: {
+        color: '#FFD700',
+        fontSize: 13,
+        textAlign: 'center',
+        marginTop: 5,
+        marginBottom: 15,
+    },
+    loginBtn: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 28,
+        height: 56,
+        marginTop: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    loginText: {
+        color: '#FF3366',
+        fontSize: 18,
+        fontWeight: '700',
+    },
+    buttonDisabled: {
+        opacity: 0.7,
     },
     divider: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 20,
+        marginVertical: 30,
     },
     dividerLine: {
         flex: 1,
         height: 1,
-        backgroundColor: '#ddd',
+        backgroundColor: 'rgba(255, 255, 255, 0.3)',
     },
     orText: {
-        marginHorizontal: 12,
-        color: '#999',
-        fontSize: 12,
+        marginHorizontal: 15,
+        color: '#FFFFFF',
+        fontSize: 14,
+        fontWeight: '600',
     },
-    input: {
-        borderWidth: 1,
-        borderColor: '#ddd',
-        borderRadius: 8,
-        paddingHorizontal: 14,
-        paddingVertical: 12,
-        marginVertical: 8,
-        color: '#000',
-        fontSize: 15,
-        backgroundColor: '#fff',
-    },
-    inputError: {
-        borderColor: '#ff3b3b',
-    },
-    errorContainer: {
-        marginTop: 8,
-        marginBottom: 4,
-        minHeight: 18,
-        justifyContent: 'center',
-    },
-    errorText: {
-        color: '#ff3b3b',
-        fontSize: 13,
-        textAlign: 'center',
-    },
-    loginBtn: {
-        backgroundColor: '#00B2FF',
-        borderRadius: 8,
-        paddingVertical: 14,
-        marginTop: 10,
+    googleBtn: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 28,
+        height: 56,
         alignItems: 'center',
         justifyContent: 'center',
-        minHeight: 50,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
     },
-    buttonDisabled: {
-        opacity: 0.6,
+    row: {
+        flexDirection: 'row',
+        alignItems: 'center',
     },
-    loginText: {
-        color: '#fff',
-        fontSize: 16,
+    googleText: {
+        color: '#1a1a1a',
         fontWeight: '600',
+        fontSize: 16,
+        marginLeft: 12,
     },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
-        marginTop: 24,
+        marginTop: 30,
     },
     footerText: {
-        color: '#666',
+        color: 'rgba(255, 255, 255, 0.8)',
         fontSize: 14,
     },
     signupText: {
-        color: '#00B2FF',
-        fontWeight: '600',
+        color: '#FFFFFF',
+        fontWeight: '700',
         fontSize: 14,
+        textDecorationLine: 'underline',
     },
 });

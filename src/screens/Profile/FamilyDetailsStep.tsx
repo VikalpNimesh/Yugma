@@ -8,14 +8,16 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    Dimensions,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
-import { RootState } from "../../redux/store";
 import { Dropdown } from "react-native-element-dropdown";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateFamilyDetails, setCurrentScreen } from "../../redux/slices/profileFormSlice";
+
+const { width } = Dimensions.get("window");
 
 const FamilyDetailsStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
@@ -31,7 +33,6 @@ const FamilyDetailsStep = ({ navigation }: any) => {
 
     const handleNext = () => {
         const { fatherOccupation, motherOccupation, siblings, familyType } = form;
-
         if (!fatherOccupation || !motherOccupation || !siblings || !familyType) {
             Toast.show({
                 type: 'error',
@@ -40,123 +41,87 @@ const FamilyDetailsStep = ({ navigation }: any) => {
             });
             return;
         }
-
-        console.log("📝 Family Form Data:", form);
         navigation.navigate("PreferencesStep");
     };
 
     return (
         <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     {/* Header */}
-                    <View style={styles.header}>
-                        <TouchableOpacity
-                            style={styles.backButton}
-                            onPress={() => navigation.goBack()}
-                        >
-                            <Ionicons name="arrow-back" size={20} color="#000" />
-                            <Text style={styles.backText}>Back</Text>
-                        </TouchableOpacity>
+                    <View style={styles.headerRow}>
                         <Text style={styles.stepText}>Step 3 of 4</Text>
-                    </View>
-
-                    {/* Progress Bar */}
-                    <View style={styles.progressBarContainer}>
-                        <View style={styles.progressFill} />
-                    </View>
-
-                    {/* Card Section */}
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Family Details</Text>
-
-                        <View style={styles.row}>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Father's Occupation</Text>
-                                <TextInput
-                                    placeholder="Father's profession"
-                                    placeholderTextColor="#A0A0A0"
-                                    style={styles.input}
-                                    value={form.fatherOccupation}
-                                    onChangeText={(text) => handleChange("fatherOccupation", text)}
-                                />
-                            </View>
-
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Mother's Occupation</Text>
-                                <TextInput
-                                    placeholder="Mother's profession"
-                                    placeholderTextColor="#A0A0A0"
-                                    style={styles.input}
-                                    value={form.motherOccupation}
-                                    onChangeText={(text) => handleChange("motherOccupation", text)}
-                                />
-                            </View>
+                        <View style={styles.progressBarContainer}>
+                            <View style={[styles.progressBarFill, { width: "75%" }]} />
                         </View>
-
-                        <View style={styles.row}>
-                            <View style={styles.inputContainer}>
-                                <Text style={styles.label}>Siblings</Text>
-                                <TextInput
-                                    placeholder="e.g., 1 brother, 1 sister"
-                                    placeholderTextColor="#A0A0A0"
-                                    style={styles.input}
-                                    value={form.siblings}
-                                    onChangeText={(text) => handleChange("siblings", text)}
-                                />
-                            </View>
-
-                            <View style={[styles.inputContainer]}>
-                                <Text style={styles.label}>Family Type</Text>
-                                <Dropdown
-                                    data={[
-                                        { label: "Joint Family", value: "Joint Family" },
-                                        { label: "Nuclear Family", value: "Nuclear Family" },
-                                        { label: "Extended Family", value: "Extended Family" },
-                                    ]}
-                                    labelField="label"
-                                    valueField="value"
-                                    placeholder="Select family type"
-                                    value={form.familyType}
-                                    onChange={(item) => handleChange("familyType", item.value)}
-                                    style={[
-                                        styles.dropdown,
-                                        form.familyType ? styles.dropdownFilled : {},
-                                    ]}
-                                    placeholderStyle={styles.placeholderStyle}
-                                    selectedTextStyle={styles.selectedTextStyle}
-                                    itemTextStyle={{ color: "#333" }}
-                                    activeColor="#f4f4f4"
-                                    renderRightIcon={() => null}
-                                />
-                            </View>
-                        </View>
-
                     </View>
 
-                    {/* Buttons */}
+                    <Text style={styles.title}>Family Details</Text>
+
+                    <View style={styles.inputSection}>
+                        <InputField
+                            label="Father's Occupation"
+                            placeholder="Enter father's profession"
+                            value={form.fatherOccupation}
+                            onChangeText={(text) => handleChange("fatherOccupation", text)}
+                        />
+
+                        <InputField
+                            label="Mother's Occupation"
+                            placeholder="Enter mother's profession"
+                            value={form.motherOccupation}
+                            onChangeText={(text) => handleChange("motherOccupation", text)}
+                        />
+
+                        <InputField
+                            label="Siblings"
+                            placeholder="e.g., 1 brother, 1 sister"
+                            value={form.siblings}
+                            onChangeText={(text) => handleChange("siblings", text)}
+                        />
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Family Type</Text>
+                            <Dropdown
+                                data={[
+                                    { label: "Joint Family", value: "Joint Family" },
+                                    { label: "Nuclear Family", value: "Nuclear Family" },
+                                    { label: "Extended Family", value: "Extended Family" },
+                                ]}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Select family type"
+                                value={form.familyType}
+                                onChange={(item) => handleChange("familyType", item.value)}
+                                style={styles.dropdown}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                itemTextStyle={{ color: "#333" }}
+                                activeColor="#f4f4f4"
+                                renderRightIcon={() => (
+                                    <Ionicons name="chevron-down" size={20} color="rgba(255, 255, 255, 0.7)" />
+                                )}
+                            />
+                        </View>
+                    </View>
+
+                    {/* Footer Buttons */}
                     <View style={styles.footer}>
-                        <TouchableOpacity
-                            style={styles.previousButton}
-                            onPress={() => navigation.goBack()}
-                        >
-                            <Ionicons name="arrow-back" size={18} color="#000" />
-                            <Text style={styles.previousText}>Previous</Text>
+                        <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
+                            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+                            <Text style={styles.previousText}>Back</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity
-                            onPress={handleNext}
-                        >
-                            <LinearGradient
-                                colors={["#FF512F", "#DD2476"]}
-                                style={styles.nextButton}
-                            >
-                                <Text style={styles.nextText}>Next</Text>
-                                <Ionicons name="arrow-forward" size={18} color="#fff" />
-                            </LinearGradient>
+                        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
+                            <Text style={styles.nextText}>Next Step</Text>
+                            <Ionicons name="arrow-forward" size={20} color="#FF3366" />
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -165,136 +130,137 @@ const FamilyDetailsStep = ({ navigation }: any) => {
     );
 };
 
-export default FamilyDetailsStep;
+type InputFieldProps = {
+    label: string;
+    placeholder: string;
+    value: string;
+    onChangeText: (text: string) => void;
+};
+
+const InputField: React.FC<InputFieldProps> = ({ label, placeholder, value, onChangeText }) => (
+    <View style={styles.inputContainer}>
+        <Text style={styles.label}>{label}</Text>
+        <TextInput
+            style={styles.input}
+            placeholder={placeholder}
+            placeholderTextColor="rgba(255, 255, 255, 0.7)"
+            value={value}
+            onChangeText={onChangeText}
+        />
+    </View>
+);
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FFF9F6",
-        paddingHorizontal: 16,
-        paddingTop: 16,
     },
-    header: {
+    scrollContent: {
+        paddingHorizontal: 30,
+        paddingTop: 50,
+        paddingBottom: 30,
+    },
+    headerRow: {
         flexDirection: "row",
+        alignItems: "center",
         justifyContent: "space-between",
-        alignItems: "center",
-    },
-    backButton: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    backText: {
-        fontSize: 16,
-        fontWeight: "500",
-        marginLeft: 4,
-        color: "#000",
+        marginBottom: 30,
     },
     stepText: {
+        color: "rgba(255, 255, 255, 0.8)",
         fontSize: 14,
-        color: "#6B6B6B",
+        fontWeight: "600",
     },
     progressBarContainer: {
         height: 6,
-        backgroundColor: "#E6E6E6",
-        borderRadius: 4,
-        marginVertical: 12,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 3,
+        width: 100,
         overflow: "hidden",
     },
-    progressFill: {
-        width: "75%",
+    progressBarFill: {
         height: "100%",
-        backgroundColor: "#E64A8B",
+        backgroundColor: "#FFFFFF",
     },
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 16,
-        marginTop: 8,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 1,
+    title: {
+        fontSize: 32,
+        fontWeight: "800",
+        color: "#FFFFFF",
+        marginBottom: 30,
     },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 16,
-    },
-    row: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        marginBottom: 12,
+    inputSection: {
+        gap: 20,
     },
     inputContainer: {
-        width: "48%",
+        width: "100%",
     },
     label: {
         fontSize: 14,
         fontWeight: "600",
-        color: "#000",
-        marginBottom: 6,
+        color: "rgba(255, 255, 255, 0.9)",
+        marginBottom: 8,
+        marginLeft: 5,
     },
     input: {
-        backgroundColor: "#F0F0F0",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        height: 42,
-        fontSize: 14,
-        color: "#000",
+        height: 56,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 28,
+        paddingHorizontal: 25,
+        color: "#FFFFFF",
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.3)",
     },
     dropdown: {
-        backgroundColor: "#F0F0F0",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        height: 42,
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
+        height: 56,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 28,
+        paddingHorizontal: 25,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.3)",
     },
     placeholderStyle: {
-        color: "#A0A0A0",
-        fontSize: 14,
+        color: "rgba(255, 255, 255, 0.7)",
+        fontSize: 16,
     },
     selectedTextStyle: {
-        color: "#000",
-        fontSize: 14,
-    },
-    dropdownFilled: {
-        backgroundColor: "#EAEAEA",
+        color: "#FFFFFF",
+        fontSize: 16,
     },
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 24,
+        alignItems: "center",
+        marginTop: 50,
     },
     previousButton: {
         flexDirection: "row",
         alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#E6E6E6",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        backgroundColor: "#fff",
+        gap: 8,
     },
     previousText: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: "#000",
-        marginLeft: 6,
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#FFFFFF",
     },
     nextButton: {
         flexDirection: "row",
         alignItems: "center",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        backgroundColor: "#FFFFFF",
+        paddingHorizontal: 25,
+        paddingVertical: 15,
+        borderRadius: 30,
+        gap: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
     },
     nextText: {
-        color: "#fff",
-        fontSize: 15,
-        fontWeight: "500",
-        marginRight: 6,
+        color: "#FF3366",
+        fontSize: 16,
+        fontWeight: "700",
     },
 });
+
+export default FamilyDetailsStep;

@@ -56,11 +56,11 @@ const AppNavigator = () => {
             <Stack.Screen name="Splash" component={SplashScreen} />
             <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="MultiStepForm" component={MultiStepForm} options={{ headerShown: false }} />
-            <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ header: () => <Header />, headerShown: true }} />
-            <Stack.Screen name="PreferencesStep" component={PreferencesStep} options={{ header: () => <Header />, headerShown: true }} />
+            <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ headerShown: false }} />
+            <Stack.Screen name="PreferencesStep" component={PreferencesStep} options={{ headerShown: false }} />
             <Stack.Screen name="DiscoverScreen" component={DiscoverScreen} options={{ header: () => <Header />, headerShown: true }} />
-            <Stack.Screen name="BasicInfo" component={BasicInfoScreen} options={{ header: () => <Header />, headerShown: true }} />
-            <Stack.Screen name="AboutYouStep" component={AboutYouStep} options={{ header: () => <Header />, headerShown: true }} />
+            <Stack.Screen name="BasicInfo" component={BasicInfoScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="AboutYouStep" component={AboutYouStep} options={{ headerShown: false }} />
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ header: () => <Header />, headerShown: true }} />

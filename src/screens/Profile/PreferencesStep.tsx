@@ -8,6 +8,7 @@ import {
     ScrollView,
     KeyboardAvoidingView,
     Platform,
+    Dimensions,
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
@@ -15,20 +16,21 @@ import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updatePreferences, setCurrentScreen, completeProfile } from "../../redux/slices/profileFormSlice";
 import { useNavigation } from "@react-navigation/native";
-import { RootState } from "../../redux/store";
+
+const { width } = Dimensions.get("window");
 
 const PreferencesStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.preferences);
     const { updateStatus } = useAppSelector(state => state.profileForm);
     const nav = useNavigation();
+
     React.useEffect(() => {
         dispatch(setCurrentScreen('PreferencesStep'));
     }, [dispatch]);
-    // Navigate to next screen after successful profile update
+
     React.useEffect(() => {
         if (updateStatus === 'succeeded') {
-            // navigate to bottom tabs or home screen
             nav.navigate('BottomTabs' as never);
         }
     }, [updateStatus, nav]);
@@ -39,7 +41,6 @@ const PreferencesStep = ({ navigation }: any) => {
 
     const handleComplete = () => {
         const { preferredAgeMin, preferredAgeMax, preferredLocations, preferredEducation } = form;
-
         if (!preferredAgeMin || !preferredAgeMax || !preferredLocations || !preferredEducation) {
             Toast.show({
                 type: 'error',
@@ -51,94 +52,77 @@ const PreferencesStep = ({ navigation }: any) => {
 
         const minAge = parseInt(preferredAgeMin, 10);
         const maxAge = parseInt(preferredAgeMax, 10);
-
         if (isNaN(minAge) || isNaN(maxAge)) {
-            Toast.show({
-                type: 'error',
-                text1: 'Invalid Age',
-                text2: 'Please enter valid numbers for age range.',
-            });
+            Toast.show({ type: 'error', text1: 'Invalid Age', text2: 'Please enter valid numbers.' });
             return;
         }
-
         if (minAge >= maxAge) {
-            Toast.show({
-                type: 'error',
-                text1: 'Invalid Age Range',
-                text2: 'Minimum age must be less than maximum age.',
-            });
+            Toast.show({ type: 'error', text1: 'Invalid Age Range', text2: 'Min age must be less than max age.' });
             return;
         }
 
         dispatch(completeProfile());
-        dispatch(setCurrentScreen('BottomTabs'));
-        navigation.navigate('BottomTabs' as never);
     };
 
     return (
         <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <KeyboardAvoidingView
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <ScrollView showsVerticalScrollIndicator={false}>
+                <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
                     {/* Header */}
-                    <View style={styles.header}>
-                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                            <Ionicons name="arrow-back" size={20} color="#000" />
-                            <Text style={styles.backText}>Back</Text>
-                        </TouchableOpacity>
+                    <View style={styles.headerRow}>
                         <Text style={styles.stepText}>Step 4 of 4</Text>
+                        <View style={styles.progressBarContainer}>
+                            <View style={[styles.progressBarFill, { width: "100%" }]} />
+                        </View>
                     </View>
 
-                    {/* Progress Bar */}
-                    <View style={styles.progressBarContainer}>
-                        <View style={styles.progressFill} />
-                    </View>
+                    <Text style={styles.title}>Your Preferences</Text>
 
-                    {/* Card */}
-                    <View style={styles.card}>
-                        <Text style={styles.cardTitle}>Your Preferences</Text>
-
+                    <View style={styles.inputSection}>
                         {/* Age Range */}
-                        <Text style={styles.label}>Preferred Age Range</Text>
-                        <View style={styles.ageRow}>
-                            <TextInput
-                                placeholder="25"
-                                placeholderTextColor="#A0A0A0"
-                                style={[styles.input, styles.ageInput]}
-                                keyboardType="numeric"
-                                value={form.preferredAgeMin}
-                                onChangeText={(text) => handleChange("preferredAgeMin", text)}
-                            />
-                            <Text style={styles.toText}>to</Text>
-                            <TextInput
-                                placeholder="35"
-                                placeholderTextColor="#A0A0A0"
-                                style={[styles.input, styles.ageInput]}
-                                keyboardType="numeric"
-                                value={form.preferredAgeMax}
-                                onChangeText={(text) => handleChange("preferredAgeMax", text)}
-                            />
-                            <Text style={styles.yearsText}>years</Text>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Preferred Age Range</Text>
+                            <View style={styles.ageRow}>
+                                <TextInput
+                                    placeholder="25"
+                                    placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                    style={[styles.input, styles.ageInput]}
+                                    keyboardType="numeric"
+                                    value={form.preferredAgeMin}
+                                    onChangeText={(text) => handleChange("preferredAgeMin", text)}
+                                />
+                                <Text style={styles.toText}>to</Text>
+                                <TextInput
+                                    placeholder="35"
+                                    placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                    style={[styles.input, styles.ageInput]}
+                                    keyboardType="numeric"
+                                    value={form.preferredAgeMax}
+                                    onChangeText={(text) => handleChange("preferredAgeMax", text)}
+                                />
+                                <Text style={styles.yearsText}>years</Text>
+                            </View>
                         </View>
 
                         {/* Preferred Locations */}
-                        <Text style={styles.label}>Preferred Locations</Text>
-                        <TextInput
+                        <InputField
+                            label="Preferred Locations"
                             placeholder="e.g., Mumbai, Delhi, Bangalore"
-                            placeholderTextColor="#A0A0A0"
-                            style={styles.input}
                             value={form.preferredLocations}
                             onChangeText={(text) => handleChange("preferredLocations", text)}
                         />
 
                         {/* Preferred Education */}
-                        <Text style={styles.label}>Preferred Education</Text>
-                        <TextInput
+                        <InputField
+                            label="Preferred Education"
                             placeholder="e.g., Bachelor's, Master's, PhD"
-                            placeholderTextColor="#A0A0A0"
-                            style={styles.input}
                             value={form.preferredEducation}
                             onChangeText={(text) => handleChange("preferredEducation", text)}
                         />
@@ -147,18 +131,13 @@ const PreferencesStep = ({ navigation }: any) => {
                     {/* Footer Buttons */}
                     <View style={styles.footer}>
                         <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
-                            <Ionicons name="arrow-back" size={18} color="#000" />
-                            <Text style={styles.previousText}>Previous</Text>
+                            <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
+                            <Text style={styles.previousText}>Back</Text>
                         </TouchableOpacity>
 
-                        <TouchableOpacity onPress={handleComplete}>
-                            <LinearGradient
-                                colors={["#FF512F", "#DD2476"]}
-                                style={styles.nextButton}
-                            >
-                                <Text style={styles.nextText}>Complete Profile</Text>
-                                <Ionicons name="arrow-forward" size={18} color="#fff" />
-                            </LinearGradient>
+                        <TouchableOpacity style={styles.nextButton} onPress={handleComplete}>
+                            <Text style={styles.nextText}>Complete Profile</Text>
+                            <Ionicons name="checkmark-circle" size={22} color="#FF3366" />
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
@@ -167,128 +146,140 @@ const PreferencesStep = ({ navigation }: any) => {
     );
 };
 
-export default PreferencesStep;
+type InputFieldProps = {
+    label: string;
+    placeholder: string;
+    value: string;
+    onChangeText: (text: string) => void;
+};
+
+const InputField: React.FC<InputFieldProps> = ({ label, placeholder, value, onChangeText }) => (
+    <View style={styles.inputContainer}>
+        <Text style={styles.label}>{label}</Text>
+        <TextInput
+            style={styles.input}
+            placeholder={placeholder}
+            placeholderTextColor="rgba(255, 255, 255, 0.7)"
+            value={value}
+            onChangeText={onChangeText}
+        />
+    </View>
+);
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#FFF9F6",
-        paddingHorizontal: 16,
-        paddingTop: 16,
     },
-    header: {
+    scrollContent: {
+        paddingHorizontal: 30,
+        paddingTop: 50,
+        paddingBottom: 30,
+    },
+    headerRow: {
         flexDirection: "row",
+        alignItems: "center",
         justifyContent: "space-between",
-        alignItems: "center",
-    },
-    backButton: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    backText: {
-        fontSize: 16,
-        fontWeight: "500",
-        marginLeft: 4,
-        color: "#000",
+        marginBottom: 30,
     },
     stepText: {
+        color: "rgba(255, 255, 255, 0.8)",
         fontSize: 14,
-        color: "#6B6B6B",
+        fontWeight: "600",
     },
     progressBarContainer: {
         height: 6,
-        backgroundColor: "#E6E6E6",
-        borderRadius: 4,
-        marginVertical: 12,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 3,
+        width: 100,
         overflow: "hidden",
     },
-    progressFill: {
-        width: "100%",
+    progressBarFill: {
         height: "100%",
-        backgroundColor: "#E64A8B",
+        backgroundColor: "#FFFFFF",
     },
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 12,
-        padding: 16,
-        marginTop: 8,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-        elevation: 1,
+    title: {
+        fontSize: 32,
+        fontWeight: "800",
+        color: "#FFFFFF",
+        marginBottom: 30,
     },
-    cardTitle: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginBottom: 16,
+    inputSection: {
+        gap: 25,
+    },
+    inputContainer: {
+        width: "100%",
     },
     label: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#000",
-        marginTop: 10,
-        marginBottom: 6,
+        fontSize: 16,
+        fontWeight: "700",
+        color: "rgba(255, 255, 255, 0.9)",
+        marginBottom: 10,
+        marginLeft: 5,
+    },
+    input: {
+        height: 56,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        borderRadius: 28,
+        paddingHorizontal: 25,
+        color: "#FFFFFF",
+        fontSize: 16,
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.3)",
     },
     ageRow: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: 10,
-    },
-    input: {
-        backgroundColor: "#F0F0F0",
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        height: 42,
-        fontSize: 14,
-        color: "#000",
+        gap: 10,
     },
     ageInput: {
-        width: 70,
+        width: 100,
         textAlign: "center",
     },
     toText: {
-        marginHorizontal: 10,
-        fontSize: 14,
-        color: "#000",
+        color: "#FFFFFF",
+        fontSize: 16,
+        fontWeight: "600",
     },
     yearsText: {
-        marginLeft: 8,
-        fontSize: 14,
-        color: "#000",
+        color: "#FFFFFF",
+        fontSize: 16,
+        fontWeight: "600",
     },
     footer: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 24,
+        alignItems: "center",
+        marginTop: 60,
     },
     previousButton: {
         flexDirection: "row",
         alignItems: "center",
-        borderWidth: 1,
-        borderColor: "#E6E6E6",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 16,
-        backgroundColor: "#fff",
+        gap: 8,
     },
     previousText: {
-        fontSize: 15,
-        fontWeight: "500",
-        color: "#000",
-        marginLeft: 6,
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#FFFFFF",
     },
     nextButton: {
         flexDirection: "row",
         alignItems: "center",
-        borderRadius: 8,
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        backgroundColor: "#FFFFFF",
+        paddingHorizontal: 25,
+        paddingVertical: 15,
+        borderRadius: 30,
+        gap: 10,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
     },
     nextText: {
-        color: "#fff",
-        fontSize: 15,
-        fontWeight: "500",
-        marginRight: 6,
+        color: "#FF3366",
+        fontSize: 16,
+        fontWeight: "700",
     },
 });
+
+export default PreferencesStep;

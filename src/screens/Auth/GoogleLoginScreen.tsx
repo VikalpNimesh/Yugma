@@ -29,10 +29,11 @@ const GoogleLoginScreen = ({ navigation }: any) => {
     };
 
     return (
-        <LinearGradient
-            colors={["#FF5F6D", "#FF3366"]}
-            style={styles.container}
-        >
+        <View style={styles.container}>
+            <LinearGradient
+                colors={["#FF5F6D", "#FF3366"]}
+                style={StyleSheet.absoluteFillObject}
+            />
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.content}>
                     {/* Circular Logo Container */}
@@ -54,13 +55,6 @@ const GoogleLoginScreen = ({ navigation }: any) => {
 
                     {/* Buttons Section */}
                     <View style={styles.buttonSection}>
-                        {/* <TouchableOpacity 
-                            style={styles.whiteButton}
-                            onPress={() => navigation.navigate("LoginScreen")}
-                        >
-                            <Text style={styles.buttonText}>Continue with Mobile Number</Text>
-                        </TouchableOpacity> */}
-
                         <TouchableOpacity
                             style={styles.whiteButton}
                             onPress={handleGoogleSignIn}
@@ -95,7 +89,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                     </View>
                 </View>
             </SafeAreaView>
-        </LinearGradient>
+        </View>
     );
 };
 
