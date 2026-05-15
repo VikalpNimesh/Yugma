@@ -22,7 +22,7 @@ const Avatar: React.FC<AvatarProps> = ({ uri, name, size = 50, style }) => {
     if (!fullName) return '#ccc';
     const colors = [
       '#FF5733', '#33FF57', '#3357FF', '#FF33A1', '#A133FF',
-      '#33FFF5', '#FFB833', '#DD2476', '#4A148C', '#004D40'
+      '#33FFF5', '#FFB833', '#FF5F6D', '#4A148C', '#004D40'
     ];
     let hash = 0;
     for (let i = 0; i < fullName.length; i++) {
@@ -61,9 +61,9 @@ const Avatar: React.FC<AvatarProps> = ({ uri, name, size = 50, style }) => {
   if (hasValidUri) {
     return (
       <View style={containerStyle}>
-        <Image 
-          source={{ uri }} 
-          style={imageStyle} 
+        <Image
+          source={{ uri }}
+          style={imageStyle}
         />
       </View>
     );

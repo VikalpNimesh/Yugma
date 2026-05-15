@@ -63,7 +63,7 @@ const MatchList = ({ data }: any) => {
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
             <View style={styles.iconCircle}>
-                <Ionicons name="people-outline" size={40} color="#DD2476" />
+                <Ionicons name="people-outline" size={40} color="#FF5F6D" />
             </View>
             <Text style={styles.emptyTitle}>No Friends Yet</Text>
             <Text style={styles.emptySubText}>
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     discoverBtn: {
-        backgroundColor: '#DD2476',
+        backgroundColor: '#FF5F6D',
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,

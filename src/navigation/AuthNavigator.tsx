@@ -30,19 +30,17 @@ const AuthNavigator = () => {
             <Stack.Screen
                 name="LoginScreen"
                 component={LoginScreen}
-                options={{ header: () => <Header />, headerShown: true }}
             />
             <Stack.Screen
                 name="SignupScreen"
                 component={SignupScreen}
-                options={{ header: () => <Header />, headerShown: true }}
             />
             {/* BasicInfo is part of onboarding so we keep it here. 
                 Once verified, AppNavigator takes over. */}
             <Stack.Screen
                 name="BasicInfo"
                 component={BasicInfoScreen}
-                options={{ header: () => <Header />, headerShown: true }}
+            // options={{ header: () => <Header />, headerShown: true }}
             />
         </Stack.Navigator>
     );

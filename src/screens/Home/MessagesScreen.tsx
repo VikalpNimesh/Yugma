@@ -142,7 +142,7 @@ const MessagesScreen = () => {
             <View style={styles.container}>
                 {isLoading && !isRefreshing ? (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#DD2476" />
+                        <ActivityIndicator size="large" color="#FF5F6D" />
                     </View>
                 ) : (
                     <FlatList
@@ -152,7 +152,7 @@ const MessagesScreen = () => {
                         ListHeaderComponent={renderHeader}
                         showsVerticalScrollIndicator={false}
                         refreshControl={
-                            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#DD2476" />
+                            <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#FF5F6D" />
                         }
                         ListEmptyComponent={
                             <View style={styles.emptyContainer}>

@@ -45,7 +45,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
+      <StatusBar barStyle="light-content" backgroundColor="#FF5F6D" translucent />
       <SafeAreaView style={{ flex: 1 }} >
         <Provider store={store}>
           <PersistGate loading={<ActivityIndicator />} persistor={persistor}>

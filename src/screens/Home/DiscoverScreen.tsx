@@ -191,7 +191,7 @@ const DiscoverScreen = () => {
                         }}
                     >
                         <LinearGradient
-                            colors={["#FF512F", "#DD2476"]}
+                            colors={["#FF512F", "#FF5F6D"]}
                             style={styles.likeButton}
                         >
                             <Ionicons name="heart" size={28} color="#fff" />
@@ -271,7 +271,7 @@ const DiscoverScreen = () => {
                                 onPress={() => setShowFilter(false)}
                             >
                                 <LinearGradient
-                                    colors={["#FF512F", "#DD2476"]}
+                                    colors={["#FF512F", "#FF5F6D"]}
                                     style={styles.applyButtonGradient}
                                 >
                                     <Text style={styles.applyButtonText}>Confirm Filters</Text>

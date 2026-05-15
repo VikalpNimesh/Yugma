@@ -39,7 +39,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                     {/* Circular Logo Container */}
                     <View style={styles.logoCircle}>
                         <Image
-                            source={require("../../assets/new_yugma.png")}
+                            source={require("../../assets/yugma_png.png")}
                             style={styles.logo}
                             resizeMode="stretch"
                         />

@@ -23,7 +23,7 @@ export default function BottomTabs() {
                 tabBarShowLabel: false,
                 tabBarHideOnKeyboard: true,
                 tabBarActiveTintColor: "#fff",
-                tabBarInactiveTintColor: "#DD2476",
+                tabBarInactiveTintColor: "#FF5F6D",
                 tabBarStyle: {
                     height: 58,
                     paddingTop: 8,
@@ -49,7 +49,7 @@ export default function BottomTabs() {
                     return (
                         <View
                             style={{
-                                backgroundColor: focused ? "#DD2476" : "transparent",
+                                backgroundColor: focused ? "#FF5F6D" : "transparent",
                                 borderRadius: 8,
                                 alignItems: "center",
                                 justifyContent: "center",

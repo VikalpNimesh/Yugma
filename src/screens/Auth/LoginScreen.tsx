@@ -127,7 +127,7 @@ export default function LoginScreen() {
                         </View>
 
                         {/* Error Message */}
-                        { (localError || authError) ? (
+                        {(localError || authError) ? (
                             <Text style={styles.errorText}>{localError || authError}</Text>
                         ) : null}
 
@@ -170,7 +170,7 @@ export default function LoginScreen() {
                         <View style={styles.footer}>
                             <Text style={styles.footerText}>Don't have an account?</Text>
                             <TouchableOpacity onPress={() => navigation.navigate('SignupScreen')} disabled={isLoading || googleLoading}>
-                                <Text style={styles.signupText}> Sign Up Free</Text>
+                                <Text style={styles.signupText}> Sign Up</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

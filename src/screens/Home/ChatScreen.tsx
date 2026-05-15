@@ -56,7 +56,7 @@ const ChatScreen = () => {
                 const data = await messageService.getConversation(otherUserId);
                 if (isMounted) {
                     setMessages(data.messages);
-                    
+
                     // Mark as read immediately when opening the chat
                     if (generatedId) {
                         messageService.markAsRead(generatedId).catch(console.error);
@@ -94,8 +94,8 @@ const ChatScreen = () => {
 
                     // 2. If it's my message, try to replace the optimistic 'temp-' message
                     if (newMessage.isMine) {
-                        const tempMessageIndex = prev.findIndex(m => 
-                            m.id.toString().startsWith('temp-') && 
+                        const tempMessageIndex = prev.findIndex(m =>
+                            m.id.toString().startsWith('temp-') &&
                             m.content === newMessage.content
                         );
 
@@ -170,7 +170,7 @@ const ChatScreen = () => {
 
         const tempContent = inputText.trim();
         setInputText('');
-        
+
         // Immediately stop typing indicator when sending
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
@@ -255,7 +255,7 @@ const ChatScreen = () => {
                 {/* Messages List */}
                 {isLoading ? (
                     <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color="#DD2476" />
+                        <ActivityIndicator size="large" color="#FF5F6D" />
                     </View>
                 ) : (
                     <FlatList
@@ -346,7 +346,7 @@ const styles = StyleSheet.create({
     },
     typingIndicator: {
         fontSize: 12,
-        color: '#DD2476',
+        color: '#FF5F6D',
         fontWeight: '500',
     },
     onlineStatus: {
@@ -386,7 +386,7 @@ const styles = StyleSheet.create({
         borderRadius: 20,
     },
     myBubble: {
-        backgroundColor: '#DD2476',
+        backgroundColor: '#FF5F6D',
         borderBottomRightRadius: 4,
     },
     theirBubble: {
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: '#DD2476',
+        backgroundColor: '#FF5F6D',
         justifyContent: 'center',
         alignItems: 'center',
     },

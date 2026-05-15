@@ -71,7 +71,7 @@ function NotificationTab() {
         <View style={styles.notificationRow}>
             <Text style={styles.notificationLabel}>{label}</Text>
             <Switch
-                trackColor={{ false: "#767577", true: "#DD2476" }}
+                trackColor={{ false: "#767577", true: "#FF5F6D" }}
                 thumbColor={value ? "#fff" : "#f4f3f4"}
                 ios_backgroundColor="#3e3e3e"
                 onValueChange={onValueChange}
@@ -118,7 +118,7 @@ function PrivacyTab() {
                 {description && <Text style={styles.privacyDescription}>{description}</Text>}
             </View>
             <Switch
-                trackColor={{ false: "#767577", true: "#DD2476" }}
+                trackColor={{ false: "#767577", true: "#FF5F6D" }}
                 thumbColor={value ? "#fff" : "#f4f3f4"}
                 ios_backgroundColor="#3e3e3e"
                 onValueChange={onValueChange}
@@ -173,7 +173,7 @@ function VerificationTab() {
 
             <View style={styles.verificationCard}>
                 <View style={styles.badgeContainer}>
-                    <Ionicons name="shield-checkmark" size={64} color="#DD2476" />
+                    <Ionicons name="shield-checkmark" size={64} color="#FF5F6D" />
                 </View>
                 <Text style={styles.verificationStatus}>Get Verified</Text>
                 <Text style={styles.verificationSubtext}>
@@ -182,15 +182,15 @@ function VerificationTab() {
 
                 <View style={styles.benefitsList}>
                     <View style={styles.benefitItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#DD2476" />
+                        <Ionicons name="checkmark-circle" size={20} color="#FF5F6D" />
                         <Text style={styles.benefitText}>Exclusive Verification Badge</Text>
                     </View>
                     <View style={styles.benefitItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#DD2476" />
+                        <Ionicons name="checkmark-circle" size={20} color="#FF5F6D" />
                         <Text style={styles.benefitText}>Higher trust from other users</Text>
                     </View>
                     <View style={styles.benefitItem}>
-                        <Ionicons name="checkmark-circle" size={20} color="#DD2476" />
+                        <Ionicons name="checkmark-circle" size={20} color="#FF5F6D" />
                         <Text style={styles.benefitText}>Priority support</Text>
                     </View>
                 </View>
@@ -295,7 +295,7 @@ function ProfileTab() {
                             uri: basicInfo.photo || reduxPhoto || "https://via.placeholder.com/150"
                         }} style={styles.profileAvatar} />
                         <View style={styles.profileBadge}>
-                            <Ionicons name="checkmark-circle" size={24} color="#DD2476" />
+                            <Ionicons name="checkmark-circle" size={24} color="#FF5F6D" />
                         </View>
                     </View>
 
@@ -528,10 +528,10 @@ const styles = StyleSheet.create({
     activeTab: {
         backgroundColor: "#fff",
         borderLeftWidth: 3,
-        borderLeftColor: "#DD2476",
+        borderLeftColor: "#FF5F6D",
     },
     tabText: { color: "#666", fontSize: 12, marginTop: 4 },
-    activeTabText: { color: "#DD2476", fontWeight: "600" },
+    activeTabText: { color: "#FF5F6D", fontWeight: "600" },
     content: {
         flex: 1,
         padding: 16,
@@ -563,7 +563,7 @@ const styles = StyleSheet.create({
     primaryBtn: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#DD2476",
+        backgroundColor: "#FF5F6D",
         paddingVertical: 10,
         paddingHorizontal: 16,
         borderRadius: 20,
@@ -596,7 +596,7 @@ const styles = StyleSheet.create({
     buttonRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
     cancelBtn: { padding: 10 },
     cancelText: { color: "#999" },
-    saveBtn: { backgroundColor: "#DD2476", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
+    saveBtn: { backgroundColor: "#FF5F6D", paddingVertical: 10, paddingHorizontal: 20, borderRadius: 8 },
     saveText: { color: "#fff" },
 
     // Premium Styles
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
         color: "#666",
     },
     activeModeText: {
-        color: "#DD2476",
+        color: "#FF5F6D",
     },
 
     // Notification Styles
@@ -836,7 +836,7 @@ const styles = StyleSheet.create({
         fontWeight: "500",
     },
     verifyBtn: {
-        backgroundColor: "#DD2476",
+        backgroundColor: "#FF5F6D",
         paddingVertical: 14,
         paddingHorizontal: 40,
         borderRadius: 30,
@@ -945,14 +945,14 @@ const styles = StyleSheet.create({
         marginBottom: 24,
     },
     viewPlansBtn: {
-        backgroundColor: "#DD2476",
+        backgroundColor: "#FF5F6D",
         flexDirection: "row",
         alignItems: "center",
         paddingVertical: 12,
         paddingHorizontal: 24,
         borderRadius: 25,
         gap: 8,
-        shadowColor: "#DD2476",
+        shadowColor: "#FF5F6D",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.3,
         shadowRadius: 6,

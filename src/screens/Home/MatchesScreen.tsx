@@ -117,7 +117,7 @@ const MatchesScreen = () => {
 
             {isLoading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#DD2476" />
+                    <ActivityIndicator size="large" color="#FF5F6D" />
                 </View>
             ) : selectedTab === "Friends" ? (
                 <MatchList data={transformedFriends} />

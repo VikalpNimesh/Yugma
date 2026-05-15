@@ -79,7 +79,7 @@ const LikeList = ({ data, onRefresh }: any) => {
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
             <View style={styles.iconCircle}>
-                <Ionicons name="heart-outline" size={40} color="#DD2476" />
+                <Ionicons name="heart-outline" size={40} color="#FF5F6D" />
             </View>
             <Text style={styles.emptyTitle}>No Likes Yet</Text>
             <Text style={styles.emptySubText}>
@@ -265,8 +265,8 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     acceptBtn: {
-        backgroundColor: '#DD2476',
-        borderColor: '#DD2476',
+        backgroundColor: '#FF5F6D',
+        borderColor: '#FF5F6D',
     },
     rejectBtn: {
         backgroundColor: 'white',

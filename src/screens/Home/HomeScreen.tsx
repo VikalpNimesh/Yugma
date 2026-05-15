@@ -96,7 +96,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                         <Feather
                             name="arrow-right"
                             size={18}
-                            color={"#DD2476"}
+                            color={"#FF5F6D"}
 
                         />
                     </TouchableOpacity>
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     logoText: {
         fontSize: 28,
         fontWeight: "700",
-        color: "#DD2476",
+        color: "#FF5F6D",
     },
     subHeading: {
         fontSize: 16,
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
         lineHeight: 20,
     },
     getStartedBtn: {
-        backgroundColor: "#DD2476",
+        backgroundColor: "#FF5F6D",
         paddingVertical: 12,
         paddingHorizontal: 32,
         borderRadius: 30,
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
     },
     cardTitle: {
         fontWeight: "700",
-        color: "#DD2476",
+        color: "#FF5F6D",
         marginBottom: 6,
         fontSize: 14,
     },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
     footer: {
-        backgroundColor: "#DD2476",
+        backgroundColor: "#FF5F6D",
         paddingVertical: 32,
         paddingHorizontal: 24,
         alignItems: "center",
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
 
     },
     profileBtnText: {
-        color: "#DD2476",
+        color: "#FF5F6D",
         fontWeight: "700",
     },
 });

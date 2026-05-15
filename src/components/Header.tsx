@@ -26,7 +26,7 @@ const Header = () => {
         <View style={styles.header}>
             <View style={styles.logoCon}>
                 <Image
-                    source={require("../assets/yug.png")}
+                    source={require("../assets/yugma_png.png")}
                     style={{ width: "100%", height: "100%", resizeMode: "contain" }}
                 />
             </View>
@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         flexDirection: "row",
-        backgroundColor: "#DD2476",
+        backgroundColor: "#FF5F6D",
         paddingVertical: 0,
         elevation: 10,
         paddingHorizontal: 14

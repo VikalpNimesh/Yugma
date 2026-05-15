@@ -138,7 +138,7 @@ const NotificationsScreen = () => {
                 <Ionicons
                     name={getIcon(item.type)}
                     size={24}
-                    color={item.isRead ? '#666' : '#DD2476'}
+                    color={item.isRead ? '#666' : '#FF5F6D'}
                 />
             </View>
             <View style={styles.contentContainer}>
@@ -147,17 +147,17 @@ const NotificationsScreen = () => {
                     <Text style={styles.time}>{dayjs(item.createdAt).fromNow()}</Text>
                 </View>
                 <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
-                
+
                 {item.type === 'friend_request' && !item.isRead && (
                     <View style={styles.actionButtonsContainer}>
-                        <TouchableOpacity 
-                            style={styles.acceptButton} 
+                        <TouchableOpacity
+                            style={styles.acceptButton}
                             onPress={() => handleAcceptRequest(item.relatedUserId, item.id)}
                         >
                             <Text style={styles.acceptText}>Accept</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
-                            style={styles.rejectButton} 
+                        <TouchableOpacity
+                            style={styles.rejectButton}
                             onPress={() => handleRejectRequest(item.relatedUserId, item.id)}
                         >
                             <Text style={styles.rejectText}>Reject</Text>
@@ -183,7 +183,7 @@ const NotificationsScreen = () => {
 
             {isLoading ? (
                 <View style={styles.loadingContainer}>
-                    <ActivityIndicator size="large" color="#DD2476" />
+                    <ActivityIndicator size="large" color="#FF5F6D" />
                 </View>
             ) : (
                 <FlatList
@@ -192,7 +192,7 @@ const NotificationsScreen = () => {
                     keyExtractor={item => item.id}
                     contentContainerStyle={styles.listContainer}
                     refreshControl={
-                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={['#DD2476']} />
+                        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} colors={['#FF5F6D']} />
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     },
     markReadText: {
         fontSize: 14,
-        color: '#DD2476',
+        color: '#FF5F6D',
         fontWeight: '600',
     },
     loadingContainer: {
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
         width: 8,
         height: 8,
         borderRadius: 4,
-        backgroundColor: '#DD2476',
+        backgroundColor: '#FF5F6D',
         marginLeft: 8,
     },
     emptyContainer: {
@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
         gap: 10,
     },
     acceptButton: {
-        backgroundColor: '#DD2476',
+        backgroundColor: '#FF5F6D',
         paddingVertical: 8,
         paddingHorizontal: 16,
         borderRadius: 20,
