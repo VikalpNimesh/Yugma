@@ -90,7 +90,6 @@ const SplashScreen = () => {
                     source={require("../assets/new_yugma.png")}
                     style={styles.logo}
                     resizeMode="contain"
-                    tintColor="#FFFFFF"
                 />
                 <View style={styles.textContainer}>
                     <Text style={styles.brandName}>yugma</Text>
@@ -119,7 +118,9 @@ const styles = StyleSheet.create({
     logo: {
         width: width * 0.5,
         height: width * 0.5,
-        marginBottom: 10,
+        marginBottom: 60,
+        borderRadius: 100,
+        overflow: "hidden"
     },
     textContainer: {
         alignItems: 'center',
