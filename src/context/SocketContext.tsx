@@ -1,8 +1,11 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import * as Keychain from 'react-native-keychain';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
+import { addUnreadConversation, setUnreadConversations, addUserOnline, removeUserOnline } from '../redux/slices/chatSlice';
+import { incrementUnreadCount as incrementNotificationCount } from '../redux/slices/notificationSlice';
+import messageService from '../api/services/messageService';
 import Toast from 'react-native-toast-message';
 
 interface SocketContextType {
@@ -22,6 +25,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     let socketInstance: Socket | null = null;
@@ -61,19 +66,38 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
         socketInstance.on('new_message', (data) => {
           console.log('📩 New message received:', data);
-          // Toast.show({
-          //   type: 'info',
-          //   text1: `New message from ${data.senderName || 'User'}`,
-          //   text2: data.content,
-          //   onPress: () => {
+          if (data.senderId !== currentUserId) {
+            dispatch(addUnreadConversation(data.conversationId));
+          }
+        });
 
-          //     Toast.hide();
-          //   }
-          // });
+        socketInstance.on('messages_read', (data) => {
+          // Re-fetch conversations to get updated unread status
+          messageService.getConversations().then(conversations => {
+            const unreadIds = conversations
+              .filter(conv => (conv.unreadCount || 0) > 0)
+              .map(conv => conv.conversationId);
+            dispatch(setUnreadConversations(unreadIds));
+          }).catch(console.error);
+        });
+
+        socketInstance.on('user_online', (data) => {
+          console.log('Userasdedas online:', data.userId);
+          if (data.userId) {
+            dispatch(addUserOnline(data.userId));
+          }
+        });
+
+        socketInstance.on('user_offline', (data) => {
+          console.log('Userasdedas offline:', data.userId);
+          if (data.userId) {
+            dispatch(removeUserOnline(data.userId));
+          }
         });
 
         socketInstance.on('new_notification', (data) => {
           console.log('🔔 New notification received:', data);
+          dispatch(incrementNotificationCount());
           Toast.show({
             type: 'success',
             text1: data.title || 'New Notification',
@@ -89,6 +113,13 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
     if (isAuthenticated) {
       connectSocket();
+      // Fetch initial unread conversations
+      messageService.getConversations().then(conversations => {
+        const unreadIds = conversations
+          .filter(conv => (conv.unreadCount || 0) > 0)
+          .map(conv => conv.conversationId);
+        dispatch(setUnreadConversations(unreadIds));
+      }).catch(console.error);
     } else {
       if (socket) {
         socket.disconnect();

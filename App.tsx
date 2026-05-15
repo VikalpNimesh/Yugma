@@ -2,7 +2,7 @@ import 'react-native-get-random-values';
 import Toast from 'react-native-toast-message';
 import { Provider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View, StatusBar } from "react-native";
 import { persistor, store } from "./src/redux/store";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import AppNavigator from "./src/navigation/AppNavigator";
@@ -45,7 +45,8 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView style={{ flex: 1 }}>
+      <StatusBar barStyle="light-content" backgroundColor="#DD2476" translucent />
+      <SafeAreaView style={{ flex: 1 }} >
         <Provider store={store}>
           <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
             <SocketProvider>

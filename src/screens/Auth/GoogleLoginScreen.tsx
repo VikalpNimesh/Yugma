@@ -1,13 +1,13 @@
 // GoogleLoginScreen.tsx
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image, Dimensions, SafeAreaView, Platform } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import { useDispatch } from "react-redux";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import AntDesign from "react-native-vector-icons/AntDesign";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { signInWithGoogle } from "../../api/firebase/auth";
-import { initializeBasicInfo } from "../../redux/slices/profileFormSlice";
+
+const { width, height } = Dimensions.get("window");
 
 const GoogleLoginScreen = ({ navigation }: any) => {
     const dispatch = useDispatch();
@@ -16,15 +16,13 @@ const GoogleLoginScreen = ({ navigation }: any) => {
 
     const handleGoogleSignIn = async () => {
         if (loading) return;
-
         setError("");
         setLoading(true);
-
         try {
             await signInWithGoogle(dispatch);
             navigation.replace("HomeScreen");
         } catch (err: any) {
-            setError(err.message || "Google Sign-In failed. Please try again.");
+            setError(err.message || "Google Sign-In failed.");
         } finally {
             setLoading(false);
         }
@@ -32,157 +30,175 @@ const GoogleLoginScreen = ({ navigation }: any) => {
 
     return (
         <LinearGradient
-            colors={["#6f1478ff", "#300017ff"]}
-            start={{ x: 1, y: 1 }}
-            end={{ x: 1, y: 0 }}
-            style={styles.gradientContainer}
+            colors={["#FF5F6D", "#FF3366"]}
+            style={styles.container}
         >
-        <View style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
-                <View style={styles.logoContainer}>
-                    {/* Logo placeholder */}
-                    <Image
-                        source={require("../../assets/yug.png")}
-                        style={styles.logo}
-                        resizeMode="contain"
-                    />
-                </View>
-
+            <SafeAreaView style={styles.safeArea}>
                 <View style={styles.content}>
-                    {/* <Text style={styles.newText}>New to Yugma ?</Text> */}
+                    {/* Circular Logo Container */}
+                    <View style={styles.logoCircle}>
+                        <Image
+                            source={require("../../assets/new_yugma.png")}
+                            style={styles.logo}
+                            resizeMode="stretch"
+                        />
+                    </View>
 
-                    <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
-                        onPress={() => navigation.navigate("SignupScreen")}
-                        disabled={loading}
-                    >
-                        <Icon name="email" size={20} color="#ff3b3b" />
-                        <Text style={styles.buttonText}>Sign Up with Email</Text>
-                    </TouchableOpacity>
+                    {/* Text Section */}
+                    <View style={styles.textSection}>
+                        <Text style={styles.title}>Find your perfect match</Text>
+                        <Text style={styles.subtitle}>
+                            Dating or Marriage, Yugma helps you connect with the right person
+                        </Text>
+                    </View>
 
-                    {/* <TouchableOpacity
-                        style={[styles.button, styles.buttonDisabled]}
-                        disabled
-                    >
-                        <Icon name="phone" size={20} color="#ff3b3b" />
-                        <Text style={styles.buttonText}>Sign Up with Mobile</Text>
-                    </TouchableOpacity> */}
-
-                    <TouchableOpacity
-                        style={[styles.button, loading && styles.buttonDisabled]}
-                        onPress={handleGoogleSignIn}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color="#ff3b3b" />
-                        ) : (
-                            <>
-                                <AntDesign name="google" size={20} color="#ff3b3b" />
-                                <Text style={styles.buttonText}>Sign Up with Google</Text>
-                            </>
-                        )}
-                    </TouchableOpacity>
-
-                    {error ? (
-                        <View style={styles.errorContainer}>
-                            <Text style={styles.errorText}>{error}</Text>
-                        </View>
-                    ) : null}
-
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>Already have an account?</Text>
-                        <TouchableOpacity
+                    {/* Buttons Section */}
+                    <View style={styles.buttonSection}>
+                        {/* <TouchableOpacity 
+                            style={styles.whiteButton}
                             onPress={() => navigation.navigate("LoginScreen")}
+                        >
+                            <Text style={styles.buttonText}>Continue with Mobile Number</Text>
+                        </TouchableOpacity> */}
+
+                        <TouchableOpacity
+                            style={styles.whiteButton}
+                            onPress={handleGoogleSignIn}
                             disabled={loading}
                         >
-                            <Text style={linkLinkStyles.loginLink}>Login</Text>
+                            {loading ? (
+                                <ActivityIndicator color="#000" />
+                            ) : (
+                                <View style={styles.row}>
+                                    <AntDesign name="google" size={20} color="#EA4335" />
+                                    <Text style={[styles.buttonText, { marginLeft: 10 }]}>Continue with Google</Text>
+                                </View>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={styles.emailLink}
+                            onPress={() => navigation.navigate("SignupScreen")}
+                        >
+                            <Text style={styles.emailText}>Continue with Email</Text>
+                            <MaterialIcons name="arrow-forward" size={20} color="#FFFFFF" />
                         </TouchableOpacity>
                     </View>
+
+                    {/* Footer Section */}
+                    <View style={styles.footer}>
+                        <Text style={styles.footerText}>
+                            By continuing, you agree to our{" "}
+                            <Text style={styles.linkText} onPress={() => { }}>Terms of Service</Text>
+                            {"\n"}and <Text style={styles.linkText} onPress={() => { }}>Privacy Policy</Text>
+                        </Text>
+                    </View>
                 </View>
-            </View>
+            </SafeAreaView>
         </LinearGradient>
     );
 };
 
-const linkLinkStyles = StyleSheet.create({
-    loginLink: {
-        color: "#ff3b3b",
-        fontWeight: "700",
-        marginLeft: 5,
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    safeArea: {
+        flex: 1,
+    },
+    content: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingVertical: 60,
+        paddingHorizontal: 30,
+    },
+    logoCircle: {
+        width: 140,
+        height: 140,
+        borderRadius: 100,
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 0,
+    },
+    logo: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 100,
+        overflow: "hidden",
+    },
+    textSection: {
+        alignItems: "center",
+        width: "100%",
+    },
+    title: {
+        fontSize: 36,
+        fontWeight: "800",
+        color: "#FFFFFF",
+        textAlign: "center",
+        marginBottom: 15,
+        lineHeight: 42,
+    },
+    subtitle: {
+        fontSize: 16,
+        color: "rgba(255, 255, 255, 0.9)",
+        textAlign: "center",
+        lineHeight: 22,
+        paddingHorizontal: 20,
+    },
+    buttonSection: {
+        width: "100%",
+        gap: 15,
+        alignItems: "center",
+    },
+    whiteButton: {
+        width: "100%",
+        height: 56,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 28,
+        alignItems: "center",
+        justifyContent: "center",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+    },
+    buttonText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "#1a1a1a",
+    },
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+    emailLink: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 10,
+    },
+    emailText: {
+        color: "#FFFFFF",
+        fontSize: 16,
+        fontWeight: "600",
+        marginRight: 8,
+    },
+    footer: {
+        marginTop: 20,
+    },
+    footerText: {
+        color: "rgba(255, 255, 255, 0.8)",
+        textAlign: "center",
+        fontSize: 13,
+        lineHeight: 18,
+    },
+    linkText: {
+        color: "#FFFFFF",
         textDecorationLine: "underline",
+        fontWeight: "600",
     },
 });
 
 export default GoogleLoginScreen;
-
-const styles = StyleSheet.create({
-    gradientContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    logoContainer: {
-        // flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    content: {
-        // flex: 1,
-        alignItems: "center",
-        width: "100%",
-        justifyContent: "center",
-    },
-    newText: {
-        color: "#ff3b3b",
-        fontSize: 18,
-        marginBottom: 20,
-        fontWeight: "500",
-    },
-    button: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#fff",
-        width: "85%",
-        paddingVertical: 14,
-        borderRadius: 30,
-        justifyContent: "center",
-        marginBottom: 15,
-        elevation: 3,
-    },
-    buttonDisabled: {
-        opacity: 0.6,
-    },
-    buttonText: {
-        color: "#ff3b3b",
-        fontWeight: "600",
-        fontSize: 15,
-        marginLeft: 10,
-    },
-    errorContainer: {
-        marginTop: 10,
-        paddingHorizontal: 20,
-    },
-    errorText: {
-        color: "#ff3b3b",
-        fontSize: 13,
-        textAlign: "center",
-    },
-    footer: {
-        flexDirection: "row",
-        marginTop: 20,
-    },
-    footerText: {
-        color: "#ff3b3b",
-        fontSize: 14,
-    },
-    loginLink: {
-        color: "#ff3b3b",
-        fontWeight: "700",
-        marginLeft: 5,
-        textDecorationLine: "underline",
-    },
-    logo: {
-        width: 400,
-        height: 400,
-        // marginBottom: 30,
-    },
-});

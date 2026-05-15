@@ -19,6 +19,7 @@ import dayjs from "dayjs";
 const MatchesScreen = () => {
     const [selectedTab, setSelectedTab] = useState("Friends");
     const [friends, setFriends] = useState<FriendItem[]>([]);
+    console.log('friends', friends);
     const [likes, setLikes] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 

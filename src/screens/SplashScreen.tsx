@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, Image } from "react-native";
+import { View, Text, StyleSheet, Image, Dimensions, Platform } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/AppNavigator";
-import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { checkAuthState } from "../redux/slices/authSlice";
+import LinearGradient from "react-native-linear-gradient";
+
+const { width } = Dimensions.get("window");
 
 type SplashNavProp = NativeStackNavigationProp<RootStackParamList, "Splash">;
 
@@ -15,15 +17,12 @@ const SplashScreen = () => {
     const dispatch = useAppDispatch();
     const currentScreen = useAppSelector((state) => state.profileForm.currentScreen);
     const { isAuthenticated, profile, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
-    console.log(isAuthenticated, "isAuthenticated", profile, "profile");
-    // Helper function to get the navigation stack based on current screen
+
+    // Helper functions for navigation logic
     const getNavigationStack = (screen: string) => {
         const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
         const currentIndex = screenOrder.indexOf(screen);
-
         if (currentIndex === -1) return [{ name: screen as keyof RootStackParamList, key: screen }];
-
-        // Build stack up to current screen
         const stack = [];
         for (let i = 0; i <= currentIndex; i++) {
             stack.push({
@@ -34,7 +33,6 @@ const SplashScreen = () => {
         return stack;
     };
 
-    // Helper function to get the index of current screen in stack
     const getScreenIndex = (screen: string) => {
         const screenOrder = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
         const index = screenOrder.indexOf(screen);
@@ -42,26 +40,20 @@ const SplashScreen = () => {
     };
 
     useEffect(() => {
-        // Initialize auth state from Keychain only if not already authenticated
         if (!isAuthenticated) {
             dispatch(checkAuthState());
         }
     }, [dispatch, isAuthenticated]);
 
     useEffect(() => {
-        // Wait for both the initial app delay and the auth check to complete
         const timer = setTimeout(async () => {
-            if (isAuthLoading) return; // Wait until auth check is finished
+            if (isAuthLoading) return;
 
             try {
                 if (isAuthenticated) {
-                    // User is authenticated, check profile data
-                    // 👈 FIX: profile in Redux is already the data object, so it won't have .data
                     if (profile && (profile.id || Object.keys(profile).length > 0)) {
-                        // Profile exists, go to HomeScreen (as per user request)
                         navigation.replace("BottomTabs");
                     } else {
-                        // Profile is null, check for pending local profile steps or go to default root
                         const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
                         if (currentScreen && validScreens.includes(currentScreen)) {
                             navigation.reset({
@@ -69,12 +61,10 @@ const SplashScreen = () => {
                                 routes: getNavigationStack(currentScreen),
                             });
                         } else {
-                            // Default root for null profile
                             navigation.replace("BasicInfo");
                         }
                     }
                 } else {
-                    // Not authenticated, check first launch
                     const hasLaunched = await AsyncStorage.getItem('hasLaunched');
                     navigation.replace("AppTypeSelection");
                 }
@@ -84,68 +74,83 @@ const SplashScreen = () => {
                     navigation.replace("LoginScreen");
                 }
             }
-        }, 500);
+        }, 2000); // Increased delay for a more premium splash feel
 
         return () => clearTimeout(timer);
     }, [navigation, currentScreen, isAuthenticated, isAuthLoading, profile]);
 
     return (
-        <View style={styles.container}>
-            <Image
-                source={require("../assets/yugmaNew.jpg")}
-                style={styles.logo}
-                resizeMode="contain"
-            />
-            <Text style={styles.title}>Welcome to Yugma</Text>
-            <Text style={styles.subtitle}>Find your perfect match</Text>
-
-        </View>
+        <LinearGradient
+            colors={["#FF5F6D", "#FF3366"]}
+            style={styles.container}
+        >
+            <View style={styles.logoWrapper}>
+                <Image
+                    source={require("../assets/yugmaNew.png")}
+                    style={styles.logo}
+                    resizeMode="contain"
+                    tintColor="#FFFFFF"
+                />
+                <View style={styles.textContainer}>
+                    <Text style={styles.brandName}>yugma</Text>
+                    <View style={styles.separatorContainer}>
+                        <View style={styles.line} />
+                        <Text style={styles.brandSubtitle}>FOR BRAHMINS</Text>
+                        <View style={styles.line} />
+                    </View>
+                </View>
+            </View>
+        </LinearGradient>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fffaf5",
         alignItems: "center",
         justifyContent: "center",
-        paddingHorizontal: 20,
+    },
+    logoWrapper: {
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
     },
     logo: {
-        width: 120,
-        height: 120,
-        marginBottom: 30,
+        width: width * 0.5,
+        height: width * 0.5,
+        marginBottom: 10,
     },
-    title: {
-        fontSize: 26,
-        fontWeight: "700",
-        color: "#1a1a1a",
+    textContainer: {
+        alignItems: 'center',
+        marginTop: -20,
     },
-    subtitle: {
-        fontSize: 16,
-        color: "#666",
-        marginBottom: 40,
+    brandName: {
+        fontSize: 64,
+        color: "#FFFFFF",
+        fontWeight: "400",
+        letterSpacing: 2,
+        // Using serif font for that premium look
+        fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
     },
-    buttonContainer: {
-        width: "100%",
-        gap: 16,
+    separatorContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 10,
+        width: '80%',
+        justifyContent: 'center',
     },
-    button: {
-        paddingVertical: 14,
-        borderRadius: 12,
-        alignItems: "center",
-        justifyContent: "center",
+    line: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#FFFFFF',
+        opacity: 0.6,
     },
-    matrimonyButton: {
-        backgroundColor: "linear-gradient(90deg, #ff5f6d, #ffc371)",
-    },
-    datingButton: {
-        backgroundColor: "linear-gradient(90deg, #f77062, #fe5196)",
-    },
-    buttonText: {
-        color: "#000",
-        fontSize: 16,
-        fontWeight: "600",
+    brandSubtitle: {
+        color: "#FFFFFF",
+        fontSize: 14,
+        fontWeight: "500",
+        marginHorizontal: 15,
+        letterSpacing: 3,
     },
 });
 

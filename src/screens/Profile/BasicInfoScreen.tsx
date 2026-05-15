@@ -298,7 +298,7 @@ const InputField: React.FC<InputFieldProps> = ({
         <TextInput
             mode="outlined"
             placeholder={placeholder}
-            placeholderTextColor={"#999"}
+            placeholderTextColor={"#000"}
             value={value}
             onChangeText={onChangeText}
             onFocus={onFocus}

@@ -17,6 +17,7 @@ import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from 'react-native-toast-message';
 import { updateBasicInfo, updateAboutYou } from "../../redux/slices/profileFormSlice";
+import { version } from '../../../package.json';
 
 type TabType = "Profile" | "Notifications" | "Privacy" | "Premium" | "Verification";
 
@@ -27,17 +28,23 @@ export default function SettingsScreen() {
         <View style={styles.container}>
             {/* Sidebar Tabs */}
             <View style={styles.sidebar}>
-                {(["Profile", "Notifications", "Privacy", "Premium", "Verification"] as TabType[]).map(
-                    (tab) => (
-                        <TouchableOpacity
-                            key={tab}
-                            onPress={() => setActiveTab(tab)}
-                            style={[styles.tabItem, activeTab === tab && styles.activeTab]}
-                        >
-                            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
-                        </TouchableOpacity>
-                    )
-                )}
+                <View style={{ width: '100%' }}>
+                    {(["Profile", "Notifications", "Privacy", "Premium", "Verification"] as TabType[]).map(
+                        (tab) => (
+                            <TouchableOpacity
+                                key={tab}
+                                onPress={() => setActiveTab(tab)}
+                                style={[styles.tabItem, activeTab === tab && styles.activeTab]}
+                            >
+                                <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>{tab}</Text>
+                            </TouchableOpacity>
+                        )
+                    )}
+                </View>
+
+                <View style={styles.sidebarFooter}>
+                    <Text style={styles.versionText}>v{version}</Text>
+                </View>
             </View>
 
             {/* Main Content */}
@@ -151,8 +158,8 @@ function PrivacyTab() {
                     <Ionicons name="chevron-forward" size={20} color="#ccc" />
                 </TouchableOpacity>
                 <View style={styles.separator} />
-                 <TouchableOpacity style={styles.menuRow}>
-                    <Text style={[styles.menuText, {color: 'red'}]}>Delete Account</Text>
+                <TouchableOpacity style={styles.menuRow}>
+                    <Text style={[styles.menuText, { color: 'red' }]}>Delete Account</Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -163,7 +170,7 @@ function VerificationTab() {
     return (
         <View style={{ flex: 1 }}>
             <Text style={styles.header}>Verification</Text>
-            
+
             <View style={styles.verificationCard}>
                 <View style={styles.badgeContainer}>
                     <Ionicons name="shield-checkmark" size={64} color="#DD2476" />
@@ -316,7 +323,7 @@ function ProfileTab() {
 
                     {bio ? (
                         <View style={styles.bioContainer}>
-                             <Text style={styles.bioLabel}>About Me</Text>
+                            <Text style={styles.bioLabel}>About Me</Text>
                             <Text style={styles.bioText}>{bio}</Text>
                         </View>
                     ) : null}
@@ -465,7 +472,7 @@ function PremiumTab() {
                     Send unlimited likes, see who likes you, and get verified with our premium plans.
                 </Text>
 
-                <TouchableOpacity 
+                <TouchableOpacity
                     onPress={() => navigation.navigate('PremiumPlans')}
                     style={styles.viewPlansBtn}
                 >
@@ -499,7 +506,19 @@ const styles = StyleSheet.create({
         width: 100,
         backgroundColor: "#f9f9f9",
         paddingVertical: 20,
-        alignItems: "center"
+        alignItems: "center",
+        justifyContent: "space-between"
+    },
+    sidebarFooter: {
+        marginBottom: -10,
+        alignItems: 'center',
+        width: "100%"
+
+    },
+    versionText: {
+        fontSize: 14,
+        color: '#000',
+        fontWeight: '500',
     },
     tabItem: {
         paddingVertical: 15,

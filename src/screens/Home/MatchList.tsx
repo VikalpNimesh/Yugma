@@ -25,19 +25,19 @@ const MatchList = ({ data }: any) => {
             <View style={{ flex: 1 }}>
                 <View style={styles.matchBadge}>
                     <Text style={styles.name}>
-                        {item.name}, {item.age}
+                        {item.name} {item.age != 'N/A' && `, ${item.age}`}
                     </Text>
-                    <View style={styles.percent}>
+                    {/* <View style={styles.percent}>
 
                         <Text style={styles.matchText}>{item.matchPercent} match</Text>
-                    </View>
+                    </View> */}
                 </View>
 
-                <Text style={styles.subText}><Ionicons name="location-outline" size={12} /> {item.location}</Text>
-                <Text style={styles.subText}>{item.job}</Text>
+                {item.location != 'Hidden' && <Text style={styles.subText}><Ionicons name="location-outline" size={12} /> {item.location}</Text>}
+                {item.job != 'N/A' && <Text style={styles.subText}>{item.job}</Text>}
                 <View style={styles.dateMsg}>
 
-                    <Text style={styles.matchDate}><Ionicons name="calendar-clear-outline" size={12} /> Matched {item.matchedDays}</Text>
+                    {/* <Text style={styles.matchDate}><Ionicons name="calendar-clear-outline" size={12} /> Matched {item.matchedDays}</Text> */}
                     <Pressable style={styles.messageBtn} onPress={() => handleMessagePress(item)}>
                         <Feather name="message-circle" size={24} color={"white"} />
                         <Text style={styles.messageText}>
@@ -192,8 +192,10 @@ const styles = StyleSheet.create({
     },
     dateMsg: {
         flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center"
+        justifyContent: "flex-end",
+        alignItems: "center",
+        width: "100%"
+
 
     },
     percent: {

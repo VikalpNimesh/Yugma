@@ -5,6 +5,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MessageCard from '../../components/MessageCard';
 import messageService, { ConversationItem } from '../../api/services/messageService';
+import { useSocket } from '../../context/SocketContext';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../redux/store';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -13,8 +16,12 @@ dayjs.extend(relativeTime);
 const MessagesScreen = () => {
     const navigation = useNavigation<any>();
     const [conversations, setConversations] = useState<ConversationItem[]>([]);
+    const [typingUsers, setTypingUsers] = useState<{ [key: string]: boolean }>({});
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const { socket } = useSocket();
+    const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
+    const onlineUserIds = useSelector((state: RootState) => state.chat.onlineUserIds);
 
     const fetchConversations = async (showLoading = true) => {
         if (showLoading) setIsLoading(true);
@@ -34,6 +41,74 @@ const MessagesScreen = () => {
             fetchConversations(true);
         }, [])
     );
+
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (newMessage: any) => {
+            setConversations((prev) => {
+                const index = prev.findIndex(c => c.conversationId === newMessage.conversationId);
+
+                if (index !== -1) {
+                    const updatedConversations = [...prev];
+                    const target = { ...updatedConversations[index] };
+
+                    target.lastMessage = newMessage.content;
+                    target.lastMessageTime = newMessage.createdAt;
+
+                    // Increment unread count only if message is from the other person
+                    // Note: If we are in ChatScreen, this component might still be mounted but not focused.
+                    // But usually, navigation stacks keep it mounted.
+                    if (newMessage.senderId !== currentUserId) {
+                        target.unreadCount = (target.unreadCount || 0) + 1;
+                    }
+
+                    // Move to top
+                    updatedConversations.splice(index, 1);
+                    updatedConversations.unshift(target);
+                    return updatedConversations;
+                } else {
+                    // If it's a new conversation, re-fetch to get all metadata (user object, etc.)
+                    fetchConversations(false);
+                    return prev;
+                }
+            });
+        };
+
+        const handleMessagesRead = (data: any) => {
+            setConversations((prev) => {
+                const index = prev.findIndex(c => c.conversationId === data.conversationId);
+                if (index !== -1) {
+                    const updatedConversations = [...prev];
+                    updatedConversations[index] = {
+                        ...updatedConversations[index],
+                        unreadCount: 0
+                    };
+                    return updatedConversations;
+                }
+                return prev;
+            });
+        };
+
+        const handleTyping = (data: any) => {
+            setTypingUsers(prev => ({ ...prev, [data.conversationId]: true }));
+        };
+
+        const handleStopTyping = (data: any) => {
+            setTypingUsers(prev => ({ ...prev, [data.conversationId]: false }));
+        };
+
+        socket.on('new_message', handleNewMessage);
+        socket.on('messages_read', handleMessagesRead);
+        socket.on('typing', handleTyping);
+        socket.on('stop_typing', handleStopTyping);
+        return () => {
+            socket.off('new_message', handleNewMessage);
+            socket.off('messages_read', handleMessagesRead);
+            socket.off('typing', handleTyping);
+            socket.off('stop_typing', handleStopTyping);
+        };
+    }, [socket, currentUserId]);
 
     const handleRefresh = () => {
         setIsRefreshing(true);
@@ -87,11 +162,11 @@ const MessagesScreen = () => {
                         renderItem={({ item }) => (
                             <MessageCard
                                 name={item.user.fullName || 'Unknown User'}
-                                message={item.lastMessage}
+                                message={typingUsers[item.conversationId] ? 'Typing...' : item.lastMessage}
                                 time={dayjs(item.lastMessageTime).fromNow(true)}
                                 avatar={item.user.previewPhoto}
                                 unreadCount={item.unreadCount}
-                                online={false} // Currently not provided by backend GET /messages
+                                online={onlineUserIds.includes(item.user.id)}
                                 onPress={() => navigateToChat(item)}
                             />
                         )}

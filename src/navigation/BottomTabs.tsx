@@ -2,6 +2,8 @@ import React from "react";
 import { View, Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
+import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 import DiscoverScreen from "../screens/Home/DiscoverScreen";
 import { DatingScreen } from "../screens/Home/DatingScreen";
 import { HomeScreen } from "../screens/Home/HomeScreen";
@@ -13,11 +15,13 @@ import SettingsScreen from "../screens/Settings/SettingsScreen";
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
+    const unreadCount = useSelector((state: RootState) => state.chat.unreadConversationIds.length);
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 headerShown: false,
                 tabBarShowLabel: false,
+                tabBarHideOnKeyboard: true,
                 tabBarActiveTintColor: "#fff",
                 tabBarInactiveTintColor: "#DD2476",
                 tabBarStyle: {
@@ -59,6 +63,25 @@ export default function BottomTabs() {
                                 size={20}
                                 color={focused ? "#fff" : "#666"}
                             />
+                            {route.name === "Messages" && unreadCount > 0 && (
+                                <View style={{
+                                    position: 'absolute',
+                                    top: 4,
+                                    right: 18,
+                                    backgroundColor: '#ff3b30',
+                                    borderRadius: 10,
+                                    minWidth: 18,
+                                    height: 18,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    paddingHorizontal: 4,
+                                    zIndex: 1
+                                }}>
+                                    <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </Text>
+                                </View>
+                            )}
                             <Text
                                 style={{
                                     color: focused ? "#fff" : "#666",

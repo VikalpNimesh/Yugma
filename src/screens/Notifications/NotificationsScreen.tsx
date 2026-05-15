@@ -9,7 +9,9 @@ import {
     ActivityIndicator,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { resetUnreadCount } from '../../redux/slices/notificationSlice';
 import notificationService, { NotificationItem } from '../../api/services/notificationService';
 import socialService from '../../api/services/socialService';
 import dayjs from 'dayjs';
@@ -20,6 +22,7 @@ dayjs.extend(relativeTime);
 
 const NotificationsScreen = () => {
     const navigation = useNavigation();
+    const dispatch = useDispatch();
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -45,6 +48,12 @@ const NotificationsScreen = () => {
     useEffect(() => {
         fetchNotifications();
     }, [fetchNotifications]);
+
+    useFocusEffect(
+        useCallback(() => {
+            dispatch(resetUnreadCount());
+        }, [dispatch])
+    );
 
     const onRefresh = () => {
         setIsRefreshing(true);

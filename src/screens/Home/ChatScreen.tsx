@@ -113,8 +113,6 @@ const ChatScreen = () => {
                 if (newMessage.senderId === otherUserId) {
                     socket.emit('mark_read', { conversationId });
                 }
-
-                setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
             }
         };
 
@@ -193,7 +191,6 @@ const ChatScreen = () => {
         };
 
         setMessages(prev => [...prev, tempMessage]);
-        setTimeout(() => flatListRef.current?.scrollToEnd({ animated: true }), 100);
 
         try {
             if (isConnected && socket) {
@@ -233,15 +230,18 @@ const ChatScreen = () => {
         <SafeAreaView style={styles.safeArea}>
             <KeyboardAvoidingView
                 style={styles.container}
-                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+                behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
             >
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                         <Ionicons name="chevron-back" size={28} color="#333" />
                     </TouchableOpacity>
-                    <Avatar uri={avatar} name={name} size={40} style={styles.headerAvatar} />
+                    <View style={styles.headerAvatarContainer}>
+                        <Avatar uri={avatar} name={name} size={40} style={styles.headerAvatar} />
+                        <View style={styles.onlineBadge} />
+                    </View>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerName}>{name}</Text>
                         {isOtherUserTyping ? (
@@ -260,13 +260,13 @@ const ChatScreen = () => {
                 ) : (
                     <FlatList
                         ref={flatListRef}
-                        data={messages}
+                        data={[...messages].reverse()}
+                        inverted
                         keyExtractor={item => item.id}
                         renderItem={renderMessage}
                         contentContainerStyle={styles.listContent}
-                        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
-                        onLayout={() => flatListRef.current?.scrollToEnd({ animated: false })}
                         showsVerticalScrollIndicator={false}
+                        keyboardDismissMode="on-drag"
                     />
                 )}
 
@@ -320,7 +320,21 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
+    },
+    headerAvatarContainer: {
+        position: 'relative',
         marginRight: 12,
+    },
+    onlineBadge: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: '#4CAF50',
+        borderWidth: 2,
+        borderColor: '#fff',
     },
     headerInfo: {
         flex: 1,

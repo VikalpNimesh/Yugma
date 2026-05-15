@@ -44,7 +44,7 @@ const MessageCard: React.FC<MessageCardProps> = ({
             {/* Unread Count */}
             {unreadCount ? (
                 <View style={styles.unreadBadge}>
-                    <Text style={styles.unreadText}>{unreadCount}</Text>
+                    <Text style={styles.unreadText}>{unreadCount > 9 ? '9+' : unreadCount}</Text>
                 </View>
             ) : null}
         </TouchableOpacity>
@@ -77,12 +77,12 @@ const styles = StyleSheet.create({
     },
     onlineDot: {
         position: 'absolute',
-        bottom: 4,
-        right: 4,
-        width: 10,
-        height: 10,
+        bottom: 2,
+        right: 2,
+        width: 14,
+        height: 14,
         backgroundColor: '#00C851',
-        borderRadius: 5,
+        borderRadius: 8,
         borderWidth: 2,
         borderColor: '#fff',
     },

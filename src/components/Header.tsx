@@ -5,16 +5,19 @@ import Entypo from "react-native-vector-icons/Entypo";
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
+import { RootState } from '../redux/store';
 
 
 const Header = () => {
     const navigation = useNavigation<any>();
     const route = useRoute();
-    const isAuthenticated = useSelector((state: any) => state.auth.isAuthenticated);
-
+    const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+    const unreadNotifications = useSelector((state: RootState) => state.notification.unreadCount);
+    // const unreadNotifications = 5
+    // 
     // Get the focused route name if it's a nested navigator (like BottomTabs)
     const focusedRoute = getFocusedRouteNameFromRoute(route);
-    
+
     // Determine if we should show the notification icon
     // Show only if we are on 'Discover' (tab) or 'DiscoverScreen' (stack)
     const isDiscoverScreen = route.name === 'DiscoverScreen' || focusedRoute === 'Discover' || (route.name === 'BottomTabs' && !focusedRoute);
@@ -23,19 +26,25 @@ const Header = () => {
         <View style={styles.header}>
             <View style={styles.logoCon}>
                 <Image
-                    source={require("../assets/yugmaNew.jpg")}
-                    style={{ width: 120, height: 40, resizeMode: "contain" }}
+                    source={require("../assets/yug.png")}
+                    style={{ width: "100%", height: "100%", resizeMode: "contain" }}
                 />
             </View>
 
             {isAuthenticated && isDiscoverScreen && (
                 <View style={styles.headerRight}>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                         onPress={() => navigation.navigate('Notifications')}
                         style={styles.iconButton}
                     >
-                        <Ionicons name="notifications-outline" size={24} color="#000" />
-                        <View style={styles.badge} />
+                        <Ionicons name="notifications-outline" size={24} color="white" />
+                        {unreadNotifications > 0 && (
+                            <View style={styles.badge}>
+                                <Text style={styles.badgeText}>
+                                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                </Text>
+                            </View>
+                        )}
                     </TouchableOpacity>
                 </View>
             )}
@@ -52,7 +61,8 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         flexDirection: "row",
         gap: 4,
-width:50
+        width: 40,
+        height: 40,
     },
     logo: {
         fontSize: 18,
@@ -92,10 +102,10 @@ width:50
         justifyContent: "space-between",
         alignItems: "center",
         flexDirection: "row",
-        backgroundColor: "white",
-        paddingVertical: 8,
+        backgroundColor: "#DD2476",
+        paddingVertical: 0,
         elevation: 10,
-        paddingHorizontal: 8
+        paddingHorizontal: 14
     },
     headerRight: {
         flexDirection: 'row',
@@ -107,14 +117,22 @@ width:50
     },
     badge: {
         position: 'absolute',
-        top: 4,
-        right: 4,
-        width: 10,
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: '#DD2476',
-        borderWidth: 2,
+        top: -2,
+        right: -2,
+        backgroundColor: 'red',
+        borderRadius: 10,
+        minWidth: 18,
+        height: 18,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 4,
+        borderWidth: 1,
         borderColor: '#fff',
+    },
+    badgeText: {
+        color: 'white',
+        fontSize: 10,
+        fontWeight: '700',
     },
     gradientContainer: {
         borderRadius: 8,

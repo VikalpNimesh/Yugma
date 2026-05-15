@@ -4,6 +4,8 @@ import userReducer from './slices/userSlice';
 import authReducer from './slices/authSlice';
 import profileFormReducer from './slices/profileFormSlice';
 import discoveryReducer from './slices/discoverySlice';
+import chatReducer from './slices/chatSlice';
+import notificationReducer from './slices/notificationSlice';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { rozeniteDevToolsEnhancer } from '@rozenite/redux-devtools-plugin';
@@ -19,6 +21,8 @@ const combinedReducer = combineReducers({
   auth: authReducer,
   profileForm: profileFormReducer,
   discovery: discoveryReducer,
+  chat: chatReducer,
+  notification: notificationReducer,
 });
 
 const rootReducer = (state: any, action: any) => {
