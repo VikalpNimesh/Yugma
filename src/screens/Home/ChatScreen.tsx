@@ -231,7 +231,7 @@ const ChatScreen = () => {
             <KeyboardAvoidingView
                 style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 20}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 40}
             >
                 {/* Header */}
                 <View style={styles.header}>

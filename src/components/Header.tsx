@@ -1,20 +1,28 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
-import React from 'react'
+import React, { useMemo } from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Entypo from "react-native-vector-icons/Entypo";
 import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 import { useNavigation, useRoute, getFocusedRouteNameFromRoute } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-
+import { useGlobalIAP } from '../context/IapContext';
 
 const Header = () => {
     const navigation = useNavigation<any>();
     const route = useRoute();
     const { isAuthenticated } = useSelector((state: RootState) => state.auth);
     const unreadNotifications = useSelector((state: RootState) => state.notification.unreadCount);
-    // const unreadNotifications = 5
-    // 
+    const iapContext = useGlobalIAP();
+
+    const hasPremium = useMemo(() => {
+        if (!iapContext?.activeSubscriptions) return false;
+        return iapContext.activeSubscriptions.some((sub: any) => sub.isActive && sub.productId === 'premium');
+    }, [iapContext?.activeSubscriptions]);
+
+
+    console.log("hasPremium", iapContext?.activeSubscriptions);
+
     // Get the focused route name if it's a nested navigator (like BottomTabs)
     const focusedRoute = getFocusedRouteNameFromRoute(route);
 
@@ -33,6 +41,11 @@ const Header = () => {
 
             {isAuthenticated && isDiscoverScreen && (
                 <View style={styles.headerRight}>
+                    {hasPremium && (
+                        <TouchableOpacity style={{ marginRight: 15 }} onPress={() => navigation.navigate('PremiumPlans')}>
+                            <Ionicons name="star" size={24} color="#FFD700" />
+                        </TouchableOpacity>
+                    )}
                     <TouchableOpacity
                         onPress={() => navigation.navigate('Notifications')}
                         style={styles.iconButton}

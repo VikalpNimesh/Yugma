@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Platform } from 'react-native';
+import { Platform, AppState, AppStateStatus } from 'react-native';
 import * as IAP from 'react-native-iap';
 
 const skus = Platform.select({
@@ -19,7 +19,7 @@ export const useIAP = () => {
         try {
             setIsLoading(true);
             await IAP.initConnection();
-            
+
             // Fetch products and active subscriptions in parallel for efficiency
             const [productResult, activeResult] = await Promise.all([
                 IAP.fetchProducts({ skus, type: 'subs' }),
@@ -38,9 +38,24 @@ export const useIAP = () => {
 
     useEffect(() => {
         initIAP();
-        
+
+        const handleAppStateChange = async (nextAppState: AppStateStatus) => {
+            if (nextAppState === 'active') {
+                try {
+                    console.log('App returned to foreground, refreshing active subscriptions...');
+                    const activeResult = await IAP.getActiveSubscriptions();
+                    setActiveSubscriptions(activeResult);
+                } catch (err) {
+                    console.warn('Failed to refresh active subscriptions on AppState change:', err);
+                }
+            }
+        };
+
+        const appStateSubscription = AppState.addEventListener('change', handleAppStateChange);
+
         const purchaseUpdateSubscription = IAP.purchaseUpdatedListener(async (purchase) => {
-            const receipt = purchase.transactionReceipt;
+            console.log('purchaseUpdateSubscription', purchase);
+            const receipt = purchase.transactionReceipt || purchase.purchaseToken;
             if (receipt) {
                 try {
                     await IAP.finishTransaction({ purchase, isConsumable: false });
@@ -62,6 +77,7 @@ export const useIAP = () => {
         });
 
         return () => {
+            appStateSubscription.remove();
             purchaseUpdateSubscription.remove();
             purchaseErrorSubscription.remove();
             IAP.endConnection();

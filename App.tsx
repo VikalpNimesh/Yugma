@@ -13,6 +13,7 @@ import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { SocketProvider } from './src/context/SocketContext';
 import { requestUserPermission, notificationListener } from './src/utils/notificationHelper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { IapProvider } from './src/context/IapContext';
 
 function RootNavigator() {
   const isLoggedIn = useSelector(
@@ -51,9 +52,11 @@ export default function App() {
         <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: '#ffffff' }}>
           <Provider store={store}>
             <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
-              <SocketProvider>
-                <RootNavigator />
-              </SocketProvider>
+              <IapProvider>
+                <SocketProvider>
+                  <RootNavigator />
+                </SocketProvider>
+              </IapProvider>
               <Toast />
             </PersistGate>
           </Provider>

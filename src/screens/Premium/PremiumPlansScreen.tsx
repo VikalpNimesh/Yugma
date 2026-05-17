@@ -14,7 +14,10 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import LinearGradient from "react-native-linear-gradient";
-import { useIAP } from "../../hooks/useIAP";
+import { useSelector } from "react-redux";
+import { useGlobalIAP as useIAP } from "../../context/IapContext";
+import { RootState } from "../../redux/store";
+import axiosInstance from "../../api/axios/axiosInstance";
 
 interface Feature {
     text: string;
@@ -50,8 +53,40 @@ const PremiumPlansScreen = () => {
         requestSubscription,
         clearPurchaseState
     } = useIAP();
+    const { user } = useSelector((state: RootState) => state.auth);
     const [selectedPlanId, setSelectedPlanId] = useState<string | null>(null);
     const [isPurchasing, setIsPurchasing] = useState(false);
+
+    // Verify purchase with backend API
+    useEffect(() => {
+        const verifyPurchase = async () => {
+            if (currentPurchase && user) {
+                try {
+                    const payload = {
+                        userId: user.id,
+                        productId: currentPurchase.productId || "premium",
+                        purchaseToken: currentPurchase.purchaseToken || currentPurchase.transactionReceipt,
+                        transactionId: currentPurchase.transactionId || (currentPurchase as any).id,
+                        transactionDate: currentPurchase.transactionDate,
+                        packageName: (currentPurchase as any).packageNameAndroid || "com.yugma.dating",
+                        basePlan: selectedPlanId || "monthly"
+                    };
+
+                    const response = await axiosInstance.post('/subscription/verify', payload);
+
+                    if (response.status === 200 || response.status === 201) {
+                        console.log('Subscription verified successfully');
+                    } else {
+                        console.error('Subscription verification failed', response.data);
+                    }
+                } catch (err) {
+                    console.error('API Verification error:', err);
+                }
+            }
+        };
+
+        verifyPurchase();
+    }, [currentPurchase, user, selectedPlanId]);
 
     // Identify the currently active plan
     const activePlan = useMemo(() => {
@@ -149,8 +184,8 @@ const PremiumPlansScreen = () => {
     const SuccessModal = () => {
         if (!currentPurchase) return null;
         
-        // Find the plan that was just bought
-        const purchasedPlan = [...plans, ...activeSubscriptions.map(s => ({ title: 'Premium' }))].find(p => p.sku === currentPurchase.productId) || { title: 'Premium Plan' };
+        // Find the plan that was just bought using selectedPlanId
+        const purchasedPlan = plans.find(p => p.id === selectedPlanId) || { title: 'Premium Plan' };
 
         return (
             <Modal transparent visible={!!currentPurchase} animationType="fade">
@@ -166,7 +201,7 @@ const PremiumPlansScreen = () => {
                         <View style={styles.receiptContainer}>
                             <View style={styles.receiptRow}>
                                 <Text style={styles.receiptLabel}>Order ID</Text>
-                                <Text style={styles.receiptValue} numberOfLines={1}>{currentPurchase.transactionId}</Text>
+                                <Text style={styles.receiptValue} numberOfLines={1}>{currentPurchase.transactionId || (currentPurchase as any).id}</Text>
                             </View>
                             <View style={styles.receiptDivider} />
                             <View style={styles.receiptRow}>
