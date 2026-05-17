@@ -108,19 +108,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 30,
     },
     logoCircle: {
-        width: 140,
-        height: 140,
+        width: 160,
+        height: 160,
         borderRadius: 100,
         backgroundColor: "rgba(255, 255, 255, 0.2)",
         alignItems: "center",
         justifyContent: "center",
         marginBottom: 0,
+        overflow: "hidden"
     },
     logo: {
         width: "100%",
         height: "100%",
         borderRadius: 100,
         overflow: "hidden",
+        marginTop: 30
     },
     textSection: {
         alignItems: "center",
