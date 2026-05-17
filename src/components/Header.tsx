@@ -93,6 +93,10 @@ const styles = StyleSheet.create({
 
 
     },
+
+
+
+
     segmentButton: {
         flexDirection: "row",
         alignItems: "center",
