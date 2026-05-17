@@ -9,7 +9,7 @@ import AppNavigator from "./src/navigation/AppNavigator";
 import AuthNavigator from "./src/navigation/AuthNavigator";
 import { NavigationContainer } from '@react-navigation/native';
 import { useEffect, useRef } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider } from 'react-native-safe-area-context';
 import { SocketProvider } from './src/context/SocketContext';
 import { requestUserPermission, notificationListener } from './src/utils/notificationHelper';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -44,18 +44,21 @@ export default function App() {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar barStyle="light-content" backgroundColor="#FF5F6D" translucent />
-      <SafeAreaView style={{ flex: 1 }} >
-        <Provider store={store}>
-          <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
-            <SocketProvider>
-              <RootNavigator />
-            </SocketProvider>
-            <Toast />
-          </PersistGate>
-        </Provider>
-      </SafeAreaView>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <StatusBar barStyle="light-content" backgroundColor="#FF5F6D" />
+        <SafeAreaView edges={['top']} style={{ backgroundColor: '#FF5F6D' }} />
+        <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: '#ffffff' }}>
+          <Provider store={store}>
+            <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
+              <SocketProvider>
+                <RootNavigator />
+              </SocketProvider>
+              <Toast />
+            </PersistGate>
+          </Provider>
+        </SafeAreaView>
+      </GestureHandlerRootView>
+    </SafeAreaProvider>
   );
 }
