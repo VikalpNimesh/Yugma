@@ -1,0 +1,54 @@
+name: Android Assemble Release (FREE)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install JS dependencies
+        run: npm install
+
+      - name: Grant execute permission to gradlew
+        run: chmod +x android/gradlew
+
+      - name: Build AAB (bundleRelease)
+        run: |
+          cd android
+          ./gradlew bundleRelease
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+
+      # ==========================================
+      # To build APK (assembleRelease) instead of AAB:
+      # ==========================================
+      # - name: Build APK (assembleRelease)
+      #   run: |
+      #     cd android
+      #     ./gradlew assembleRelease
+      # 
+      # - name: Upload APK Artifact
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-release-apk
+      #     path: android/app/build/outputs/apk/release/app-release.apk
