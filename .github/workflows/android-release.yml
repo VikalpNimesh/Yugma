@@ -1,17 +1,22 @@
-name: Android Assemble Release (FREE)
+name: Deploy to Play Store Internal Testing
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main  # triggers automatically when you push to main
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -27,30 +32,25 @@ jobs:
       - name: Install JS dependencies
         run: npm install
 
+      - name: Decode Keystore
+        env:
+          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
+        run: |
+          echo "$KEYSTORE_FILE" | base64 --decode > android/app/yugma-upload-key.keystore
+
       - name: Grant execute permission to gradlew
         run: chmod +x android/gradlew
 
-      - name: Build AAB (bundleRelease)
+      - name: Build AAB
         run: |
           cd android
           ./gradlew bundleRelease
 
-      - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload to Play Store Internal Testing
+        uses: r0adkll/upload-google-play@v1
         with:
-          name: app-release-aab
-          path: android/app/build/outputs/bundle/release/app-release.aab
-
-      # ==========================================
-      # To build APK (assembleRelease) instead of AAB:
-      # ==========================================
-      # - name: Build APK (assembleRelease)
-      #   run: |
-      #     cd android
-      #     ./gradlew assembleRelease
-      # 
-      # - name: Upload APK Artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-release-apk
-      #     path: android/app/build/outputs/apk/release/app-release.apk
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_JSON_KEY }}
+          packageName: com.yugma.dating
+          releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
