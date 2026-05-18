@@ -10,9 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-      KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     steps:
       - name: Checkout code
@@ -33,10 +30,14 @@ jobs:
         run: npm install
 
       - name: Decode Keystore
-        env:
-          KEYSTORE_FILE: ${{ secrets.KEYSTORE_FILE }}
-        run: |
-          echo "$KEYSTORE_FILE" | base64 --decode > android/app/yugma-upload-key.keystore
+        uses: timheuer/base64-to-file@v1.2
+        id: keystore_file
+        with:
+          fileName: 'yugma-upload-key.keystore'
+          encodedString: ${{ secrets.KEYSTORE_FILE }}
+
+      - name: Copy Keystore to App Folder
+        run: mv ${{ steps.keystore_file.outputs.filePath }} android/app/yugma-upload-key.keystore
 
       - name: Grant execute permission to gradlew
         run: chmod +x android/gradlew
