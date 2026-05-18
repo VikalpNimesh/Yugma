@@ -95,9 +95,15 @@ android {
 
             release {
                 storeFile file('yugma-upload-key.keystore')
-                storePassword System.getenv("KEYSTORE_PASSWORD") ?: '123456'
-                keyAlias System.getenv("KEY_ALIAS") ?: 'upload-key'
-                keyPassword System.getenv("KEY_PASSWORD") ?: '123456'
+                
+                def keystorePassword = System.getenv("KEYSTORE_PASSWORD")
+                storePassword = (keystorePassword != null && !keystorePassword.isEmpty()) ? keystorePassword : '123456'
+                
+                def alias = System.getenv("KEY_ALIAS")
+                keyAlias = (alias != null && !alias.isEmpty()) ? alias : 'upload-key'
+                
+                def keyPass = System.getenv("KEY_PASSWORD")
+                keyPassword = (keyPass != null && !keyPass.isEmpty()) ? keyPass : '123456'
             }
         }
     buildTypes {
