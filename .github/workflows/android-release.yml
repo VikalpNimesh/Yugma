@@ -1,9 +1,7 @@
 name: Deploy to Play Store Internal Testing
 
 on:
-  push:
-    branches:
-      - main  # triggers automatically when you push to main
+  workflow_dispatch:
 
 jobs:
   deploy:
