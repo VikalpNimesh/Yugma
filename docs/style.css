@@ -1,0 +1,296 @@
+/* Premium CSS Design System for Yugma Documentation */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap');
+
+:root {
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: 'Fira Code', Menlo, Monaco, Consolas, "Courier New", monospace;
+  
+  /* Harmonious Sleek HSL Palette */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --primary: #ff3366;
+  --primary-hover: #e11d48;
+  --primary-light: #fff1f2;
+  
+  --border: #e2e8f0;
+  --border-focus: #cbd5e1;
+  
+  /* Alert/Callout HSL Colors */
+  --note-bg: #eff6ff;
+  --note-border: #3b82f6;
+  --note-text: #1e3a8a;
+  
+  --important-bg: #faf5ff;
+  --important-border: #a855f7;
+  --important-text: #581c87;
+  
+  --warning-bg: #fffbeb;
+  --warning-border: #f59e0b;
+  --warning-text: #78350f;
+  
+  --caution-bg: #fef2f2;
+  --caution-border: #ef4444;
+  --caution-text: #7f1d1d;
+  
+  --success-bg: #f0fdf4;
+  --success-border: #22c55e;
+  --success-text: #14532d;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.625;
+  margin: 0;
+  padding: 40px 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  letter-spacing: -0.025em;
+}
+
+h1 {
+  font-size: 2.25rem;
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 12px;
+  margin-top: 0;
+  color: var(--text-primary);
+  background: linear-gradient(to right, #ff3366, #ff6b8b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+h2 {
+  font-size: 1.625rem;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-top: 1.8em;
+}
+
+h3 {
+  font-size: 1.25rem;
+  margin-top: 1.6em;
+}
+
+h4 {
+  font-size: 1.1rem;
+}
+
+p {
+  margin-top: 0;
+  margin-bottom: 1.25em;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+
+/* Lists */
+ul, ol {
+  margin-top: 0;
+  margin-bottom: 1.25em;
+  padding-left: 1.5em;
+  color: var(--text-secondary);
+}
+
+li {
+  margin-bottom: 0.5em;
+}
+
+li > ul, li > ol {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+}
+
+/* Code Blocks */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--bg-tertiary);
+  padding: 3px 6px;
+  border-radius: 6px;
+  color: #e11d48;
+}
+
+pre {
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 20px;
+  border-radius: 12px;
+  overflow-x: auto;
+  margin-top: 0;
+  margin-bottom: 1.5em;
+  border: 1px solid #1e293b;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-size: 0.9em;
+  line-height: 1.5;
+}
+
+/* Table Design */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-top: 1.5em;
+  margin-bottom: 1.5em;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+th, td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background-color: var(--bg-secondary);
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:nth-child(even) td {
+  background-color: var(--bg-secondary);
+}
+
+/* Blockquotes & Callouts */
+blockquote {
+  margin: 1.5em 0;
+  padding: 16px 20px;
+  border-left: 4px solid var(--border);
+  background-color: var(--bg-secondary);
+  border-radius: 0 8px 8px 0;
+}
+
+blockquote p {
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* GitHub Style Alerts Styling via Custom Attribute Parsing or Text Checking */
+blockquote.note, blockquote:has(p:contains("[!NOTE]")), blockquote:has(strong:contains("[!NOTE]")) {
+  background-color: var(--note-bg);
+  border-left-color: var(--note-border);
+  color: var(--note-text);
+}
+
+blockquote.important, blockquote:has(p:contains("[!IMPORTANT]")) {
+  background-color: var(--important-bg);
+  border-left-color: var(--important-border);
+  color: var(--important-text);
+}
+
+blockquote.warning, blockquote:has(p:contains("[!WARNING]")) {
+  background-color: var(--warning-bg);
+  border-left-color: var(--warning-border);
+  color: var(--warning-text);
+}
+
+blockquote.caution, blockquote:has(p:contains("[!CAUTION]")) {
+  background-color: var(--caution-bg);
+  border-left-color: var(--caution-border);
+  color: var(--caution-text);
+}
+
+/* Helper styles for converted blockquotes in JS script */
+.alert {
+  padding: 16px 20px;
+  border-left: 4px solid;
+  border-radius: 8px;
+  margin: 20px 0;
+}
+
+.alert-title {
+  font-weight: 700;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+}
+
+.alert-note { background-color: var(--note-bg); border-color: var(--note-border); color: var(--note-text); }
+.alert-important { background-color: var(--important-bg); border-color: var(--important-border); color: var(--important-text); }
+.alert-warning { background-color: var(--warning-bg); border-color: var(--warning-border); color: var(--warning-text); }
+.alert-caution { background-color: var(--caution-bg); border-color: var(--caution-border); color: var(--caution-text); }
+.alert-success { background-color: var(--success-bg); border-color: var(--success-border); color: var(--success-text); }
+
+/* Dividers */
+hr {
+  height: 1px;
+  background-color: var(--border);
+  border: none;
+  margin: 30px 0;
+}
+
+/* Badge tags */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 12px;
+  background-color: var(--primary-light);
+  color: var(--primary);
+  border: 1px solid rgba(255, 51, 102, 0.1);
+}
+
+/* Responsive print styling */
+@media print {
+  body {
+    padding: 0;
+    font-size: 11pt;
+  }
+  
+  pre, table, blockquote {
+    page-break-inside: avoid;
+  }
+}
