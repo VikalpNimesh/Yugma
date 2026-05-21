@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { signupUser } from '../../redux/slices/authSlice';
 import { setCurrentScreen, initializeBasicInfo } from '../../redux/slices/profileFormSlice';
+import BackButton from '../../components/common/BackButton';
 
 export default function SignupScreen({ navigation }: any) {
     const [email, setEmail] = useState('');
@@ -25,6 +26,8 @@ export default function SignupScreen({ navigation }: any) {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [isAdult, setIsAdult] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { appType } = useSelector((state: any) => state.user);
     const dispatch = useDispatch();
@@ -80,6 +83,7 @@ export default function SignupScreen({ navigation }: any) {
                 colors={["#FF5F6D", "#FF3366"]}
                 style={StyleSheet.absoluteFillObject}
             />
+            <BackButton />
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -121,33 +125,57 @@ export default function SignupScreen({ navigation }: any) {
                                 editable={!loading}
                             />
 
-                            <TextInput
-                                style={[styles.input, error && styles.inputError]}
-                                placeholder="Password"
-                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
-                                value={password}
-                                onChangeText={(text) => {
-                                    setPassword(text);
-                                    setError('');
-                                }}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                editable={!loading}
-                            />
+                            <View style={styles.passwordContainer}>
+                                <TextInput
+                                    style={[styles.input, styles.passwordInput, error && styles.inputError]}
+                                    placeholder="Password"
+                                    placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                    value={password}
+                                    onChangeText={(text) => {
+                                        setPassword(text);
+                                        setError('');
+                                    }}
+                                    secureTextEntry={!showPassword}
+                                    autoCapitalize="none"
+                                    editable={!loading}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.eyeIconContainer}
+                                    onPress={() => setShowPassword(!showPassword)}
+                                >
+                                    <Ionicons 
+                                        name={showPassword ? "eye-outline" : "eye-off-outline"} 
+                                        size={22} 
+                                        color="rgba(255, 255, 255, 0.8)" 
+                                    />
+                                </TouchableOpacity>
+                            </View>
 
-                            <TextInput
-                                style={[styles.input, error && styles.inputError]}
-                                placeholder="Confirm Password"
-                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
-                                value={confirmPassword}
-                                onChangeText={(text) => {
-                                    setConfirmPassword(text);
-                                    setError('');
-                                }}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                editable={!loading}
-                            />
+                            <View style={styles.passwordContainer}>
+                                <TextInput
+                                    style={[styles.input, styles.passwordInput, error && styles.inputError]}
+                                    placeholder="Confirm Password"
+                                    placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                    value={confirmPassword}
+                                    onChangeText={(text) => {
+                                        setConfirmPassword(text);
+                                        setError('');
+                                    }}
+                                    secureTextEntry={!showConfirmPassword}
+                                    autoCapitalize="none"
+                                    editable={!loading}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.eyeIconContainer}
+                                    onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                                >
+                                    <Ionicons 
+                                        name={showConfirmPassword ? "eye-outline" : "eye-off-outline"} 
+                                        size={22} 
+                                        color="rgba(255, 255, 255, 0.8)" 
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         {error ? (
@@ -240,6 +268,19 @@ const styles = StyleSheet.create({
         fontSize: 15,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    passwordContainer: {
+        position: 'relative',
+        width: '100%',
+    },
+    passwordInput: {
+        paddingRight: 50,
+    },
+    eyeIconContainer: {
+        position: 'absolute',
+        right: 15,
+        height: '100%',
+        justifyContent: 'center',
     },
     inputError: {
         borderColor: '#FFD700',

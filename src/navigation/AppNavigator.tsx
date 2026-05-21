@@ -15,6 +15,11 @@ import MatchesScreen from "../screens/Home/MatchesScreen";
 import SignupScreen from "../screens/Auth/SignupScreen";
 import LoginScreen from "../screens/Auth/LoginScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
+import ProfileSettingsScreen from "../screens/Settings/ProfileSettingsScreen";
+import NotificationSettingsScreen from "../screens/Settings/NotificationSettingsScreen";
+import PrivacySettingsScreen from "../screens/Settings/PrivacySettingsScreen";
+import PremiumSettingsScreen from "../screens/Settings/PremiumSettingsScreen";
+import VerificationSettingsScreen from "../screens/Settings/VerificationSettingsScreen";
 import NotificationsScreen from "../screens/Notifications/NotificationsScreen";
 import PremiumPlansScreen from "../screens/Premium/PremiumPlansScreen";
 import AppTypeSelectionScreen from "../screens/Auth/AppTypeSelectionScreen";
@@ -34,6 +39,11 @@ export type RootStackParamList = {
     MatchesScreen: undefined;
     LoginScreen: undefined;
     SettingsScreen: undefined;
+    ProfileSettings: undefined;
+    NotificationSettings: undefined;
+    PrivacySettings: undefined;
+    PremiumSettings: undefined;
+    VerificationSettings: undefined;
     Notifications: undefined;
     PremiumPlans: undefined;
     ProfileDetails: { userId: string };
@@ -64,6 +74,11 @@ const AppNavigator = () => {
             <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="MatchesScreen" component={MatchesScreen} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="SettingsScreen" component={SettingsScreen} options={{ header: () => <Header />, headerShown: true }} />
+            <Stack.Screen name="ProfileSettings" component={ProfileSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="NotificationSettings" component={NotificationSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="PrivacySettings" component={PrivacySettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="PremiumSettings" component={PremiumSettingsScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="VerificationSettings" component={VerificationSettingsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="Notifications" component={NotificationsScreen} options={{ headerShown: false }} />
             <Stack.Screen name="PremiumPlans" component={PremiumPlansScreen} options={{ headerShown: false }} />
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />

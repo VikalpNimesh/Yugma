@@ -11,18 +11,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
 import { updateUser } from '../../redux/slices/userSlice';
+import BackButton from '../../components/common/BackButton';
 
 const { width } = Dimensions.get('window');
 
-const AppTypeSelectionScreen = () => {
-    const navigation = useNavigation();
+const GenderSelectionScreen = () => {
+    const navigation = useNavigation<any>();
     const dispatch = useDispatch();
 
-    const handleSelection = async (type: 'dating' | 'matrimonial') => {
+    const handleSelection = async (gender: 'male' | 'female' | 'prefer_not_to_say') => {
         try {
-            await AsyncStorage.setItem('hasLaunched', 'true');
-            dispatch(updateUser({ appType: type }));
-            // Skip GenderSelectionScreen and go straight to GoogleLogin
+            await AsyncStorage.setItem('userGender', gender);
+            dispatch(updateUser({ gender }));
             navigation.navigate('GoogleLogin' as never);
         } catch (error) {
             console.error('Error saving data', error);
@@ -35,41 +35,59 @@ const AppTypeSelectionScreen = () => {
                 colors={["#FF5F6D", "#FF3366"]}
                 style={StyleSheet.absoluteFillObject}
             />
+            <BackButton />
             <View style={styles.content}>
                 <Text style={styles.title}>Welcome to Yugma</Text>
-                <Text style={styles.subtitle}>Choose your journey</Text>
+                <Text style={styles.subtitle}>Select your gender</Text>
 
                 <View style={styles.cardsContainer}>
-                    {/* Dating Option */}
+                    {/* Male Option */}
                     <TouchableOpacity
                         style={styles.card}
-                        onPress={() => handleSelection('dating')}
+                        onPress={() => handleSelection('male')}
                         activeOpacity={0.9}
                     >
                         <View style={styles.cardContent}>
                             <View style={styles.iconCircle}>
-                                <Text style={styles.cardIcon}>💘</Text>
+                                <Text style={styles.cardIcon}>👨</Text>
                             </View>
                             <View style={styles.cardTextContainer}>
-                                <Text style={styles.cardTitle}>Dating</Text>
-                                <Text style={styles.cardDesc}>Find love and meaningful connections</Text>
+                                <Text style={styles.cardTitle}>Male</Text>
+                                <Text style={styles.cardDesc}>I am a man</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
 
-                    {/* Matrimony Option */}
+                    {/* Female Option */}
                     <TouchableOpacity
                         style={styles.card}
-                        onPress={() => handleSelection('matrimonial')}
+                        onPress={() => handleSelection('female')}
                         activeOpacity={0.9}
                     >
                         <View style={styles.cardContent}>
                             <View style={styles.iconCircle}>
-                                <Text style={styles.cardIcon}>💍</Text>
+                                <Text style={styles.cardIcon}>👩</Text>
                             </View>
                             <View style={styles.cardTextContainer}>
-                                <Text style={styles.cardTitle}>Matrimonial</Text>
-                                <Text style={styles.cardDesc}>Find your perfect life partner</Text>
+                                <Text style={styles.cardTitle}>Female</Text>
+                                <Text style={styles.cardDesc}>I am a woman</Text>
+                            </View>
+                        </View>
+                    </TouchableOpacity>
+
+                    {/* Prefer not to say Option */}
+                    <TouchableOpacity
+                        style={styles.card}
+                        onPress={() => handleSelection('prefer_not_to_say')}
+                        activeOpacity={0.9}
+                    >
+                        <View style={styles.cardContent}>
+                            <View style={styles.iconCircle}>
+                                <Text style={styles.cardIcon}>👤</Text>
+                            </View>
+                            <View style={styles.cardTextContainer}>
+                                <Text style={styles.cardTitle}>Prefer not to say</Text>
+                                <Text style={styles.cardDesc}>Keep it private</Text>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -108,7 +126,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: '100%',
-        height: 140,
+        height: 120,
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderRadius: 25,
         borderWidth: 1,
@@ -122,9 +140,9 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: 70,
+        height: 70,
+        borderRadius: 35,
         backgroundColor: '#FFFFFF',
         alignItems: 'center',
         justifyContent: 'center',
@@ -153,4 +171,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AppTypeSelectionScreen;
+export default GenderSelectionScreen;

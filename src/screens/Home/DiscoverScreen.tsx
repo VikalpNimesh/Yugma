@@ -75,25 +75,6 @@ const DiscoverScreen = () => {
         dispatch(passDiscoveryProfile(userId));
     };
 
-    if (loading && profiles.length === 0) {
-        return (
-            <View style={[styles.container, styles.centered]}>
-                <ActivityIndicator size="large" color="#E94057" />
-            </View>
-        );
-    }
-
-    if (error && profiles.length === 0) {
-        return (
-            <View style={[styles.container, styles.centered]}>
-                <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.retryButton}>
-                    <Text style={styles.retryText}>Retry</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
     return (
         <View style={styles.container}>
             <ScrollView
@@ -112,8 +93,19 @@ const DiscoverScreen = () => {
                     </TouchableOpacity> */}
                 </View>
 
-                {/* Swiper / Content */}
-                {profiles.length > 0 ? (
+                {/* Content */}
+                {loading && profiles.length === 0 ? (
+                    <View style={[styles.centered, { marginTop: 100 }]}>
+                        <ActivityIndicator size="large" color="#E94057" />
+                    </View>
+                ) : error && profiles.length === 0 ? (
+                    <View style={[styles.centered, { marginTop: 100 }]}>
+                        <Text style={styles.errorText}>{error}</Text>
+                        <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.retryButton}>
+                            <Text style={styles.retryText}>Retry</Text>
+                        </TouchableOpacity>
+                    </View>
+                ) : profiles.length > 0 ? (
                     <>
                         <View style={styles.swiperWrapper}>
                             <Swiper
@@ -164,10 +156,15 @@ const DiscoverScreen = () => {
                         </View>
                     </>
                 ) : (
-                    <View style={styles.centered}>
-                        <Text style={styles.emptyText}>No more profiles found!</Text>
-                        <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.retryButton}>
-                            <Text style={styles.retryText}>Refresh</Text>
+                    <View style={styles.emptyStateContainer}>
+                        <View style={styles.emptyIconContainer}>
+                            <Ionicons name="compass-outline" size={64} color="#FF5F6D" />
+                        </View>
+                        <Text style={styles.emptyTitle}>Out of Profiles!</Text>
+                        <Text style={styles.emptySubtitle}>You've seen everyone nearby. Try adjusting your preferences or check back later.</Text>
+                        <TouchableOpacity onPress={() => dispatch(fetchDiscoveryFeed())} style={styles.refreshButton}>
+                            <Ionicons name="refresh" size={20} color="#fff" style={{ marginRight: 8 }} />
+                            <Text style={styles.refreshButtonText}>Refresh Search</Text>
                         </TouchableOpacity>
                     </View>
                 )}
@@ -305,7 +302,7 @@ const DiscoverScreen = () => {
 export default DiscoverScreen;
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#FFF9F6" },
+    container: { flex: 1, backgroundColor: "#fff" },
     centered: {
         flex: 1,
         justifyContent: "center",
@@ -319,7 +316,7 @@ const styles = StyleSheet.create({
         marginTop: 16,
         paddingHorizontal: 16,
     },
-    title: { fontSize: 20, fontWeight: "700", color: "#000" },
+    title: { fontSize: 24, fontWeight: "700", color: "#000" },
     filterButton: {
         flexDirection: "row",
         alignItems: "center",
@@ -381,12 +378,53 @@ const styles = StyleSheet.create({
         textAlign: "center",
         marginBottom: 20,
     },
-    emptyText: {
-        fontSize: 18,
-        color: "#555",
+    emptyStateContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: height * 0.15,
+        paddingHorizontal: 20,
+    },
+    emptyIconContainer: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: '#fff0f3',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    emptyTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 8,
+    },
+    emptySubtitle: {
+        fontSize: 15,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 22,
+        marginBottom: 32,
+        paddingHorizontal: 20,
+    },
+    refreshButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: "#FF5F6D",
+        paddingHorizontal: 24,
+        paddingVertical: 14,
+        borderRadius: 30,
+        elevation: 3,
+        shadowColor: "#FF5F6D",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+    },
+    refreshButtonText: {
+        color: "#fff",
+        fontSize: 16,
         fontWeight: "600",
-        textAlign: "center",
-        marginBottom: 20,
     },
     retryButton: {
         backgroundColor: "#E94057",

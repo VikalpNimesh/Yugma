@@ -51,8 +51,8 @@ export const BasicInfoScreen: React.FC = () => {
     };
 
     const handleNext = () => {
-        const { fullName, email, age, location, profession, education, region } = form;
-        if (!fullName || !email || !age || !location || !profession || !education || !region) {
+        const { fullName, email, age, location, profession, education, region, gender } = form;
+        if (!fullName || !email || !age || !location || !profession || !education || !region || !gender) {
             Toast.show({
                 type: 'error',
                 text1: 'Missing Information',
@@ -130,7 +130,35 @@ export const BasicInfoScreen: React.FC = () => {
                         />
 
                         <View style={styles.inputContainer}>
-                            <Text style={styles.label}>Education</Text>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.label}>Gender</Text>
+                            </View>
+                            <Dropdown
+                                data={[
+                                    { label: "Male", value: "Male" },
+                                    { label: "Female", value: "Female" },
+                                    { label: "Other", value: "Other" },
+                                ]}
+                                labelField="label"
+                                valueField="value"
+                                placeholder="Select gender"
+                                value={form.gender}
+                                onChange={(item) => handleChange("gender", item.value)}
+                                style={styles.dropdown}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                itemTextStyle={{ color: "#333" }}
+                                activeColor="#f4f4f4"
+                                renderRightIcon={() => (
+                                    <Ionicons name="chevron-down" size={20} color="rgba(255, 255, 255, 0.7)" />
+                                )}
+                            />
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <View style={styles.labelRow}>
+                                <Text style={styles.label}>Education</Text>
+                            </View>
                             <Dropdown
                                 data={[
                                     { label: "High School", value: "High School" },
@@ -158,18 +186,26 @@ export const BasicInfoScreen: React.FC = () => {
                         <InputField
                             label="Religion"
                             placeholder="Religion"
-                            value="Brahmin"
-                            onChangeText={() => {}}
+                            value="Hindu"
+                            onChangeText={() => { }}
                             editable={false}
                         />
 
+                        <InputField
+                            label="Caste"
+                            placeholder="Caste"
+                            value="Brahmin"
+                            onChangeText={() => { }}
+                            editable={false}
+                        />
+                        {/* 
                         <InputField
                             label="Area Cover (Premium)"
                             placeholder="Coverage area"
                             value={form.areaCover}
                             onChangeText={(text) => handleChange("areaCover", text)}
                             isPremium
-                        />
+                        /> */}
                     </View>
 
                     {/* Footer Buttons */}

@@ -17,6 +17,7 @@ import socialService from '../../api/services/socialService';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Toast from 'react-native-toast-message';
+import BackButton from '../../components/common/BackButton';
 
 dayjs.extend(relativeTime);
 
@@ -172,13 +173,12 @@ const NotificationsScreen = () => {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle}>Notifications</Text>
-                <TouchableOpacity onPress={handleMarkAllRead}>
-                    <Text style={styles.markReadText}>Mark all read</Text>
-                </TouchableOpacity>
+                <BackButton title="Notifications" color="#000" absolute={false} />
+                {notifications.length > 0 && (
+                    <TouchableOpacity onPress={handleMarkAllRead}>
+                        <Text style={styles.markReadText}>Mark all read</Text>
+                    </TouchableOpacity>
+                )}
             </View>
 
             {isLoading ? (
@@ -196,8 +196,11 @@ const NotificationsScreen = () => {
                     }
                     ListEmptyComponent={
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="notifications-off-outline" size={64} color="#ccc" />
-                            <Text style={styles.emptyText}>No notifications yet</Text>
+                            <View style={styles.emptyIconContainer}>
+                                <Ionicons name="notifications-outline" size={64} color="#FF5F6D" />
+                            </View>
+                            <Text style={styles.emptyTitle}>You're all caught up!</Text>
+                            <Text style={styles.emptySubtitle}>When you get new matches, messages, or likes, they'll show up right here.</Text>
                         </View>
                     }
                 />
@@ -222,11 +225,6 @@ const styles = StyleSheet.create({
     },
     backButton: {
         padding: 4,
-    },
-    headerTitle: {
-        fontSize: 18,
-        fontWeight: '700',
-        color: '#000',
     },
     markReadText: {
         fontSize: 14,
@@ -296,10 +294,27 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 100,
     },
-    emptyText: {
-        marginTop: 16,
-        fontSize: 16,
-        color: '#999',
+    emptyIconContainer: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: '#fff0f3',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 8,
+    },
+    emptySubtitle: {
+        fontSize: 15,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 22,
+        paddingHorizontal: 40,
     },
     actionButtonsContainer: {
         flexDirection: 'row',

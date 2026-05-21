@@ -21,6 +21,8 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import AntDesign from "react-native-vector-icons/AntDesign";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import BackButton from "../../components/common/BackButton";
 
 const { width } = Dimensions.get('window');
 
@@ -31,6 +33,7 @@ export default function LoginScreen() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [localError, setLocalError] = useState('');
     const [googleLoading, setGoogleLoading] = useState(false);
 
@@ -80,6 +83,7 @@ export default function LoginScreen() {
                 colors={["#FF5F6D", "#FF3366"]}
                 style={StyleSheet.absoluteFillObject}
             />
+            <BackButton />
             <KeyboardAvoidingView
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                 style={styles.keyboardView}
@@ -110,20 +114,32 @@ export default function LoginScreen() {
                                 editable={!isLoading && !googleLoading}
                             />
 
-                            <TextInput
-                                style={[styles.input, (localError || authError) && styles.inputError]}
-                                placeholder="Password"
-                                placeholderTextColor="rgba(255, 255, 255, 0.7)"
-                                value={password}
-                                onChangeText={(text) => {
-                                    setPassword(text);
-                                    setLocalError('');
-                                    if (authError) dispatch(clearError());
-                                }}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                editable={!isLoading && !googleLoading}
-                            />
+                            <View style={styles.passwordContainer}>
+                                <TextInput
+                                    style={[styles.input, styles.passwordInput, (localError || authError) && styles.inputError]}
+                                    placeholder="Password"
+                                    placeholderTextColor="rgba(255, 255, 255, 0.7)"
+                                    value={password}
+                                    onChangeText={(text) => {
+                                        setPassword(text);
+                                        setLocalError('');
+                                        if (authError) dispatch(clearError());
+                                    }}
+                                    secureTextEntry={!showPassword}
+                                    autoCapitalize="none"
+                                    editable={!isLoading && !googleLoading}
+                                />
+                                <TouchableOpacity 
+                                    style={styles.eyeIconContainer}
+                                    onPress={() => setShowPassword(!showPassword)}
+                                >
+                                    <Ionicons 
+                                        name={showPassword ? "eye-outline" : "eye-off-outline"} 
+                                        size={22} 
+                                        color="rgba(255, 255, 255, 0.8)" 
+                                    />
+                                </TouchableOpacity>
+                            </View>
                         </View>
 
                         {/* Error Message */}
@@ -222,6 +238,19 @@ const styles = StyleSheet.create({
         fontSize: 16,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.3)',
+    },
+    passwordContainer: {
+        position: 'relative',
+        width: '100%',
+    },
+    passwordInput: {
+        paddingRight: 50,
+    },
+    eyeIconContainer: {
+        position: 'absolute',
+        right: 15,
+        height: '100%',
+        justifyContent: 'center',
     },
     inputError: {
         borderColor: '#FFD700',

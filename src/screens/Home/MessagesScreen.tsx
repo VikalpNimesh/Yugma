@@ -1,7 +1,7 @@
 // screens/MessagesScreen.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MessageCard from '../../components/MessageCard';
 import messageService, { ConversationItem } from '../../api/services/messageService';
@@ -133,14 +133,9 @@ const MessagesScreen = () => {
     );
 
     return (
-        <LinearGradient
-            colors={['#FFDAB9', 'white', "pink"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.gradientContainer}
-        >
-            <View style={styles.container}>
-                {isLoading && !isRefreshing ? (
+        <View style={styles.container}>
+            {renderHeader()}
+            {isLoading && !isRefreshing ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator size="large" color="#FF5F6D" />
                     </View>
@@ -149,14 +144,17 @@ const MessagesScreen = () => {
                         data={conversations}
                         keyExtractor={(item) => item.conversationId}
                         contentContainerStyle={styles.list}
-                        ListHeaderComponent={renderHeader}
                         showsVerticalScrollIndicator={false}
                         refreshControl={
                             <RefreshControl refreshing={isRefreshing} onRefresh={handleRefresh} tintColor="#FF5F6D" />
                         }
                         ListEmptyComponent={
                             <View style={styles.emptyContainer}>
-                                <Text style={styles.emptyText}>No messages yet.</Text>
+                                <View style={styles.emptyIconContainer}>
+                                    <Ionicons name="chatbubbles-outline" size={64} color="#FF5F6D" />
+                                </View>
+                                <Text style={styles.emptyTitle}>Say Hello!</Text>
+                                <Text style={styles.emptySubtitle}>You don't have any messages yet. Start a conversation with your matches to break the ice.</Text>
                             </View>
                         }
                         renderItem={({ item }) => (
@@ -172,8 +170,7 @@ const MessagesScreen = () => {
                         )}
                     />
                 )}
-            </View>
-        </LinearGradient>
+        </View>
     );
 };
 
@@ -183,24 +180,21 @@ export default MessagesScreen;
 
 
 const styles = StyleSheet.create({
-    gradientContainer: {
-        borderRadius: 12,
-        // marginBottom: 12,
-        flex: 1,
-    },
     container: {
-        // backgroundColor: '#fafafa',
-        padding: 16,
+        flex: 1,
+        backgroundColor: '#fff',
+        paddingHorizontal: 16,
+        paddingTop: 20,
     },
     title: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: '700',
-        color: '#111',
+        color: '#000',
     },
     subtitle: {
         color: '#666',
-        fontSize: 14,
-        marginBottom: 20,
+        fontSize: 16,
+        marginVertical: 10,
     },
     list: {
         marginTop: 8,
@@ -218,10 +212,28 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        paddingTop: 40,
+        marginTop: 60,
     },
-    emptyText: {
-        fontSize: 16,
-        color: '#999',
+    emptyIconContainer: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+        backgroundColor: '#fff0f3',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginBottom: 24,
+    },
+    emptyTitle: {
+        fontSize: 22,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 8,
+    },
+    emptySubtitle: {
+        fontSize: 15,
+        color: '#666',
+        textAlign: 'center',
+        lineHeight: 22,
+        paddingHorizontal: 30,
     },
 });

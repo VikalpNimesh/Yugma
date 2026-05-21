@@ -15,6 +15,7 @@ import { resetAuth, setCredentials, fetchUserProfile } from '../../redux/slices/
 import authService from '../services/authService';
 import axiosInstance from '../axios/axiosInstance';
 import socialService from '../services/socialService';
+import { getPushNotificationContext } from '../../utils/pushHelper';
 
 /**
  * Sign in with email and password
@@ -148,6 +149,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
     }
 
     // 2. Exchange Google ID Token for Backend Tokens
+    const pushContext = await getPushNotificationContext();
     const backendPayload = {
       scopes: scopes || [],
       serverAuthCode: serverAuthCode || null,
@@ -159,9 +161,11 @@ export const signInWithGoogle = async (dispatch?: any) => {
         email: userInfo.data.user.email,
         name: userInfo.data.user.name || '',
         id: userInfo.data.user.id,
-      }
+      },
+      // ...pushContext
     };
 
+    console.log('🚀 Google Login Payload:', JSON.stringify(backendPayload, null, 2));
     console.log('🚀 Calling backend google-login with payload');
     const backendResponse = await authService.googleLogin(backendPayload);
 

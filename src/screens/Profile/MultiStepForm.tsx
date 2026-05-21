@@ -122,7 +122,7 @@ const StepOne = () => (
             <InputField label="Region" placeholder="Select region" />
         </View>
 
-        <InputField label="Area Cover (Premium)" placeholder="Enter area details" />
+        {/* <InputField label="Area Cover (Premium)" placeholder="Enter area details" /> */}
     </View>
 );
 

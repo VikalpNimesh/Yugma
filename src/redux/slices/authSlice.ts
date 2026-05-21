@@ -7,6 +7,7 @@ import type {
   LoginRequest,
   SignupRequest,
 } from '../../api/types/auth.types';
+import { getPushNotificationContext } from '../../utils/pushHelper';
 
 // Types
 interface User {
@@ -45,10 +46,10 @@ export const checkAuthState = createAsyncThunk(
       if (credentials) {
         const tokens = JSON.parse(credentials.password);
         console.log(tokens);
-        
+
         // Fetch profile
         await dispatch(fetchUserProfile());
-        
+
         return { token: tokens.access };
       }
       return null;
@@ -76,7 +77,13 @@ export const loginUser = createAsyncThunk(
   'auth/login',
   async (credentials: LoginRequest, { dispatch, rejectWithValue }) => {
     try {
-      const response = await authService.login(credentials);
+      const pushContext = await getPushNotificationContext();
+      const payload = {
+        ...credentials,
+        // ...pushContext
+      };
+      console.log('🚀 Login Payload:', JSON.stringify(payload, null, 2));
+      const response = await authService.login(payload);
 
       const { tokens, user } = response.data;
 
@@ -108,7 +115,13 @@ export const signupUser = createAsyncThunk(
   'auth/signup',
   async (userData: SignupRequest, { rejectWithValue }) => {
     try {
-      const response = await authService.signup(userData);
+      const pushContext = await getPushNotificationContext();
+      const payload = {
+        ...userData,
+        // ...pushContext
+      };
+      console.log('🚀 Signup Payload:', JSON.stringify(payload, null, 2));
+      const response = await authService.signup(payload);
       console.log(response);
       // Using the same pattern as loginUser
       // Assuming response is the Axios response and data contains tokens and user

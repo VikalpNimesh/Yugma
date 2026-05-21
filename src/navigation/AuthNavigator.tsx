@@ -2,6 +2,7 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import AppTypeSelectionScreen from '../screens/Auth/AppTypeSelectionScreen';
+import GenderSelectionScreen from '../screens/Auth/GenderSelectionScreen';
 import GoogleLoginScreen from '../screens/Auth/GoogleLoginScreen';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import SignupScreen from '../screens/Auth/SignupScreen';
@@ -10,6 +11,7 @@ import Header from '../components/Header';
 
 export type AuthStackParamList = {
     AppTypeSelection: undefined;
+    GenderSelection: undefined;
     GoogleLogin: undefined;
     LoginScreen: undefined;
     SignupScreen: undefined;
@@ -26,6 +28,7 @@ const AuthNavigator = () => {
                 headerShown: false,
             }}>
             <Stack.Screen name="AppTypeSelection" component={AppTypeSelectionScreen} />
+            <Stack.Screen name="GenderSelection" component={GenderSelectionScreen} />
             <Stack.Screen name="GoogleLogin" component={GoogleLoginScreen} />
             <Stack.Screen
                 name="LoginScreen"

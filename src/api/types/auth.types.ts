@@ -5,6 +5,9 @@
 export interface LoginRequest {
     emailOrPhone: string;
     password: string;
+    deviceToken?: string;
+    deviceType?: string;
+    deviceId?: string;
 }
 
 export interface LoginResponse {
@@ -38,6 +41,9 @@ export interface GoogleLoginRequest {
         name: string;
         id: string;
     };
+    deviceToken?: string;
+    deviceType?: string;
+    deviceId?: string;
 }
 
 export interface SignupRequest {
@@ -46,6 +52,9 @@ export interface SignupRequest {
     password: string;
     name: string;
     accountMode: string;
+    deviceToken?: string;
+    deviceType?: string;
+    deviceId?: string;
 }
 
 export interface SignupResponse {

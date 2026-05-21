@@ -28,18 +28,21 @@ const Header = () => {
 
     // Determine if we should show the notification icon
     // Show only if we are on 'Discover' (tab) or 'DiscoverScreen' (stack)
-    const isDiscoverScreen = route.name === 'DiscoverScreen' || focusedRoute === 'Discover' || (route.name === 'BottomTabs' && !focusedRoute);
+    // const isDiscoverScreen = route.name === 'DiscoverScreen' || focusedRoute === 'Discover' || (route.name === 'BottomTabs' && !focusedRoute);
 
     return (
         <View style={styles.header}>
-            <View style={styles.logoCon}>
-                <Image
-                    source={require("../assets/yugma_png.png")}
-                    style={{ width: "100%", height: "100%", resizeMode: "contain" }}
-                />
+            <View style={styles.leftContainer}>
+                <View style={styles.logoCon}>
+                    <Image
+                        source={require("../assets/yugma_png.png")}
+                        style={{ width: "100%", height: "100%", resizeMode: "contain" }}
+                    />
+                </View>
+                <Text style={styles.appName}>Yugma</Text>
             </View>
 
-            {isAuthenticated && isDiscoverScreen && (
+            {isAuthenticated && (
                 <View style={styles.headerRight}>
                     {hasPremium && (
                         <TouchableOpacity style={{ marginRight: 15 }} onPress={() => navigation.navigate('PremiumPlans')}>
@@ -68,6 +71,12 @@ const Header = () => {
 export default Header
 
 const styles = StyleSheet.create({
+    leftContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 8,
+        justifyContent: "center",
+    },
     logoCon: {
 
         alignItems: "center",
@@ -76,6 +85,11 @@ const styles = StyleSheet.create({
         gap: 4,
         width: 40,
         height: 40,
+    },
+    appName: {
+        fontSize: 20,
+        fontWeight: 'bold',
+        color: '#FFFFFF',
     },
     logo: {
         fontSize: 18,

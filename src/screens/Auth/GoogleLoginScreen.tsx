@@ -6,6 +6,7 @@ import { useDispatch } from "react-redux";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import { signInWithGoogle } from "../../api/firebase/auth";
+import BackButton from "../../components/common/BackButton";
 
 const { width, height } = Dimensions.get("window");
 
@@ -34,6 +35,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                 colors={["#FF5F6D", "#FF3366"]}
                 style={StyleSheet.absoluteFillObject}
             />
+            <BackButton />
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.content}>
                     {/* Circular Logo Container */}
