@@ -12,11 +12,15 @@ import Toast from 'react-native-toast-message';
 const LikeList = ({ data, onRefresh }: any) => {
     const handleRespond = async (requesterId: string, action: 'accepted' | 'rejected') => {
         try {
-            await socialService.respondToFriendRequest(requesterId, action);
+            if (action === 'accepted') {
+                await socialService.likeUser(requesterId);
+            } else {
+                await socialService.passUser(requesterId);
+            }
             Toast.show({
                 type: 'success',
                 text1: 'Success',
-                text2: `Request ${action} successfully`,
+                text2: action === 'accepted' ? 'Match created successfully' : 'Passed successfully',
             });
             if (onRefresh) onRefresh();
         } catch (error: any) {
@@ -24,7 +28,7 @@ const LikeList = ({ data, onRefresh }: any) => {
             Toast.show({
                 type: 'error',
                 text1: 'Error',
-                text2: `Failed to ${action} request`,
+                text2: `Failed to ${action === 'accepted' ? 'match' : 'pass'}`,
             });
         }
     };
@@ -60,7 +64,7 @@ const LikeList = ({ data, onRefresh }: any) => {
                             activeOpacity={0.7}
                         >
                             <Icon name="close" size={18} color="#ff3b30" />
-                            <Text style={styles.rejectText}>Reject</Text>
+                            <Text style={styles.rejectText}>Pass</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.acceptBtn]}
@@ -68,7 +72,7 @@ const LikeList = ({ data, onRefresh }: any) => {
                             activeOpacity={0.7}
                         >
                             <Icon name="checkmark" size={18} color="white" />
-                            <Text style={styles.acceptText}>Accept</Text>
+                            <Text style={styles.acceptText}>Match</Text>
                         </TouchableOpacity>
                     </View>
                 </View>

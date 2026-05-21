@@ -111,7 +111,7 @@ export const createUserWithEmailPassword = async (
 export const signInWithGoogle = async (dispatch?: any) => {
   try {
     console.log('🔄 Starting Google Sign-In process...');
-    
+
     // 1. Configure
     GoogleSignin.configure({
       webClientId: "719942063573-votd1cg12nv5hti22v6oeks4kliuagbd.apps.googleusercontent.com",
@@ -162,7 +162,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
         name: userInfo.data.user.name || '',
         id: userInfo.data.user.id,
       },
-      // ...pushContext
+      ...pushContext
     };
 
     console.log('🚀 Google Login Payload:', JSON.stringify(backendPayload, null, 2));

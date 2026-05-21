@@ -55,11 +55,11 @@ const DiscoverScreen = () => {
         dispatch(likeDiscoveryProfile(userId));
 
         try {
-            // Send actual friend request
-            await socialService.sendFriendRequest(userId);
+            // Send actual like
+            await socialService.likeUser(userId);
             Toast.show({
                 type: 'success',
-                text1: 'Friend Request Sent!',
+                text1: 'Profile Liked!',
                 text2: 'They will be notified.',
             });
         } catch (error: any) {
@@ -71,8 +71,13 @@ const DiscoverScreen = () => {
         }
     };
 
-    const handlePass = (userId: string) => {
+    const handlePass = async (userId: string) => {
         dispatch(passDiscoveryProfile(userId));
+        try {
+            await socialService.passUser(userId);
+        } catch (error) {
+            console.error("Error passing user:", error);
+        }
     };
 
     return (

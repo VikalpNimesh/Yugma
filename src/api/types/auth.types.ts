@@ -5,7 +5,7 @@
 export interface LoginRequest {
     emailOrPhone: string;
     password: string;
-    deviceToken?: string;
+    fcmToken?: string;
     deviceType?: string;
     deviceId?: string;
 }
@@ -41,7 +41,7 @@ export interface GoogleLoginRequest {
         name: string;
         id: string;
     };
-    deviceToken?: string;
+    fcmToken?: string;
     deviceType?: string;
     deviceId?: string;
 }
@@ -52,7 +52,7 @@ export interface SignupRequest {
     password: string;
     name: string;
     accountMode: string;
-    deviceToken?: string;
+    fcmToken?: string;
     deviceType?: string;
     deviceId?: string;
 }

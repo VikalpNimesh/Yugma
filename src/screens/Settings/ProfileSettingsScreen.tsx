@@ -32,7 +32,7 @@ export default function ProfileSettingsScreen() {
     // Local state for editing
     const [name, setName] = useState(authProfile.fullName || basicInfo.fullName || reduxName || "");
     const [age, setAge] = useState(authProfile.age ? String(authProfile.age) : basicInfo.age || "");
-    const [gender, setGender] = useState(reduxGender);
+    const [gender, setGender] = useState(authProfile.gender || basicInfo.gender || reduxGender);
     const [location, setLocation] = useState(authProfile.location || basicInfo.location || "");
     const [profession, setProfession] = useState(authProfile.profession || basicInfo.profession || "");
     const [education, setEducation] = useState(authProfile.education || basicInfo.education || "");
@@ -45,7 +45,7 @@ export default function ProfileSettingsScreen() {
         if (!isEditing) {
             setName(authProfile.fullName || basicInfo.fullName || reduxName || "");
             setAge(authProfile.age ? String(authProfile.age) : basicInfo.age || "");
-            setGender(reduxGender);
+            setGender(authProfile.gender || basicInfo.gender || reduxGender);
             setLocation(authProfile.location || basicInfo.location || "");
             setProfession(authProfile.profession || basicInfo.profession || "");
             setEducation(authProfile.education || basicInfo.education || "");

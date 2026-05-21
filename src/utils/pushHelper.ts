@@ -12,7 +12,7 @@ const generateFallbackUUID = () => {
 };
 
 export interface PushNotificationContext {
-    deviceToken?: string;
+    fcmToken?: string;
     deviceType: string;
     deviceId: string;
 }
@@ -41,7 +41,7 @@ const getOrCreateDeviceId = async (): Promise<string> => {
 export const getPushNotificationContext = async (): Promise<PushNotificationContext> => {
     const deviceType = Platform.OS;
     const deviceId = await getOrCreateDeviceId();
-    let deviceToken: string | undefined = undefined;
+    let fcmToken: string | undefined = undefined;
 
     try {
         // Request permissions (primarily for iOS, Android 13+ handles this via prompt later usually, 
@@ -52,7 +52,7 @@ export const getPushNotificationContext = async (): Promise<PushNotificationCont
             authStatus === messaging.AuthorizationStatus.PROVISIONAL;
 
         if (enabled) {
-            deviceToken = await messaging().getToken();
+            fcmToken = await messaging().getToken();
         } else {
             console.warn('Push notification permissions denied by user');
         }
@@ -61,7 +61,7 @@ export const getPushNotificationContext = async (): Promise<PushNotificationCont
     }
 
     return {
-        deviceToken,
+        fcmToken,
         deviceType,
         deviceId,
     };

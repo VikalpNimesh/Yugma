@@ -80,7 +80,7 @@ export const loginUser = createAsyncThunk(
       const pushContext = await getPushNotificationContext();
       const payload = {
         ...credentials,
-        // ...pushContext
+        ...pushContext
       };
       console.log('🚀 Login Payload:', JSON.stringify(payload, null, 2));
       const response = await authService.login(payload);
@@ -118,7 +118,7 @@ export const signupUser = createAsyncThunk(
       const pushContext = await getPushNotificationContext();
       const payload = {
         ...userData,
-        // ...pushContext
+        ...pushContext
       };
       console.log('🚀 Signup Payload:', JSON.stringify(payload, null, 2));
       const response = await authService.signup(payload);

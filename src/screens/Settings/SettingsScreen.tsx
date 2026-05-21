@@ -67,13 +67,13 @@ export default function SettingsScreen() {
                     onPress={() => navigation.navigate("NotificationSettings")}
                 />
                 <View style={styles.separator} />
-                <SettingItem
+                {/* <SettingItem
                     icon="lock-closed-outline"
                     title="Privacy & Safety"
                     subtitle="Visibility and blocked contacts"
                     color="#50C878"
                     onPress={() => navigation.navigate("PrivacySettings")}
-                />
+                /> */}
             </View>
 
             <View style={styles.section}>
@@ -85,13 +85,13 @@ export default function SettingsScreen() {
                     onPress={() => navigation.navigate("PremiumSettings")}
                 />
                 <View style={styles.separator} />
-                <SettingItem
+                {/* <SettingItem
                     icon="shield-checkmark-outline"
                     title="Verification"
                     subtitle="Get the verified badge"
                     color="#9B59B6"
                     onPress={() => navigation.navigate("VerificationSettings")}
-                />
+                /> */}
             </View>
 
             <View style={styles.section}>

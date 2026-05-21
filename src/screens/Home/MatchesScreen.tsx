@@ -12,29 +12,29 @@ import {
 import MatchList from "./MatchList";
 import LikeList from "./LikeList";
 import Icon from "react-native-vector-icons/Ionicons";
-import socialService, { FriendItem } from "../../api/services/socialService";
+import socialService, { SocialUserItem } from "../../api/services/socialService";
 import Toast from "react-native-toast-message";
 import dayjs from "dayjs";
 
 const MatchesScreen = () => {
-    const [selectedTab, setSelectedTab] = useState("Friends");
-    const [friends, setFriends] = useState<FriendItem[]>([]);
-    console.log('friends', friends);
-    const [likes, setLikes] = useState<any[]>([]);
+    const [selectedTab, setSelectedTab] = useState("Matches");
+    const [matches, setMatches] = useState<SocialUserItem[]>([]);
+    console.log('matches', matches);
+    const [likes, setLikes] = useState<SocialUserItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const fetchFriends = async () => {
+    const fetchMatches = async () => {
         try {
-            const data = await socialService.getFriends();
-            setFriends(data || []);
+            const data = await socialService.getMatches();
+            setMatches(data || []);
         } catch (error: any) {
-            console.error("Error fetching friends:", error);
+            console.error("Error fetching matches:", error);
         }
     };
 
     const fetchLikes = async () => {
         try {
-            const data = await socialService.getIncomingRequests();
+            const data = await socialService.getLikesReceived();
             setLikes(data || []);
         } catch (error: any) {
             console.error("Error fetching likes:", error);
@@ -43,7 +43,7 @@ const MatchesScreen = () => {
 
     const loadData = async () => {
         setIsLoading(true);
-        await Promise.all([fetchFriends(), fetchLikes()]);
+        await Promise.all([fetchMatches(), fetchLikes()]);
         setIsLoading(false);
     };
 
@@ -51,17 +51,17 @@ const MatchesScreen = () => {
         loadData();
     }, []);
 
-    // Transform FriendItem to MatchList format
-    const transformedFriends = friends.map(f => ({
-        id: f.id,
-        name: f.fullName || 'User',
+    // Transform SocialUserItem to MatchList format
+    const transformedMatches = matches.map(m => ({
+        id: m.id,
+        name: m.fullName || 'User',
         age: 'N/A',
         location: 'Hidden',
         job: 'N/A',
-        matchedDays: dayjs(f.friendsSince).fromNow(),
+        matchedDays: dayjs(m.matchedSince).fromNow(),
         verified: true,
         matchPercent: "100%",
-        image: f.profilePhoto,
+        image: m.profilePhoto,
     }));
 
     const transformedLikes = likes.map(l => ({
@@ -70,7 +70,7 @@ const MatchesScreen = () => {
         age: 'N/A',
         location: 'Hidden',
         job: 'N/A',
-        matchedDays: dayjs(l.requestedAt).fromNow(),
+        matchedDays: dayjs(l.likedAt).fromNow(),
         verified: false,
         matchPercent: "95%",
         image: l.profilePhoto,
@@ -80,11 +80,11 @@ const MatchesScreen = () => {
         <View style={styles.container}>
             <Text style={styles.header}>Your Connections</Text>
             <Text style={styles.subHeader}>
-                Connect with your friends and start chatting
+                Connect with your matches and start chatting
             </Text>
 
             <View style={styles.tabContainer}>
-                {["Friends", "Likes"]?.map((tab) => (
+                {["Matches", "Likes"]?.map((tab) => (
                     <Pressable
                         key={tab}
                         style={[
@@ -93,7 +93,7 @@ const MatchesScreen = () => {
                         ]}
                         onPress={() => setSelectedTab(tab)}
                     >
-                        {tab === "Friends" ? <Icon
+                        {tab === "Matches" ? <Icon
                             name={"people-outline"}
                             size={20}
                             color={"black"}
@@ -109,7 +109,7 @@ const MatchesScreen = () => {
                                 selectedTab === tab && styles.activeTabText,
                             ]}
                         >
-                            {tab} {tab === "Friends" ? `(${friends.length})` : `(${likes.length})`}
+                            {tab} {tab === "Matches" ? `(${matches.length})` : `(${likes.length})`}
                         </Text>
                     </Pressable>
                 ))}
@@ -119,8 +119,8 @@ const MatchesScreen = () => {
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
                     <ActivityIndicator size="large" color="#FF5F6D" />
                 </View>
-            ) : selectedTab === "Friends" ? (
-                <MatchList data={transformedFriends} />
+            ) : selectedTab === "Matches" ? (
+                <MatchList data={transformedMatches} />
             ) : (
                 <LikeList data={transformedLikes} onRefresh={loadData} />
             )}

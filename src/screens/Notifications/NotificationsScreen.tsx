@@ -32,6 +32,7 @@ const NotificationsScreen = () => {
         if (showLoading) setIsLoading(true);
         try {
             const data = await notificationService.getNotifications();
+            console.log('🚀 Notifications Data:', JSON.stringify(data, null, 2));
             setNotifications(Array.isArray(data) ? data.filter(n => n && typeof n === 'object') : []);
         } catch (error: any) {
             console.error('Error fetching notifications:', error);
@@ -100,22 +101,22 @@ const NotificationsScreen = () => {
     const handleAcceptRequest = async (requesterId: string | undefined, notificationId: string) => {
         if (!requesterId) return;
         try {
-            await socialService.respondToFriendRequest(requesterId, 'accepted');
-            Toast.show({ type: 'success', text1: 'Request Accepted', text2: 'You are now friends!' });
+            await socialService.likeUser(requesterId);
+            Toast.show({ type: 'success', text1: 'Match Created', text2: 'You can now chat with them!' });
             await handleMarkAsRead(notificationId);
         } catch (error: any) {
-            Toast.show({ type: 'error', text1: 'Failed to accept request', text2: error?.response?.data?.message || 'Something went wrong' });
+            Toast.show({ type: 'error', text1: 'Failed to accept like', text2: error?.response?.data?.message || 'Something went wrong' });
         }
     };
 
     const handleRejectRequest = async (requesterId: string | undefined, notificationId: string) => {
         if (!requesterId) return;
         try {
-            await socialService.respondToFriendRequest(requesterId, 'rejected');
-            Toast.show({ type: 'info', text1: 'Request Rejected' });
+            await socialService.passUser(requesterId);
+            Toast.show({ type: 'info', text1: 'Passed' });
             await handleMarkAsRead(notificationId);
         } catch (error: any) {
-            Toast.show({ type: 'error', text1: 'Failed to reject request', text2: error?.response?.data?.message || 'Something went wrong' });
+            Toast.show({ type: 'error', text1: 'Failed to pass', text2: error?.response?.data?.message || 'Something went wrong' });
         }
     };
 
@@ -124,16 +125,18 @@ const NotificationsScreen = () => {
             case 'match': return 'heart';
             case 'message': return 'chatbubble';
             case 'like': return 'thumbs-up';
-            case 'friend_request': return 'person-add';
             default: return 'notifications';
         }
     };
 
     const renderItem = ({ item }: { item: NotificationItem }) => (
         <TouchableOpacity
-            style={[styles.notificationItem, !item.isRead && styles.unreadItem]}
+            style={[
+                styles.notificationItem, 
+                !item.isRead ? styles.unreadItem : styles.readItem
+            ]}
             onPress={() => handleMarkAsRead(item.id)}
-            disabled={item.type === 'friend_request' && !item.isRead}
+            disabled={item.type === 'like' && !item.isRead}
         >
             <View style={[styles.iconContainer, { backgroundColor: item.isRead ? '#f0f0f0' : '#FFE5EC' }]}>
                 <Ionicons
@@ -149,7 +152,7 @@ const NotificationsScreen = () => {
                 </View>
                 <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
 
-                {item.type === 'friend_request' && !item.isRead && (
+                {item.type === 'like' && !item.isRead && (
                     <View style={styles.actionButtonsContainer}>
                         <TouchableOpacity
                             style={styles.acceptButton}
@@ -166,7 +169,7 @@ const NotificationsScreen = () => {
                     </View>
                 )}
             </View>
-            {!item.isRead && item.type !== 'friend_request' && <View style={styles.unreadDot} />}
+            {!item.isRead && item.type !== 'like' && <View style={styles.unreadDot} />}
         </TouchableOpacity>
     );
 
@@ -248,7 +251,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     unreadItem: {
-        backgroundColor: '#fff9fa',
+        backgroundColor: '#FFF0F5',
+    },
+    readItem: {
+        backgroundColor: '#ffffff',
+        opacity: 0.65,
     },
     iconContainer: {
         width: 48,
