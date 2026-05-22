@@ -13,12 +13,14 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
-import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateBasicInfo, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 import { handleLogout } from "../../api/firebase/auth";
+import { educationOptions, genderOptions, indianStatesArray } from "../../constant/constant";
+import { SelectionBottomSheet } from "../../components/common/SelectionBottomSheet";
+
 
 const { width } = Dimensions.get("window");
 
@@ -26,6 +28,59 @@ export const BasicInfoScreen: React.FC = () => {
     const navigation = useNavigation();
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.basicInfo);
+
+    const [sheetConfig, setSheetConfig] = useState<{
+        visible: boolean;
+        title: string;
+        options: any[];
+        selectedKey?: string;
+        onSelect: (option: any) => void;
+        searchable?: boolean;
+        searchPlaceholder?: string;
+    }>({
+        visible: false,
+        title: "",
+        options: [],
+        selectedKey: undefined,
+        onSelect: () => { },
+        searchable: false,
+    });
+
+
+    const openLocationSheet = () => {
+        const selectedState = indianStatesArray.find(s => s.name === form.location);
+        setSheetConfig({
+            visible: true,
+            title: "Select State",
+            options: indianStatesArray,
+            selectedKey: selectedState ? selectedState.key : undefined,
+            onSelect: (item) => handleChange("location", item.name),
+            searchable: true,
+            searchPlaceholder: "Search state...",
+        });
+    };
+
+    const openGenderSheet = () => {
+        setSheetConfig({
+            visible: true,
+            title: "Select Gender",
+            options: genderOptions,
+            selectedKey: form.gender,
+            onSelect: (item) => handleChange("gender", item.key),
+            searchable: false,
+        });
+    };
+
+    const openEducationSheet = () => {
+        setSheetConfig({
+            visible: true,
+            title: "Select Education Level",
+            options: educationOptions,
+            selectedKey: form.education,
+            onSelect: (item) => handleChange("education", item.key),
+            searchable: false,
+        });
+    };
 
     React.useEffect(() => {
         dispatch(setCurrentScreen('BasicInfo'));
@@ -115,9 +170,9 @@ export const BasicInfoScreen: React.FC = () => {
                             <View style={{ flex: 2 }}>
                                 <InputField
                                     label="Location"
-                                    placeholder="City, State"
+                                    placeholder="Select State"
                                     value={form.location}
-                                    onChangeText={(text) => handleChange("location", text)}
+                                    onPress={openLocationSheet}
                                 />
                             </View>
                         </View>
@@ -129,59 +184,19 @@ export const BasicInfoScreen: React.FC = () => {
                             onChangeText={(text) => handleChange("profession", text)}
                         />
 
-                        <View style={styles.inputContainer}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.label}>Gender</Text>
-                            </View>
-                            <Dropdown
-                                data={[
-                                    { label: "Male", value: "Male" },
-                                    { label: "Female", value: "Female" },
-                                    { label: "Other", value: "Other" },
-                                ]}
-                                labelField="label"
-                                valueField="value"
-                                placeholder="Select gender"
-                                value={form.gender}
-                                onChange={(item) => handleChange("gender", item.value)}
-                                style={styles.dropdown}
-                                placeholderStyle={styles.placeholderStyle}
-                                selectedTextStyle={styles.selectedTextStyle}
-                                itemTextStyle={{ color: "#333" }}
-                                activeColor="#f4f4f4"
-                                renderRightIcon={() => (
-                                    <Ionicons name="chevron-down" size={20} color="rgba(255, 255, 255, 0.7)" />
-                                )}
-                            />
-                        </View>
+                        <InputField
+                            label="Gender"
+                            placeholder="Select gender"
+                            value={form.gender}
+                            onPress={openGenderSheet}
+                        />
 
-                        <View style={styles.inputContainer}>
-                            <View style={styles.labelRow}>
-                                <Text style={styles.label}>Education</Text>
-                            </View>
-                            <Dropdown
-                                data={[
-                                    { label: "High School", value: "High School" },
-                                    { label: "Bachelor's", value: "Bachelor's" },
-                                    { label: "Master's", value: "Master's" },
-                                    { label: "PhD", value: "PhD" },
-                                    { label: "Professional Degree", value: "Professional Degree" },
-                                ]}
-                                labelField="label"
-                                valueField="value"
-                                placeholder="Select education level"
-                                value={form.education}
-                                onChange={(item) => handleChange("education", item.value)}
-                                style={styles.dropdown}
-                                placeholderStyle={styles.placeholderStyle}
-                                selectedTextStyle={styles.selectedTextStyle}
-                                itemTextStyle={{ color: "#333" }}
-                                activeColor="#f4f4f4"
-                                renderRightIcon={() => (
-                                    <Ionicons name="chevron-down" size={20} color="rgba(255, 255, 255, 0.7)" />
-                                )}
-                            />
-                        </View>
+                        <InputField
+                            label="Education"
+                            placeholder="Select education level"
+                            value={form.education}
+                            onPress={openEducationSheet}
+                        />
 
                         <InputField
                             label="Religion"
@@ -222,6 +237,18 @@ export const BasicInfoScreen: React.FC = () => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Unified Selection Bottom Sheet */}
+            <SelectionBottomSheet
+                visible={sheetConfig.visible}
+                onClose={() => setSheetConfig(prev => ({ ...prev, visible: false }))}
+                title={sheetConfig.title}
+                options={sheetConfig.options}
+                selectedKey={sheetConfig.selectedKey}
+                onSelect={sheetConfig.onSelect}
+                searchable={sheetConfig.searchable}
+                searchPlaceholder={sheetConfig.searchPlaceholder}
+            />
         </View>
     );
 };
@@ -230,10 +257,11 @@ type InputFieldProps = {
     label: string;
     placeholder: string;
     value: string;
-    onChangeText: (text: string) => void;
+    onChangeText?: (text: string) => void;
     keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
     editable?: boolean;
     isPremium?: boolean;
+    onPress?: () => void;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -244,17 +272,9 @@ const InputField: React.FC<InputFieldProps> = ({
     keyboardType = "default",
     editable = true,
     isPremium = false,
-}) => (
-    <View style={styles.inputContainer}>
-        <View style={styles.labelRow}>
-            <Text style={styles.label}>{label}</Text>
-            {isPremium && (
-                <View style={styles.premiumBadge}>
-                    <Ionicons name="star" size={12} color="#FFD700" />
-                    <Text style={styles.premiumText}>PREMIUM</Text>
-                </View>
-            )}
-        </View>
+    onPress,
+}) => {
+    const renderInput = () => (
         <TextInput
             style={[
                 styles.input,
@@ -265,10 +285,33 @@ const InputField: React.FC<InputFieldProps> = ({
             value={value}
             onChangeText={onChangeText}
             keyboardType={keyboardType}
-            editable={editable}
+            editable={onPress ? false : editable}
+            pointerEvents={onPress ? "none" : undefined}
         />
-    </View>
-);
+    );
+
+    return (
+        <View style={styles.inputContainer}>
+            <View style={styles.labelRow}>
+                <Text style={styles.label}>{label}</Text>
+                {isPremium && (
+                    <View style={styles.premiumBadge}>
+                        <Ionicons name="star" size={12} color="#FFD700" />
+                        <Text style={styles.premiumText}>PREMIUM</Text>
+                    </View>
+                )}
+            </View>
+            {onPress ? (
+                <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+                    {renderInput()}
+                </TouchableOpacity>
+            ) : (
+                renderInput()
+            )}
+        </View>
+    );
+};
+
 
 const styles = StyleSheet.create({
     container: {
@@ -340,22 +383,6 @@ const styles = StyleSheet.create({
     },
     row: {
         flexDirection: "row",
-    },
-    dropdown: {
-        height: 56,
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-        borderRadius: 28,
-        paddingHorizontal: 25,
-        borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.3)",
-    },
-    placeholderStyle: {
-        color: "rgba(255, 255, 255, 0.7)",
-        fontSize: 16,
-    },
-    selectedTextStyle: {
-        color: "#FFFFFF",
-        fontSize: 16,
     },
     premiumBadge: {
         flexDirection: "row",

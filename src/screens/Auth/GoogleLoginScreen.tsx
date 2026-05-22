@@ -1,93 +1,74 @@
 // GoogleLoginScreen.tsx
-import React, { useState } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Image, Dimensions, SafeAreaView, Platform } from "react-native";
+import React from "react";
+import { View, Text, TouchableOpacity, StyleSheet, Image, Dimensions, SafeAreaView } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { useDispatch } from "react-redux";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
-import { signInWithGoogle } from "../../api/firebase/auth";
 import BackButton from "../../components/common/BackButton";
 
 const { width, height } = Dimensions.get("window");
 
 const GoogleLoginScreen = ({ navigation }: any) => {
-    const dispatch = useDispatch();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-
-    const handleGoogleSignIn = async () => {
-        if (loading) return;
-        setError("");
-        setLoading(true);
-        try {
-            await signInWithGoogle(dispatch);
-            navigation.replace("HomeScreen");
-        } catch (err: any) {
-            setError(err.message || "Google Sign-In failed.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
     return (
         <View style={styles.container}>
             <LinearGradient
                 colors={["#FF5F6D", "#FF3366"]}
                 style={StyleSheet.absoluteFillObject}
             />
+            
+            {/* Floating Decorative Circles to fill space elegantly */}
+            <View style={[styles.decoratorCircle, { top: -80, left: -80, width: 280, height: 280, borderRadius: 140, backgroundColor: "rgba(255, 255, 255, 0.12)" }]} />
+            <View style={[styles.decoratorCircle, { bottom: -60, right: -60, width: 240, height: 240, borderRadius: 120, backgroundColor: "rgba(255, 255, 255, 0.1)" }]} />
+            <View style={[styles.decoratorCircle, { top: height * 0.32, right: -90, width: 180, height: 180, borderRadius: 90, backgroundColor: "rgba(255, 255, 255, 0.08)" }]} />
+            <View style={[styles.decoratorCircle, { top: height * 0.55, left: -60, width: 140, height: 140, borderRadius: 70, backgroundColor: "rgba(255, 255, 255, 0.06)" }]} />
+
             <BackButton />
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.content}>
-                    {/* Circular Logo Container */}
-                    <View style={styles.logoCircle}>
-                        <Image
-                            source={require("../../assets/yugma_png.png")}
-                            style={styles.logo}
-                            resizeMode="stretch"
-                        />
+                    {/* Centered Main Group */}
+                    <View style={styles.mainGroup}>
+                        {/* Circular Logo Container with elegant outer ring */}
+                        <View style={styles.logoOuterRing}>
+                            <View style={styles.logoCircle}>
+                                <Image
+                                    source={require("../../assets/yugma_png.png")}
+                                    style={styles.logo}
+                                    resizeMode="stretch"
+                                />
+                            </View>
+                        </View>
+
+                        {/* Text Section */}
+                        <View style={styles.textSection}>
+                            <Text style={styles.title}>Find your perfect match</Text>
+                            <Text style={styles.subtitle}>
+                                Dating or Marriage, Yugma helps you connect with the right person
+                            </Text>
+                        </View>
                     </View>
 
-                    {/* Text Section */}
-                    <View style={styles.textSection}>
-                        <Text style={styles.title}>Find your perfect match</Text>
-                        <Text style={styles.subtitle}>
-                            Dating or Marriage, Yugma helps you connect with the right person
-                        </Text>
-                    </View>
-
-                    {/* Buttons Section */}
-                    <View style={styles.buttonSection}>
-                        <TouchableOpacity
-                            style={styles.whiteButton}
-                            onPress={handleGoogleSignIn}
-                            disabled={loading}
-                        >
-                            {loading ? (
-                                <ActivityIndicator color="#000" />
-                            ) : (
+                    {/* Bottom Action Group */}
+                    <View style={styles.bottomGroup}>
+                        {/* Buttons Section */}
+                        <View style={styles.buttonSection}>
+                            <TouchableOpacity
+                                style={styles.whiteButton}
+                                onPress={() => navigation.navigate("LoginScreen")}
+                            >
                                 <View style={styles.row}>
-                                    <AntDesign name="google" size={20} color="#EA4335" />
-                                    <Text style={[styles.buttonText, { marginLeft: 10 }]}>Continue with Google</Text>
+                                    <Text style={styles.buttonText}>Start</Text>
+                                    <MaterialIcons name="arrow-forward" size={22} color="#FF3366" style={{ marginLeft: 8 }} />
                                 </View>
-                            )}
-                        </TouchableOpacity>
+                            </TouchableOpacity>
+                        </View>
 
-                        <TouchableOpacity
-                            style={styles.emailLink}
-                            onPress={() => navigation.navigate("SignupScreen")}
-                        >
-                            <Text style={styles.emailText}>Continue with Email</Text>
-                            <MaterialIcons name="arrow-forward" size={20} color="#FFFFFF" />
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Footer Section */}
-                    <View style={styles.footer}>
-                        <Text style={styles.footerText}>
-                            By continuing, you agree to our{" "}
-                            <Text style={styles.linkText} onPress={() => { }}>Terms of Service</Text>
-                            {"\n"}and <Text style={styles.linkText} onPress={() => { }}>Privacy Policy</Text>
-                        </Text>
+                        {/* Footer Section */}
+                        <View style={styles.footer}>
+                            <Text style={styles.footerText}>
+                                By continuing, you agree to our{" "}
+                                <Text style={styles.linkText} onPress={() => { }}>Terms of Service</Text>
+                                {"\n"}and <Text style={styles.linkText} onPress={() => { }}>Privacy Policy</Text>
+                            </Text>
+                        </View>
                     </View>
                 </View>
             </SafeAreaView>
@@ -106,23 +87,43 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         justifyContent: "space-between",
-        paddingVertical: 60,
+        paddingVertical: 50,
         paddingHorizontal: 30,
+    },
+    decoratorCircle: {
+        position: "absolute",
+    },
+    mainGroup: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%",
+        paddingBottom: 40,
+    },
+    logoOuterRing: {
+        width: 190,
+        height: 190,
+        borderRadius: 95,
+        borderWidth: 2,
+        borderColor: "rgba(255, 255, 255, 0.2)",
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 25,
+        backgroundColor: "rgba(255, 255, 255, 0.05)",
     },
     logoCircle: {
         width: 160,
         height: 160,
-        borderRadius: 100,
+        borderRadius: 80,
         backgroundColor: "rgba(255, 255, 255, 0.2)",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 0,
         overflow: "hidden"
     },
     logo: {
         width: "100%",
         height: "100%",
-        borderRadius: 100,
+        borderRadius: 80,
         overflow: "hidden",
         marginTop: 30
     },
@@ -131,12 +132,13 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     title: {
-        fontSize: 36,
+        fontSize: 34,
         fontWeight: "800",
         color: "#FFFFFF",
         textAlign: "center",
         marginBottom: 15,
-        lineHeight: 42,
+        lineHeight: 40,
+        letterSpacing: 0.5,
     },
     subtitle: {
         fontSize: 16,
@@ -145,10 +147,13 @@ const styles = StyleSheet.create({
         lineHeight: 22,
         paddingHorizontal: 20,
     },
+    bottomGroup: {
+        width: "100%",
+        alignItems: "center",
+    },
     buttonSection: {
         width: "100%",
-        gap: 15,
-        alignItems: "center",
+        marginBottom: 15,
     },
     whiteButton: {
         width: "100%",
@@ -159,32 +164,21 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
         elevation: 5,
     },
     buttonText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#1a1a1a",
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#FF3366",
     },
     row: {
         flexDirection: "row",
         alignItems: "center",
     },
-    emailLink: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 10,
-    },
-    emailText: {
-        color: "#FFFFFF",
-        fontSize: 16,
-        fontWeight: "600",
-        marginRight: 8,
-    },
     footer: {
-        marginTop: 20,
+        marginTop: 10,
     },
     footerText: {
         color: "rgba(255, 255, 255, 0.8)",

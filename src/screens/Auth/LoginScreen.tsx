@@ -93,8 +93,8 @@ export default function LoginScreen() {
                     keyboardShouldPersistTaps="handled"
                 >
                     <View style={styles.inner}>
-                        <Text style={styles.title}>Welcome Back</Text>
-                        <Text style={styles.subtitle}>Login to your account</Text>
+                        <Text style={styles.title}>Begin Your Story</Text>
+                        <Text style={styles.subtitle}>Your perfect match is just a login away</Text>
 
                         {/* Inputs Container */}
                         <View style={styles.inputSection}>

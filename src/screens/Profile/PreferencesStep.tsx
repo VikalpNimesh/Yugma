@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     View,
     Text,
@@ -16,6 +16,8 @@ import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updatePreferences, setCurrentScreen, completeProfile } from "../../redux/slices/profileFormSlice";
 import { useNavigation } from "@react-navigation/native";
+import { educationOptions, indianStatesArray } from "../../constant/constant";
+import { SelectionBottomSheet } from "../../components/common/SelectionBottomSheet";
 
 const { width } = Dimensions.get("window");
 
@@ -24,6 +26,23 @@ const PreferencesStep = ({ navigation }: any) => {
     const form = useAppSelector((state) => state.profileForm.preferences);
     const { updateStatus } = useAppSelector(state => state.profileForm);
     const nav = useNavigation();
+
+    const [sheetConfig, setSheetConfig] = useState<{
+        visible: boolean;
+        title: string;
+        options: any[];
+        selectedKey?: string;
+        onSelect: (option: any) => void;
+        searchable?: boolean;
+        searchPlaceholder?: string;
+    }>({
+        visible: false,
+        title: "",
+        options: [],
+        selectedKey: undefined,
+        onSelect: () => { },
+        searchable: false,
+    });
 
     React.useEffect(() => {
         dispatch(setCurrentScreen('PreferencesStep'));
@@ -37,6 +56,30 @@ const PreferencesStep = ({ navigation }: any) => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updatePreferences({ [field]: value }));
+    };
+
+    const openLocationSheet = () => {
+        const selectedState = indianStatesArray.find(s => s.name === form.preferredLocations);
+        setSheetConfig({
+            visible: true,
+            title: "Select Preferred Location",
+            options: indianStatesArray,
+            selectedKey: selectedState ? selectedState.key : undefined,
+            onSelect: (item) => handleChange("preferredLocations", item.name),
+            searchable: true,
+            searchPlaceholder: "Search state...",
+        });
+    };
+
+    const openEducationSheet = () => {
+        setSheetConfig({
+            visible: true,
+            title: "Select Preferred Education",
+            options: educationOptions,
+            selectedKey: form.preferredEducation,
+            onSelect: (item) => handleChange("preferredEducation", item.key),
+            searchable: false,
+        });
     };
 
     const handleComplete = () => {
@@ -114,17 +157,17 @@ const PreferencesStep = ({ navigation }: any) => {
                         {/* Preferred Locations */}
                         <InputField
                             label="Preferred Locations"
-                            placeholder="e.g., Mumbai, Delhi, Bangalore"
+                            placeholder="Select Preferred State"
                             value={form.preferredLocations}
-                            onChangeText={(text) => handleChange("preferredLocations", text)}
+                            onPress={openLocationSheet}
                         />
 
                         {/* Preferred Education */}
                         <InputField
                             label="Preferred Education"
-                            placeholder="e.g., Bachelor's, Master's, PhD"
+                            placeholder="Select Preferred Education"
                             value={form.preferredEducation}
-                            onChangeText={(text) => handleChange("preferredEducation", text)}
+                            onPress={openEducationSheet}
                         />
                     </View>
 
@@ -142,6 +185,18 @@ const PreferencesStep = ({ navigation }: any) => {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+
+            {/* Unified Selection Bottom Sheet */}
+            <SelectionBottomSheet
+                visible={sheetConfig.visible}
+                onClose={() => setSheetConfig(prev => ({ ...prev, visible: false }))}
+                title={sheetConfig.title}
+                options={sheetConfig.options}
+                selectedKey={sheetConfig.selectedKey}
+                onSelect={sheetConfig.onSelect}
+                searchable={sheetConfig.searchable}
+                searchPlaceholder={sheetConfig.searchPlaceholder}
+            />
         </View>
     );
 };
@@ -150,21 +205,42 @@ type InputFieldProps = {
     label: string;
     placeholder: string;
     value: string;
-    onChangeText: (text: string) => void;
+    onChangeText?: (text: string) => void;
+    onPress?: () => void;
 };
 
-const InputField: React.FC<InputFieldProps> = ({ label, placeholder, value, onChangeText }) => (
-    <View style={styles.inputContainer}>
-        <Text style={styles.label}>{label}</Text>
+const InputField: React.FC<InputFieldProps> = ({
+    label,
+    placeholder,
+    value,
+    onChangeText,
+    onPress,
+}) => {
+    const renderInput = () => (
         <TextInput
             style={styles.input}
             placeholder={placeholder}
             placeholderTextColor="rgba(255, 255, 255, 0.7)"
             value={value}
             onChangeText={onChangeText}
+            editable={onPress ? false : true}
+            pointerEvents={onPress ? "none" : undefined}
         />
-    </View>
-);
+    );
+
+    return (
+        <View style={styles.inputContainer}>
+            <Text style={styles.label}>{label}</Text>
+            {onPress ? (
+                <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
+                    {renderInput()}
+                </TouchableOpacity>
+            ) : (
+                renderInput()
+            )}
+        </View>
+    );
+};
 
 const styles = StyleSheet.create({
     container: {
