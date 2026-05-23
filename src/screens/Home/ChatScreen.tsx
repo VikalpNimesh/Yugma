@@ -20,6 +20,7 @@ import { useSocket } from '../../context/SocketContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
 import dayjs from 'dayjs';
+import LinearGradient from 'react-native-linear-gradient';
 
 interface RouteParams {
     userId: string;
@@ -50,6 +51,9 @@ const ChatScreen = () => {
         const ids = [currentUserId, otherUserId].sort();
         const generatedId = ids.join('-');
         setConversationId(generatedId);
+        (globalThis as any).activeConversationId = generatedId;
+        (globalThis as any).activeChatUserId = otherUserId;
+        (globalThis as any).activeChatUserName = name;
 
         const fetchMessages = async () => {
             try {
@@ -77,6 +81,9 @@ const ChatScreen = () => {
 
         return () => {
             isMounted = false;
+            (globalThis as any).activeConversationId = null;
+            (globalThis as any).activeChatUserId = null;
+            (globalThis as any).activeChatUserName = null;
             if (generatedId && socket) {
                 socket.emit('leave_conversation', { conversationId: generatedId });
             }
@@ -212,9 +219,8 @@ const ChatScreen = () => {
         if (item.isTyping) {
             return (
                 <View style={[styles.messageBubbleContainer, styles.theirMessageContainer]}>
-                    <Avatar uri={avatar} name={name} size={28} style={styles.messageAvatar} />
-                    <View style={[styles.messageBubble, styles.theirBubble, { backgroundColor: '#F0F0F0', borderBottomLeftRadius: 4 }]}>
-                        <Text style={[styles.messageText, styles.theirText, { fontStyle: 'italic', color: '#666' }]}>
+                    <View style={[styles.messageBubble, styles.theirBubble, { backgroundColor: '#F1F3F5', borderBottomLeftRadius: 4 }]}>
+                        <Text style={[styles.messageText, styles.theirText, { fontStyle: 'italic', color: '#8E8E93' }]}>
                             typing...
                         </Text>
                     </View>
@@ -224,25 +230,42 @@ const ChatScreen = () => {
 
         const isMine = item.isMine || item.senderId === currentUserId;
 
-        return (
-            <View style={[styles.messageBubbleContainer, isMine ? styles.myMessageContainer : styles.theirMessageContainer]}>
-                {!isMine && <Avatar uri={avatar} name={name} size={28} style={styles.messageAvatar} />}
-                <View style={[styles.messageBubble, isMine ? styles.myBubble : styles.theirBubble]}>
-                    <Text style={[styles.messageText, isMine ? styles.myText : styles.theirText]}>
-                        {item.content}
-                    </Text>
-                    <View style={styles.messageFooter}>
-                        <Text style={[styles.timeText, isMine ? styles.myTime : styles.theirTime]}>
-                            {dayjs(item.createdAt).format('HH:mm')}
+        if (isMine) {
+            return (
+                <View style={[styles.messageBubbleContainer, styles.myMessageContainer]}>
+                    <LinearGradient
+                        colors={["#FF5F6D", "#FF3366"]}
+                        style={[styles.messageBubble, styles.myBubble]}
+                    >
+                        <Text style={[styles.messageText, styles.myText]}>
+                            {item.content}
                         </Text>
-                        {isMine && (
+                        <View style={styles.messageFooter}>
+                            <Text style={[styles.timeText, styles.myTime]}>
+                                {dayjs(item.createdAt).format('HH:mm')}
+                            </Text>
                             <Ionicons
                                 name="checkmark-done-sharp"
                                 size={15}
-                                color={item.isRead ? "#00F0FF" : "#FFFFFF"}
+                                color={item.isRead ? "#00F0FF" : "rgba(255, 255, 255, 0.6)"}
                                 style={{ marginLeft: 4 }}
                             />
-                        )}
+                        </View>
+                    </LinearGradient>
+                </View>
+            );
+        }
+
+        return (
+            <View style={[styles.messageBubbleContainer, styles.theirMessageContainer]}>
+                <View style={[styles.messageBubble, styles.theirBubble]}>
+                    <Text style={[styles.messageText, styles.theirText]}>
+                        {item.content}
+                    </Text>
+                    <View style={styles.messageFooter}>
+                        <Text style={[styles.timeText, styles.theirTime]}>
+                            {dayjs(item.createdAt).format('HH:mm')}
+                        </Text>
                     </View>
                 </View>
             </View>
@@ -303,19 +326,30 @@ const ChatScreen = () => {
                     <TextInput
                         style={styles.textInput}
                         placeholder="Type a message..."
-                        placeholderTextColor="#999"
+                        placeholderTextColor="#94A3B8"
                         value={inputText}
                         onChangeText={handleTypingBroadcast}
                         multiline
                         maxLength={500}
                     />
-                    <TouchableOpacity
-                        style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
-                        onPress={handleSend}
-                        disabled={!inputText.trim()}
-                    >
-                        <Ionicons name="send" size={20} color="white" />
-                    </TouchableOpacity>
+                    {inputText.trim() ? (
+                        <TouchableOpacity
+                            style={styles.sendButtonWrapper}
+                            onPress={handleSend}
+                            activeOpacity={0.8}
+                        >
+                            <LinearGradient
+                                colors={["#FF5F6D", "#FF3366"]}
+                                style={styles.sendButton}
+                            >
+                                <Ionicons name="send" size={16} color="white" />
+                            </LinearGradient>
+                        </TouchableOpacity>
+                    ) : (
+                        <View style={[styles.sendButton, styles.sendButtonDisabled]}>
+                            <Ionicons name="send" size={16} color="#CCCCCC" />
+                        </View>
+                    )}
                 </View>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -325,24 +359,29 @@ const ChatScreen = () => {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF',
     },
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: '#FAF9F9',
     },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 10,
+        paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 6,
+        elevation: 2,
     },
     backButton: {
         padding: 5,
-        marginRight: 10,
+        marginRight: 8,
     },
     headerAvatar: {
         width: 40,
@@ -357,29 +396,31 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         right: 0,
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-        backgroundColor: '#4CAF50',
+        width: 11,
+        height: 11,
+        borderRadius: 5.5,
+        backgroundColor: '#2ECC71',
         borderWidth: 2,
-        borderColor: '#fff',
+        borderColor: '#FFFFFF',
     },
     headerInfo: {
         flex: 1,
     },
     headerName: {
         fontSize: 18,
-        fontWeight: '600',
-        color: '#111',
+        fontWeight: '800',
+        color: '#1A1A1A',
     },
     typingIndicator: {
         fontSize: 12,
-        color: '#FF5F6D',
-        fontWeight: '500',
+        color: '#FF3366',
+        fontWeight: '600',
     },
     onlineStatus: {
         fontSize: 12,
-        color: '#4CAF50',
+        color: '#2ECC71',
+        fontWeight: '600',
+        marginTop: 1,
     },
     loadingContainer: {
         flex: 1,
@@ -388,7 +429,7 @@ const styles = StyleSheet.create({
     },
     listContent: {
         padding: 16,
-        paddingBottom: 20,
+        paddingBottom: 24,
     },
     messageBubbleContainer: {
         flexDirection: 'row',
@@ -411,30 +452,34 @@ const styles = StyleSheet.create({
         maxWidth: '75%',
         paddingHorizontal: 16,
         paddingVertical: 10,
-        borderRadius: 20,
+        borderRadius: 18,
     },
     myBubble: {
-        backgroundColor: '#FF5F6D',
         borderBottomRightRadius: 4,
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+        elevation: 3,
     },
     theirBubble: {
-        backgroundColor: '#fff',
+        backgroundColor: '#F1F3F5',
         borderBottomLeftRadius: 4,
-        borderWidth: 1,
-        borderColor: '#eee',
     },
     messageText: {
         fontSize: 15,
         lineHeight: 20,
+        fontWeight: "500",
     },
     myText: {
-        color: '#fff',
+        color: '#FFFFFF',
     },
     theirText: {
-        color: '#333',
+        color: '#1E293B',
     },
     timeText: {
-        fontSize: 11,
+        fontSize: 10,
+        fontWeight: "600",
     },
     messageFooter: {
         flexDirection: 'row',
@@ -446,29 +491,39 @@ const styles = StyleSheet.create({
         color: 'rgba(255, 255, 255, 0.7)',
     },
     theirTime: {
-        color: '#999',
+        color: '#94A3B8',
     },
     inputContainer: {
         flexDirection: 'row',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFFFFF',
         borderTopWidth: 1,
-        borderTopColor: '#eee',
+        borderTopColor: 'rgba(0, 0, 0, 0.04)',
     },
     textInput: {
         flex: 1,
-        backgroundColor: '#f1f1f1',
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 12,
+        backgroundColor: '#F5F6F8',
+        borderRadius: 24,
+        paddingHorizontal: 18,
+        paddingTop: 10,
+        paddingBottom: 10,
         minHeight: 40,
         maxHeight: 100,
         fontSize: 15,
-        color: '#333',
+        color: '#1A1A1A',
         marginRight: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(0, 0, 0, 0.03)',
+        fontWeight: "500",
+    },
+    sendButtonWrapper: {
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 3,
     },
     sendButton: {
         width: 44,
@@ -479,7 +534,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     sendButtonDisabled: {
-        backgroundColor: '#ccc',
+        backgroundColor: '#F1F3F5',
     },
 });
 

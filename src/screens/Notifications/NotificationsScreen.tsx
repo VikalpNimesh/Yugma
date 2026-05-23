@@ -18,11 +18,12 @@ import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import Toast from 'react-native-toast-message';
 import BackButton from '../../components/common/BackButton';
+import LinearGradient from 'react-native-linear-gradient';
 
 dayjs.extend(relativeTime);
 
 const NotificationsScreen = () => {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const dispatch = useDispatch();
     const [notifications, setNotifications] = useState<NotificationItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -98,6 +99,25 @@ const NotificationsScreen = () => {
         }
     };
 
+    const handlePressNotification = async (item: NotificationItem) => {
+        try {
+            await handleMarkAsRead(item.id);
+            if (item.type === 'like') {
+                navigation.navigate('BottomTabs', {
+                    screen: 'MatchesScreen',
+                    params: { initialTab: 'Likes' }
+                });
+            } else if (item.type === 'match') {
+                navigation.navigate('BottomTabs', {
+                    screen: 'MatchesScreen',
+                    params: { initialTab: 'Matches' }
+                });
+            }
+        } catch (error) {
+            console.error('Error handling notification press:', error);
+        }
+    };
+
     const handleAcceptRequest = async (requesterId: string | undefined, notificationId: string) => {
         if (!requesterId) return;
         try {
@@ -129,49 +149,53 @@ const NotificationsScreen = () => {
         }
     };
 
-    const renderItem = ({ item }: { item: NotificationItem }) => (
-        <TouchableOpacity
-            style={[
-                styles.notificationItem, 
-                !item.isRead ? styles.unreadItem : styles.readItem
-            ]}
-            onPress={() => handleMarkAsRead(item.id)}
-            disabled={item.type === 'like' && !item.isRead}
-        >
-            <View style={[styles.iconContainer, { backgroundColor: item.isRead ? '#f0f0f0' : '#FFE5EC' }]}>
-                <Ionicons
-                    name={getIcon(item.type)}
-                    size={24}
-                    color={item.isRead ? '#666' : '#FF5F6D'}
-                />
-            </View>
-            <View style={styles.contentContainer}>
-                <View style={styles.headerRow}>
-                    <Text style={styles.title}>{item.title}</Text>
-                    <Text style={styles.time}>{dayjs(item.createdAt).fromNow()}</Text>
-                </View>
-                <Text style={styles.description} numberOfLines={2}>{item.description}</Text>
-
-                {item.type === 'like' && !item.isRead && (
-                    <View style={styles.actionButtonsContainer}>
-                        <TouchableOpacity
-                            style={styles.acceptButton}
-                            onPress={() => handleAcceptRequest(item.relatedUserId, item.id)}
-                        >
-                            <Text style={styles.acceptText}>Accept</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={styles.rejectButton}
-                            onPress={() => handleRejectRequest(item.relatedUserId, item.id)}
-                        >
-                            <Text style={styles.rejectText}>Reject</Text>
-                        </TouchableOpacity>
+    const renderItem = ({ item }: { item: NotificationItem }) => {
+        const isUnread = !item.isRead;
+        return (
+            <TouchableOpacity
+                style={[
+                    styles.notificationCard,
+                    isUnread ? styles.unreadCard : styles.readCard
+                ]}
+                onPress={() => handlePressNotification(item)}
+                activeOpacity={0.7}
+            >
+                {isUnread ? (
+                    <LinearGradient
+                        colors={["#FF5F6D", "#FF3366"]}
+                        style={styles.iconContainer}
+                    >
+                        <Ionicons
+                            name={getIcon(item.type)}
+                            size={22}
+                            color="#FFFFFF"
+                        />
+                    </LinearGradient>
+                ) : (
+                    <View style={[styles.iconContainer, styles.readIconContainer]}>
+                        <Ionicons
+                            name={getIcon(item.type)}
+                            size={22}
+                            color="#de5972ff"
+                        //    color="#FF8FA3"
+                        />
                     </View>
                 )}
-            </View>
-            {!item.isRead && item.type !== 'like' && <View style={styles.unreadDot} />}
-        </TouchableOpacity>
-    );
+
+                <View style={styles.contentContainer}>
+                    <View style={styles.headerRow}>
+                        <Text style={[styles.title, isUnread && styles.unreadTitle]}>{item.title}</Text>
+                        <Text style={[styles.time, isUnread && styles.unreadTime]}>{dayjs(item.createdAt).fromNow()}</Text>
+                    </View>
+                    <Text style={[styles.description, isUnread && styles.unreadDescription]} numberOfLines={2}>
+                        {item.description}
+                    </Text>
+                </View>
+
+                {isUnread && <View style={styles.unreadDot} />}
+            </TouchableOpacity>
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -215,7 +239,7 @@ const NotificationsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: '#F8F9FA', // Muted off-white background
     },
     header: {
         flexDirection: 'row',
@@ -223,8 +247,13 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f0f0f0',
+        backgroundColor: '#FFFFFF',
+        shadowColor: "#000000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 6,
+        elevation: 2,
+        zIndex: 10,
     },
     backButton: {
         padding: 4,
@@ -240,30 +269,47 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     listContainer: {
-        paddingBottom: 20,
+        paddingTop: 16,
+        paddingBottom: 30,
+        paddingHorizontal: 16,
         flexGrow: 1,
     },
-    notificationItem: {
+    notificationCard: {
         flexDirection: 'row',
         padding: 16,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f5f5f5',
+        marginBottom: 12,
+        borderRadius: 16,
+        backgroundColor: '#FFFFFF',
         alignItems: 'center',
     },
-    unreadItem: {
-        backgroundColor: '#FFF0F5',
+    unreadCard: {
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        elevation: 4,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 95, 109, 0.1)',
     },
-    readItem: {
-        backgroundColor: '#ffffff',
-        opacity: 0.65,
+    readCard: {
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.04,
+        shadowRadius: 4,
+        elevation: 1,
+        borderWidth: 1,
+        borderColor: 'rgba(255, 95, 109, 0.06)',
     },
     iconContainer: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+        width: 46,
+        height: 46,
+        borderRadius: 23,
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: 12,
+        marginRight: 14,
+    },
+    readIconContainer: {
+        backgroundColor: '#FFF0F5',
     },
     contentContainer: {
         flex: 1,
@@ -275,25 +321,44 @@ const styles = StyleSheet.create({
         marginBottom: 4,
     },
     title: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#333',
+        fontSize: 15,
+        fontWeight: '600',
+        color: '#2D3748',
+        flex: 1,
+        marginRight: 8,
+    },
+    unreadTitle: {
+        color: '#1A202C',
+        fontWeight: '800',
     },
     time: {
         fontSize: 12,
-        color: '#999',
+        color: '#FFB6C1',
+        fontWeight: '500',
+    },
+    unreadTime: {
+        color: '#FF5F6D',
+        fontWeight: '600',
     },
     description: {
         fontSize: 14,
-        color: '#666',
+        color: '#4A5568',
         lineHeight: 20,
     },
+    unreadDescription: {
+        color: '#4A5568',
+    },
     unreadDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
+        width: 10,
+        height: 10,
+        borderRadius: 5,
         backgroundColor: '#FF5F6D',
-        marginLeft: 8,
+        marginLeft: 12,
+        shadowColor: "#FF5F6D",
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+        elevation: 2,
     },
     emptyContainer: {
         flex: 1,
@@ -322,33 +387,6 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         lineHeight: 22,
         paddingHorizontal: 40,
-    },
-    actionButtonsContainer: {
-        flexDirection: 'row',
-        marginTop: 12,
-        gap: 10,
-    },
-    acceptButton: {
-        backgroundColor: '#FF5F6D',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-    },
-    rejectButton: {
-        backgroundColor: '#f0f0f0',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-    },
-    acceptText: {
-        color: '#fff',
-        fontWeight: '600',
-        fontSize: 13,
-    },
-    rejectText: {
-        color: '#666',
-        fontWeight: '600',
-        fontSize: 13,
     },
 });
 

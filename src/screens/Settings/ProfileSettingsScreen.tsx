@@ -70,7 +70,7 @@ const InputField: React.FC<InputFieldProps> = ({
                 editable={onPress ? false : editable}
                 pointerEvents={onPress ? "none" : undefined}
             />
-            {onPress && (
+            {onPress && editable && (
                 <Ionicons name="chevron-down" size={20} color="#888" style={styles.inputRightIcon} />
             )}
         </View>
@@ -80,7 +80,7 @@ const InputField: React.FC<InputFieldProps> = ({
         <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>{label}</Text>
             {onPress ? (
-                <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
+                <TouchableOpacity onPress={onPress} activeOpacity={0.7} disabled={!editable}>
                     {renderInput()}
                 </TouchableOpacity>
             ) : (
@@ -361,8 +361,8 @@ export default function ProfileSettingsScreen() {
                 ) : (
                     <View style={styles.editCard}>
                         <InputField label="Name" icon="person-outline" placeholder="Name" value={name} onChangeText={setName} />
-                        <InputField label="Age" icon="calendar-outline" placeholder="Age" keyboardType="numeric" value={age} onChangeText={setAge} />
-                        <InputField label="Gender" icon="transgender-outline" placeholder="Select Gender" value={gender} onPress={openGenderSheet} />
+                        <InputField label="Age" icon="calendar-outline" placeholder="Age" keyboardType="numeric" value={age} onChangeText={setAge} editable={false} />
+                        <InputField label="Gender" icon="transgender-outline" placeholder="Select Gender" value={gender} onPress={openGenderSheet} editable={false} />
                         <InputField label="Education" icon="school-outline" placeholder="Select Education" value={education} onPress={openEducationSheet} />
                         <InputField label="Profession" icon="briefcase-outline" placeholder="Profession" value={profession} onChangeText={setProfession} />
                         <InputField label="Location" icon="location-outline" placeholder="Select State" value={location} onPress={openLocationSheet} />

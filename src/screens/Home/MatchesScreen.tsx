@@ -7,6 +7,7 @@ import {
     Pressable,
     StyleSheet,
     ActivityIndicator,
+    DeviceEventEmitter,
 } from "react-native";
 
 import MatchList from "./MatchList";
@@ -15,13 +16,26 @@ import Icon from "react-native-vector-icons/Ionicons";
 import socialService, { SocialUserItem } from "../../api/services/socialService";
 import Toast from "react-native-toast-message";
 import dayjs from "dayjs";
+import { useFocusEffect, useRoute } from "@react-navigation/native";
+import { useSocket } from "../../context/SocketContext";
+import messaging from '@react-native-firebase/messaging';
 
 const MatchesScreen = () => {
-    const [selectedTab, setSelectedTab] = useState("Matches");
+    const route = useRoute<any>();
+    const initialTab = route.params?.initialTab || "Matches";
+    const [selectedTab, setSelectedTab] = useState(initialTab);
     const [matches, setMatches] = useState<SocialUserItem[]>([]);
     console.log('matches', matches);
     const [likes, setLikes] = useState<SocialUserItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const { socket } = useSocket();
+
+    // Dynamically update the selected tab if deep routing param changes
+    useEffect(() => {
+        if (route.params?.initialTab) {
+            setSelectedTab(route.params.initialTab);
+        }
+    }, [route.params?.initialTab]);
 
     const fetchMatches = async () => {
         try {
@@ -47,8 +61,49 @@ const MatchesScreen = () => {
         setIsLoading(false);
     };
 
+    // Refetch data when screen gains focus
+    useFocusEffect(
+        React.useCallback(() => {
+            loadData();
+        }, [])
+    );
+
+    // Refetch data when a real-time socket event is received
     useEffect(() => {
-        loadData();
+        if (!socket) return;
+
+        const handleNotification = (data: any) => {
+            console.log("[MatchesScreen] Received new_notification, refetching...", data);
+            loadData();
+        };
+
+        socket.on('new_notification', handleNotification);
+
+        return () => {
+            socket.off('new_notification', handleNotification);
+        };
+    }, [socket]);
+
+    // Refetch data when a foreground FCM push notification is received
+    useEffect(() => {
+        const unsubscribe = messaging().onMessage(async remoteMessage => {
+            if (remoteMessage.data?.type === 'like' || remoteMessage.data?.type === 'match') {
+                console.log("[MatchesScreen] Received FCM message, refetching...");
+                loadData();
+            }
+        });
+        return unsubscribe;
+    }, []);
+
+    // Refetch data when a global notification event is received (via FCM or Socket broadcast)
+    useEffect(() => {
+        const subscription = DeviceEventEmitter.addListener('notification_received', (event) => {
+            console.log("[MatchesScreen] Received global notification event, refetching matches & likes...", event);
+            loadData();
+        });
+        return () => {
+            subscription.remove();
+        };
     }, []);
 
     // Transform SocialUserItem to MatchList format
@@ -96,11 +151,11 @@ const MatchesScreen = () => {
                         {tab === "Matches" ? <Icon
                             name={"people-outline"}
                             size={20}
-                            color={"black"}
+                            color={selectedTab === tab ? "#FF3366" : "#8E8E93"}
                         /> : <Icon
                             name={"star-outline"}
                             size={20}
-                            color={"black"}
+                            color={selectedTab === tab ? "#FF3366" : "#8E8E93"}
                         />}
 
                         <Text
@@ -149,31 +204,39 @@ const styles = StyleSheet.create({
     },
     tabContainer: {
         flexDirection: "row",
-        backgroundColor: "#f2f2f2",
-        borderRadius: 20,
-        marginBottom: 20,
-        padding: 4,
+        backgroundColor: "#FFF5F6",
+        borderRadius: 24,
+        marginBottom: 24,
+        padding: 5,
+        borderWidth: 1,
+        borderColor: "rgba(255, 95, 109, 0.12)",
     },
     tab: {
         flex: 1,
         alignItems: "center",
-        paddingVertical: 8,
-        borderRadius: 16,
+        paddingVertical: 10,
+        borderRadius: 20,
         flexDirection: "row",
         justifyContent: "center",
-        gap: 6
+        gap: 8,
     },
     activeTab: {
-        backgroundColor: "#fff",
-        elevation: 2,
+        backgroundColor: "#ffffff",
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        elevation: 4,
     },
     tabText: {
-        color: "#666",
-        fontWeight: "500",
+        color: "#8E8E93",
+        fontWeight: "600",
+        fontSize: 14,
     },
     activeTabText: {
-        color: "#000",
-        fontWeight: "600",
+        color: "#FF3366",
+        fontWeight: "700",
+        fontSize: 14,
     },
 
 });

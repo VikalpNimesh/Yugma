@@ -12,7 +12,7 @@ export interface NotificationItem {
 }
 
 const notificationService = {
-    getNotifications: async (limit: number = 20): Promise<NotificationItem[]> => {
+    getNotifications: async (limit: number = 200): Promise<NotificationItem[]> => {
         const response = await axiosInstance.get('/notifications', { params: { limit } });
         return response.data?.data;
     },

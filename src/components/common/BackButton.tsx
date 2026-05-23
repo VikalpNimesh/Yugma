@@ -36,7 +36,7 @@ const BackButton: React.FC<BackButtonProps> = ({
                 styles.container,
                 !title && absolute && {
                     position: 'absolute',
-                    top: Math.max(insets.top, 20),
+                    // top: Math.max(insets.top, 20),
                     left: 20,
                     zIndex: 10
                 },

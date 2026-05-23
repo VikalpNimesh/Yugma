@@ -2,7 +2,9 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
-import { version } from '../../../package.json';
+import DeviceInfo from 'react-native-device-info';
+
+const version = DeviceInfo.getVersion();
 import { useDispatch } from "react-redux";
 import { handleLogout } from "../../api/firebase/auth";
 import Toast from "react-native-toast-message";

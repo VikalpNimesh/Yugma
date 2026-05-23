@@ -16,6 +16,7 @@ const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
     const unreadCount = useSelector((state: RootState) => state.chat.unreadConversationIds.length);
+    const unreadNotifications = useSelector((state: RootState) => state.notification.unreadCount);
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -82,6 +83,7 @@ export default function BottomTabs() {
                                     </Text>
                                 </View>
                             )}
+
                             <Text
                                 style={{
                                     color: focused ? "#fff" : "#666",

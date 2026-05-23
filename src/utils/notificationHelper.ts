@@ -1,6 +1,10 @@
 import messaging from '@react-native-firebase/messaging';
-import { Alert, Platform } from 'react-native';
+import { Alert, Platform, Vibration, DeviceEventEmitter } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { store } from '../redux/store';
+import { incrementUnreadCount } from '../redux/slices/notificationSlice';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import Toast from 'react-native-toast-message';
 
 /**
  * Notification Helper
@@ -41,10 +45,45 @@ export const notificationListener = () => {
     // 1. Foreground Message Handler
     const unsubscribe = messaging().onMessage(async remoteMessage => {
         console.log('Foreground Message received:', JSON.stringify(remoteMessage));
-        // Alert.alert(
-        //     remoteMessage.notification?.title || 'New Notification',
-        //     remoteMessage.notification?.body || 'You have a new message'
-        // );
+        
+        // Extract active chat details from global scope
+        const activeConversationId = (globalThis as any).activeConversationId;
+        const activeChatUserId = (globalThis as any).activeChatUserId;
+        const activeChatUserName = (globalThis as any).activeChatUserName;
+
+        // Check if this incoming message belongs to the currently active chat screen
+        const isFromActiveChat = activeConversationId && (
+            remoteMessage.data?.conversationId === activeConversationId ||
+            remoteMessage.data?.senderId === activeChatUserId ||
+            (activeChatUserName && remoteMessage.notification?.title?.includes(activeChatUserName))
+        );
+
+        if (isFromActiveChat) {
+            console.log('[NotificationHelper] Skipping toast/vibration because user is in active chat');
+            // Still broadcast the event so the active screen can receive updates
+            DeviceEventEmitter.emit('notification_received', remoteMessage);
+            return;
+        }
+
+        // Trigger haptic & double vibration pulse for the notification
+        ReactNativeHapticFeedback.trigger("notificationSuccess", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: false,
+        });
+        Vibration.vibrate([0, 120, 80, 120]);
+
+        // Dispatch notification increment in redux store
+        store.dispatch(incrementUnreadCount());
+
+        // Show the beautiful premium Toast
+        Toast.show({
+            type: 'success',
+            text1: remoteMessage.notification?.title || 'New Notification',
+            text2: remoteMessage.notification?.body || 'You received a new notification',
+        });
+
+        // Emit a global event so active screens can refresh their data
+        DeviceEventEmitter.emit('notification_received', remoteMessage);
     });
 
     // 2. Notification Opened Handler (When app is in background)

@@ -2,12 +2,9 @@ import { FlatList, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'r
 import Avatar from '../../components/common/Avatar';
 import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
-import Feather from "react-native-vector-icons/Feather";
-import Octicons from "react-native-vector-icons/Octicons";
-import Icon from "react-native-vector-icons/Ionicons";
+import LinearGradient from 'react-native-linear-gradient';
 import socialService from '../../api/services/socialService';
 import Toast from 'react-native-toast-message';
-
 
 const LikeList = ({ data, onRefresh }: any) => {
     const handleRespond = async (requesterId: string, action: 'accepted' | 'rejected') => {
@@ -19,16 +16,16 @@ const LikeList = ({ data, onRefresh }: any) => {
             }
             Toast.show({
                 type: 'success',
-                text1: 'Success',
-                text2: action === 'accepted' ? 'Match created successfully' : 'Passed successfully',
+                text1: action === 'accepted' ? 'Matched! 🎉' : 'Passed Successfully',
+                text2: action === 'accepted' ? 'You created a new connection!' : 'User was successfully skipped.',
             });
             if (onRefresh) onRefresh();
         } catch (error: any) {
             console.error(`Error responding to request:`, error);
             Toast.show({
                 type: 'error',
-                text1: 'Error',
-                text2: `Failed to ${action === 'accepted' ? 'match' : 'pass'}`,
+                text1: 'Response Failed',
+                text2: `Failed to ${action === 'accepted' ? 'accept match' : 'pass user'}.`,
             });
         }
     };
@@ -36,46 +33,37 @@ const LikeList = ({ data, onRefresh }: any) => {
     const renderItem = ({ item }: any) => (
         <View style={styles.card}>
             <View style={styles.row}>
-                <Avatar uri={item.image} name={item.name} size={60} style={styles.avatar} />
+                <Avatar uri={item.image} name={item.name} size={64} style={styles.avatar} />
             </View>
-            <View style={{ flex: 1 }}>
-                <View style={styles.matchBadge}>
-                    <Text style={styles.name}>
-                        {item.name}, {item.age}
-                    </Text>
-                    <View style={styles.percent}>
-
-                        <Text style={styles.matchText}>{item.matchPercent} match</Text>
-                    </View>
+            <View style={styles.infoContainer}>
+                <Text style={styles.name} numberOfLines={1}>
+                    {item.name}, {item.age || 'N/A'}
+                </Text>
+                <View style={styles.percentPill}>
+                    <Ionicons name="heart" size={12} color="#FF3366" />
+                    <Text style={styles.matchText}>{item.matchPercent || '90%'} match</Text>
                 </View>
-
-                <Text style={styles.subText}><Ionicons name="location-outline" size={12} /> {item.location}</Text>
-                <Text style={styles.subText}>{item.job}</Text>
-
-                <View style={styles.footer}>
-                    <View style={styles.dateContainer}>
-                        <Ionicons name="calendar-clear-outline" size={14} color="#999" />
-                        <Text style={styles.matchDate}>Liked {item.matchedDays}</Text>
-                    </View>
-                    <View style={styles.actionButtons}>
-                        <TouchableOpacity
-                            style={[styles.actionBtn, styles.rejectBtn]}
-                            onPress={() => handleRespond(item.id, 'rejected')}
-                            activeOpacity={0.7}
-                        >
-                            <Icon name="close" size={18} color="#ff3b30" />
-                            <Text style={styles.rejectText}>Pass</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[styles.actionBtn, styles.acceptBtn]}
-                            onPress={() => handleRespond(item.id, 'accepted')}
-                            activeOpacity={0.7}
-                        >
-                            <Icon name="checkmark" size={18} color="white" />
-                            <Text style={styles.acceptText}>Match</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+            </View>
+            <View style={styles.actionRow}>
+                <TouchableOpacity
+                    style={styles.circleRejectBtn}
+                    onPress={() => handleRespond(item.id, 'rejected')}
+                    activeOpacity={0.8}
+                >
+                    <Ionicons name="close" size={20} color="#666666" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={styles.circleAcceptBtn}
+                    onPress={() => handleRespond(item.id, 'accepted')}
+                    activeOpacity={0.8}
+                >
+                    <LinearGradient
+                        colors={["#FF5F6D", "#FF3366"]}
+                        style={styles.gradientCircle}
+                    >
+                        <Ionicons name="heart" size={20} color="white" />
+                    </LinearGradient>
+                </TouchableOpacity>
             </View>
         </View>
     );
@@ -83,22 +71,23 @@ const LikeList = ({ data, onRefresh }: any) => {
     const renderEmpty = () => (
         <View style={styles.emptyContainer}>
             <View style={styles.iconCircle}>
-                <Ionicons name="heart-outline" size={40} color="#FF5F6D" />
+                <Ionicons name="heart-outline" size={44} color="#FF3366" />
             </View>
             <Text style={styles.emptyTitle}>No Likes Yet</Text>
             <Text style={styles.emptySubText}>
-                When people like your profile, they'll appear here. Keep your profile updated to get more interest!
+                When people like your profile, they will appear here. Keep swiping and matching to discover new partners!
             </Text>
         </View>
     );
+
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
             <FlatList
                 ListHeaderComponent={data.length > 0 ? () => (
                     <View style={styles.headerCon}>
                         <Text style={styles.header}>People who liked you</Text>
                         <Text style={styles.subHeader}>
-                            These people have shown interest in your profile. Like them back to create a match!
+                            These matches have shown interest in your profile. Match back to start chatting instantly!
                         </Text>
                     </View>
                 ) : null}
@@ -110,202 +99,138 @@ const LikeList = ({ data, onRefresh }: any) => {
                 contentContainerStyle={[{ paddingBottom: 40 }, data.length === 0 && { flex: 1, justifyContent: 'center' }]}
             />
         </View>
-    )
-}
+    );
+};
 
-export default LikeList
+export default LikeList;
 
 const styles = StyleSheet.create({
     headerCon: {
-        backgroundColor: "#FFF6EE",
-        borderRadius: 14,
-        padding: 16,
-        marginBottom: 16
+        backgroundColor: "rgba(255, 95, 109, 0.08)",
+        borderRadius: 20,
+        padding: 18,
+        marginBottom: 20,
+        borderWidth: 1,
+        borderColor: "rgba(255, 95, 109, 0.15)",
     },
     header: {
-        fontSize: 18,
-        fontWeight: "700",
-        color: "#1a1a1a",
-        marginBottom: 4
+        fontSize: 20,
+        fontWeight: "800",
+        color: "#FF3366",
+        marginBottom: 6,
     },
     subHeader: {
-        fontSize: 16,
-        color: "#666",
-        lineHeight: 24
+        fontSize: 14,
+        color: "#555555",
+        lineHeight: 20,
+        fontWeight: "500",
     },
     card: {
-        backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 14,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
+        padding: 16,
         marginBottom: 16,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 2,
         flexDirection: "row",
+        alignItems: "center",
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
+        elevation: 3,
         borderWidth: 1,
-        borderColor: "#dadada"
+        borderColor: "rgba(0, 0, 0, 0.04)",
+        marginHorizontal: 4,
     },
     row: {
         flexDirection: "row",
+        alignItems: "center",
     },
     avatar: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        marginRight: 12,
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        marginRight: 14,
+        borderWidth: 2,
+        borderColor: "#FF3366",
+    },
+    infoContainer: {
+        flex: 1,
+        justifyContent: "center",
     },
     name: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#222",
+        fontSize: 17,
+        fontWeight: "800",
+        color: "#1A1A1A",
+        marginBottom: 6,
     },
-    subText: {
-        color: "#555",
-        fontSize: 13,
-        marginTop: 2,
-    },
-    matchDate: {
-        color: "#999",
-        fontSize: 12,
-        marginLeft: 4,
-    },
-    dateContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        flex: 1,
-    },
-    verifiedTag: {
-        backgroundColor: "#d8f5dc",
-        paddingVertical: 4,
-        paddingHorizontal: 10,
-        borderRadius: 6,
-        marginTop: 6,
+    percentPill: {
+        backgroundColor: "rgba(255, 51, 102, 0.08)",
         alignSelf: "flex-start",
-    },
-    verifiedText: {
-        color: "#177245",
-        fontWeight: "600",
-        fontSize: 12,
-    },
-    verifyBtn: {
-        borderWidth: 1,
-        borderColor: "#ffb700",
-        paddingVertical: 8,
-        paddingHorizontal: 8,
-        borderRadius: 8,
-        margin: 6,
-        marginTop: 10,
-        justifyContent: "center",
-        alignItems: "center",
-        flexDirection: "row",
-        gap: 6
-
-    },
-    verifyBtnText: {
-        color: "black",
-        fontWeight: "600",
-        fontSize: 14,
-        textAlign: "center",
-
-    },
-    matchBadge: {
-        // backgroundColor: "#f5f5f5",
+        paddingHorizontal: 10,
         paddingVertical: 4,
-        paddingHorizontal: 8,
-        borderRadius: 20,
+        borderRadius: 12,
         flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center"
+        alignItems: "center",
+        gap: 4,
     },
     matchText: {
         fontSize: 12,
-        fontWeight: "600",
-        color: "#333",
+        fontWeight: "700",
+        color: "#FF3366",
     },
-    messageBtn: {
-        backgroundColor: "white",
-        paddingVertical: 6,
-        borderRadius: 10,
-        alignItems: "center",
+    actionRow: {
         flexDirection: "row",
-        paddingHorizontal: 14,
-        gap: 6,
-        borderWidth: 1,
-        borderColor: "#dadada"
-    },
-    messageText: {
-        color: "black",
-        fontWeight: "600",
-    },
-    footer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
-        marginTop: 12,
-        flexWrap: 'wrap',
-        gap: 8,
+        gap: 10,
+        marginLeft: 10,
     },
-    percent: {
+    circleRejectBtn: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: "#F5F5F5",
+        alignItems: "center",
+        justifyContent: "center",
         borderWidth: 1,
-        borderColor: "#dadada",
-        padding: 6,
-        borderRadius: 8,
-        paddingHorizontal: 10
+        borderColor: "rgba(0, 0, 0, 0.05)",
     },
-    actionButtons: {
-        flexDirection: 'row',
-        gap: 8,
-        justifyContent: 'flex-end',
+    circleAcceptBtn: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        shadowColor: "#FF3366",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.2,
+        shadowRadius: 6,
+        elevation: 3,
     },
-    actionBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 14,
-        borderRadius: 12,
-        gap: 4,
-        borderWidth: 1,
-        minWidth: 90,
-        justifyContent: 'center',
-    },
-    acceptBtn: {
-        backgroundColor: '#FF5F6D',
-        borderColor: '#FF5F6D',
-    },
-    rejectBtn: {
-        backgroundColor: 'white',
-        borderColor: '#ff3b30',
-    },
-    acceptText: {
-        color: 'white',
-        fontWeight: '600',
-        fontSize: 13,
-    },
-    rejectText: {
-        color: '#ff3b30',
-        fontWeight: '600',
-        fontSize: 13,
+    gradientCircle: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 22,
+        alignItems: "center",
+        justifyContent: "center",
     },
     emptyContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         paddingHorizontal: 40,
-        paddingBottom: 100, // Offset for the tab bar/header
+        paddingBottom: 80,
     },
     iconCircle: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
-        backgroundColor: '#FFF0F5',
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        backgroundColor: "rgba(255, 95, 109, 0.1)",
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 20,
     },
     emptyTitle: {
-        fontSize: 20,
-        fontWeight: '700',
-        color: '#222',
+        fontSize: 22,
+        fontWeight: '800',
+        color: '#1A1A1A',
         marginBottom: 10,
     },
     emptySubText: {
@@ -313,5 +238,6 @@ const styles = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
         lineHeight: 22,
+        fontWeight: "500",
     }
-})
+});

@@ -7,6 +7,8 @@ import { addUnreadConversation, setUnreadConversations, addUserOnline, removeUse
 import { incrementUnreadCount as incrementNotificationCount } from '../redux/slices/notificationSlice';
 import messageService from '../api/services/messageService';
 import Toast from 'react-native-toast-message';
+import { Vibration, DeviceEventEmitter } from 'react-native';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 interface SocketContextType {
   socket: Socket | null;
@@ -68,6 +70,21 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           console.log('📩 New message received:', data);
           if (data.senderId !== currentUserId) {
             dispatch(addUnreadConversation(data.conversationId));
+
+            // Check if user is not currently viewing this conversation
+            if ((globalThis as any).activeConversationId !== data.conversationId) {
+              ReactNativeHapticFeedback.trigger("notificationSuccess", {
+                enableVibrateFallback: true,
+                ignoreAndroidSystemSettings: false,
+              });
+              Vibration.vibrate([0, 100, 80, 100]);
+
+              Toast.show({
+                type: 'info',
+                text1: 'New Message 💬',
+                text2: data.content || 'You received a new message',
+              });
+            }
           }
         });
 
@@ -98,11 +115,21 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socketInstance.on('new_notification', (data) => {
           console.log('🔔 New notification received:', data);
           dispatch(incrementNotificationCount());
+
+          ReactNativeHapticFeedback.trigger("notificationSuccess", {
+            enableVibrateFallback: true,
+            ignoreAndroidSystemSettings: false,
+          });
+          Vibration.vibrate([0, 120, 80, 120]);
+
           Toast.show({
             type: 'success',
             text1: data.title || 'New Notification',
             text2: data.description || 'You have a new notification',
           });
+
+          // Emit a global event for socket notification so active screens can refresh
+          DeviceEventEmitter.emit('notification_received', { data, isSocket: true });
         });
 
         setSocket(socketInstance);
