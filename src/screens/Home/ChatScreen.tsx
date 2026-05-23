@@ -37,7 +37,7 @@ const ChatScreen = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [conversationId, setConversationId] = useState<string | null>(null);
     const [isOtherUserTyping, setIsOtherUserTyping] = useState(false);
-    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const typingTimeoutRef = useRef<any>(null);
 
     const flatListRef = useRef<FlatList>(null);
     const { socket, isConnected } = useSocket();
@@ -208,7 +208,20 @@ const ChatScreen = () => {
         }
     };
 
-    const renderMessage = ({ item }: { item: MessageItem }) => {
+    const renderMessage = ({ item }: { item: any }) => {
+        if (item.isTyping) {
+            return (
+                <View style={[styles.messageBubbleContainer, styles.theirMessageContainer]}>
+                    <Avatar uri={avatar} name={name} size={28} style={styles.messageAvatar} />
+                    <View style={[styles.messageBubble, styles.theirBubble, { backgroundColor: '#F0F0F0', borderBottomLeftRadius: 4 }]}>
+                        <Text style={[styles.messageText, styles.theirText, { fontStyle: 'italic', color: '#666' }]}>
+                            typing...
+                        </Text>
+                    </View>
+                </View>
+            );
+        }
+
         const isMine = item.isMine || item.senderId === currentUserId;
 
         return (
@@ -218,9 +231,19 @@ const ChatScreen = () => {
                     <Text style={[styles.messageText, isMine ? styles.myText : styles.theirText]}>
                         {item.content}
                     </Text>
-                    <Text style={[styles.timeText, isMine ? styles.myTime : styles.theirTime]}>
-                        {dayjs(item.createdAt).format('HH:mm')}
-                    </Text>
+                    <View style={styles.messageFooter}>
+                        <Text style={[styles.timeText, isMine ? styles.myTime : styles.theirTime]}>
+                            {dayjs(item.createdAt).format('HH:mm')}
+                        </Text>
+                        {isMine && (
+                            <Ionicons
+                                name="checkmark-done-sharp"
+                                size={15}
+                                color={item.isRead ? "#00F0FF" : "#FFFFFF"}
+                                style={{ marginLeft: 4 }}
+                            />
+                        )}
+                    </View>
                 </View>
             </View>
         );
@@ -244,11 +267,7 @@ const ChatScreen = () => {
                     </View>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerName}>{name}</Text>
-                        {isOtherUserTyping ? (
-                            <Text style={styles.typingIndicator}>typing...</Text>
-                        ) : (
-                            <Text style={styles.onlineStatus}>Online</Text>
-                        )}
+                        <Text style={styles.onlineStatus}>Online</Text>
                     </View>
                 </View>
 
@@ -260,7 +279,16 @@ const ChatScreen = () => {
                 ) : (
                     <FlatList
                         ref={flatListRef}
-                        data={[...messages].reverse()}
+                        data={(() => {
+                            const chatData = [...messages].reverse();
+                            if (isOtherUserTyping) {
+                                chatData.unshift({
+                                    id: 'typing-indicator',
+                                    isTyping: true,
+                                } as any);
+                            }
+                            return chatData;
+                        })()}
                         inverted
                         keyExtractor={item => item.id}
                         renderItem={renderMessage}
@@ -407,8 +435,12 @@ const styles = StyleSheet.create({
     },
     timeText: {
         fontSize: 11,
-        marginTop: 4,
+    },
+    messageFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
         alignSelf: 'flex-end',
+        marginTop: 4,
     },
     myTime: {
         color: 'rgba(255, 255, 255, 0.7)',

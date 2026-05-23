@@ -273,7 +273,27 @@ export const handleLogout = async (
   dispatch?: any,
 ) => {
   try {
-    // 1. Clear stored tokens from Keychain FIRST (crucial)
+    // 1. Retrieve the refresh token from Keychain first
+    let refreshToken = '';
+    try {
+      const credentials = await Keychain.getGenericPassword();
+      if (credentials) {
+        const tokens = JSON.parse(credentials.password);
+        refreshToken = tokens.refresh || '';
+      }
+    } catch (e) {
+      console.warn('Failed to retrieve refresh token from Keychain:', e);
+    }
+
+    // 2. Call Backend Logout API to inform backend of session termination
+    try {
+      await authService.logout(refreshToken);
+      console.log('✅ Backend logged out');
+    } catch (error) {
+      console.warn('Backend logout failed:', error);
+    }
+
+    // 3. Clear stored tokens from Keychain (crucial)
     try {
       await Keychain.resetGenericPassword();
       console.log('✅ Keychain reset');
@@ -281,7 +301,7 @@ export const handleLogout = async (
       console.warn('Keychain reset failed:', error);
     }
 
-    // 2. Sign out from Firebase
+    // 3. Sign out from Firebase
     try {
       await auth().signOut();
       console.log('✅ Firebase signed out');
@@ -289,7 +309,7 @@ export const handleLogout = async (
       console.warn('Firebase sign-out failed:', error);
     }
 
-    // 3. Sign out from Google
+    // 4. Sign out from Google
     try {
       if (Platform.OS === 'android') {
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -297,16 +317,24 @@ export const handleLogout = async (
       await GoogleSignin.signOut();
       console.log('✅ Google signed out');
     } catch (error: any) {
-      // If it fails with "activity is null", we can still continue with the logout sequence
       console.warn('Google sign-out failed or activity was null:', error.message);
     }
 
-    // 4. Clear Redux state
+    // 5. Clean local stored data from AsyncStorage & Redux Persist
+    try {
+      await AsyncStorage.removeItem('persist:root');
+      await AsyncStorage.removeItem('userBasicInfo');
+      console.log('✅ Redux Persist & User basic info cleared from AsyncStorage');
+    } catch (error) {
+      console.warn('Failed to clear AsyncStorage data:', error);
+    }
+
+    // 6. Clear Redux state
     // We clear auth state to trigger RootNavigator re-render
     if (dispatch) {
       console.log('Dispatching global RESET_STORE...');
       dispatch({ type: 'RESET_STORE' });
-      console.log('Redux state reset dispatched.');
+      console.log('Redux state reset dispatched (will trigger Socket disconnection automatically).');
     }
 
     console.log('✅ Logout sequence complete');

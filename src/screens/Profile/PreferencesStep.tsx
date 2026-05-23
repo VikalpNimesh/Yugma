@@ -27,6 +27,8 @@ const PreferencesStep = ({ navigation }: any) => {
     const { updateStatus } = useAppSelector(state => state.profileForm);
     const nav = useNavigation();
 
+    const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+
     const [sheetConfig, setSheetConfig] = useState<{
         visible: boolean;
         title: string;
@@ -56,6 +58,9 @@ const PreferencesStep = ({ navigation }: any) => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updatePreferences({ [field]: value }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: false }));
+        }
     };
 
     const openLocationSheet = () => {
@@ -65,7 +70,10 @@ const PreferencesStep = ({ navigation }: any) => {
             title: "Select Preferred Location",
             options: indianStatesArray,
             selectedKey: selectedState ? selectedState.key : undefined,
-            onSelect: (item) => handleChange("preferredLocations", item.name),
+            onSelect: (item) => {
+                handleChange("preferredLocations", item.name);
+                setErrors((prev) => ({ ...prev, preferredLocations: false }));
+            },
             searchable: true,
             searchPlaceholder: "Search state...",
         });
@@ -77,33 +85,67 @@ const PreferencesStep = ({ navigation }: any) => {
             title: "Select Preferred Education",
             options: educationOptions,
             selectedKey: form.preferredEducation,
-            onSelect: (item) => handleChange("preferredEducation", item.key),
+            onSelect: (item) => {
+                handleChange("preferredEducation", item.key);
+                setErrors((prev) => ({ ...prev, preferredEducation: false }));
+            },
             searchable: false,
         });
     };
 
     const handleComplete = () => {
+        const newErrors: { [key: string]: boolean } = {};
         const { preferredAgeMin, preferredAgeMax, preferredLocations, preferredEducation } = form;
-        if (!preferredAgeMin || !preferredAgeMax || !preferredLocations || !preferredEducation) {
+
+        if (!preferredAgeMin) newErrors.preferredAgeMin = true;
+        if (!preferredAgeMax) newErrors.preferredAgeMax = true;
+        if (!preferredLocations) newErrors.preferredLocations = true;
+        if (!preferredEducation) newErrors.preferredEducation = true;
+
+        const minAge = parseInt(preferredAgeMin, 10);
+        const maxAge = parseInt(preferredAgeMax, 10);
+
+        let ageErrorMsg = '';
+
+        if (preferredAgeMin) {
+            if (isNaN(minAge)) {
+                newErrors.preferredAgeMin = true;
+                ageErrorMsg = 'Please enter valid numbers for age.';
+            } else if (minAge < 18) {
+                newErrors.preferredAgeMin = true;
+                ageErrorMsg = 'Preferred min age must be 18 or older.';
+            }
+        }
+
+        if (preferredAgeMax) {
+            if (isNaN(maxAge)) {
+                newErrors.preferredAgeMax = true;
+                ageErrorMsg = 'Please enter valid numbers for age.';
+            } else if (maxAge > 100) {
+                newErrors.preferredAgeMax = true;
+                ageErrorMsg = 'Preferred max age must be 100 or less.';
+            }
+        }
+
+        if (preferredAgeMin && preferredAgeMax && !isNaN(minAge) && !isNaN(maxAge)) {
+            if (minAge >= maxAge) {
+                newErrors.preferredAgeMin = true;
+                newErrors.preferredAgeMax = true;
+                ageErrorMsg = 'Min age must be less than max age.';
+            }
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             Toast.show({
                 type: 'error',
-                text1: 'Missing Information',
-                text2: 'Please fill in all fields to proceed.',
+                text1: 'Validation Error',
+                text2: ageErrorMsg || 'Please fill in all highlighted fields.',
             });
             return;
         }
 
-        const minAge = parseInt(preferredAgeMin, 10);
-        const maxAge = parseInt(preferredAgeMax, 10);
-        if (isNaN(minAge) || isNaN(maxAge)) {
-            Toast.show({ type: 'error', text1: 'Invalid Age', text2: 'Please enter valid numbers.' });
-            return;
-        }
-        if (minAge >= maxAge) {
-            Toast.show({ type: 'error', text1: 'Invalid Age Range', text2: 'Min age must be less than max age.' });
-            return;
-        }
-
+        setErrors({});
         dispatch(completeProfile());
     };
 
@@ -136,7 +178,11 @@ const PreferencesStep = ({ navigation }: any) => {
                                 <TextInput
                                     placeholder="25"
                                     placeholderTextColor="rgba(255, 255, 255, 0.7)"
-                                    style={[styles.input, styles.ageInput]}
+                                    style={[
+                                        styles.input,
+                                        styles.ageInput,
+                                        errors.preferredAgeMin && { borderColor: "#e31717ff", borderWidth: 2 }
+                                    ]}
                                     keyboardType="numeric"
                                     value={form.preferredAgeMin}
                                     onChangeText={(text) => handleChange("preferredAgeMin", text)}
@@ -145,7 +191,11 @@ const PreferencesStep = ({ navigation }: any) => {
                                 <TextInput
                                     placeholder="35"
                                     placeholderTextColor="rgba(255, 255, 255, 0.7)"
-                                    style={[styles.input, styles.ageInput]}
+                                    style={[
+                                        styles.input,
+                                        styles.ageInput,
+                                        errors.preferredAgeMax && { borderColor: "#e31717ff", borderWidth: 2 }
+                                    ]}
                                     keyboardType="numeric"
                                     value={form.preferredAgeMax}
                                     onChangeText={(text) => handleChange("preferredAgeMax", text)}
@@ -160,6 +210,7 @@ const PreferencesStep = ({ navigation }: any) => {
                             placeholder="Select Preferred State"
                             value={form.preferredLocations}
                             onPress={openLocationSheet}
+                            hasError={errors.preferredLocations}
                         />
 
                         {/* Preferred Education */}
@@ -168,6 +219,7 @@ const PreferencesStep = ({ navigation }: any) => {
                             placeholder="Select Preferred Education"
                             value={form.preferredEducation}
                             onPress={openEducationSheet}
+                            hasError={errors.preferredEducation}
                         />
                     </View>
 
@@ -207,6 +259,7 @@ type InputFieldProps = {
     value: string;
     onChangeText?: (text: string) => void;
     onPress?: () => void;
+    hasError?: boolean;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -215,10 +268,14 @@ const InputField: React.FC<InputFieldProps> = ({
     value,
     onChangeText,
     onPress,
+    hasError = false,
 }) => {
     const renderInput = () => (
         <TextInput
-            style={styles.input}
+            style={[
+                styles.input,
+                hasError && { borderColor: "#e31717ff", borderWidth: 2 }
+            ]}
             placeholder={placeholder}
             placeholderTextColor="rgba(255, 255, 255, 0.7)"
             value={value}

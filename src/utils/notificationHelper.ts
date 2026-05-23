@@ -21,7 +21,7 @@ export const requestUserPermission = async () => {
 export const getFcmToken = async () => {
     let fcmToken = await AsyncStorage.getItem('fcmToken');
     console.log('Old FCM Token:', fcmToken);
-    
+
     if (!fcmToken) {
         try {
             const token = await messaging().getToken();
@@ -41,10 +41,10 @@ export const notificationListener = () => {
     // 1. Foreground Message Handler
     const unsubscribe = messaging().onMessage(async remoteMessage => {
         console.log('Foreground Message received:', JSON.stringify(remoteMessage));
-        Alert.alert(
-            remoteMessage.notification?.title || 'New Notification',
-            remoteMessage.notification?.body || 'You have a new message'
-        );
+        // Alert.alert(
+        //     remoteMessage.notification?.title || 'New Notification',
+        //     remoteMessage.notification?.body || 'You have a new message'
+        // );
     });
 
     // 2. Notification Opened Handler (When app is in background)

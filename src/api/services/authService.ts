@@ -55,9 +55,9 @@ class AuthService {
     /**
      * Logout user
      */
-    async logout(): Promise<void> {
+    async logout(refreshToken?: string): Promise<void> {
         try {
-            await axiosInstance.post(API_ENDPOINTS.AUTH.LOGOUT);
+            await axiosInstance.post(API_ENDPOINTS.AUTH.LOGOUT, { refreshToken });
         } catch (error: any) {
             // Even if logout fails on server, we should still clear local token
             console.error('Logout error:', error);

@@ -22,6 +22,7 @@ const { width } = Dimensions.get("window");
 const FamilyDetailsStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.familyDetails);
+    const [errors, setErrors] = React.useState<{ [key: string]: boolean }>({});
 
     React.useEffect(() => {
         dispatch(setCurrentScreen('FamilyDetailsStep'));
@@ -29,18 +30,31 @@ const FamilyDetailsStep = ({ navigation }: any) => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updateFamilyDetails({ [field]: value }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: false }));
+        }
     };
 
     const handleNext = () => {
         const { fatherOccupation, motherOccupation, siblings, familyType } = form;
-        if (!fatherOccupation || !motherOccupation || !siblings || !familyType) {
+        const newErrors: { [key: string]: boolean } = {};
+
+        if (!fatherOccupation) newErrors.fatherOccupation = true;
+        if (!motherOccupation) newErrors.motherOccupation = true;
+        if (!siblings) newErrors.siblings = true;
+        if (!familyType) newErrors.familyType = true;
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             Toast.show({
                 type: 'error',
-                text1: 'Missing Information',
-                text2: 'Please fill in all fields to proceed.',
+                text1: 'Validation Error',
+                text2: 'Please fill in all highlighted fields.',
             });
             return;
         }
+
+        setErrors({});
         navigation.navigate("PreferencesStep");
     };
 
@@ -71,6 +85,7 @@ const FamilyDetailsStep = ({ navigation }: any) => {
                             placeholder="Enter father's profession"
                             value={form.fatherOccupation}
                             onChangeText={(text) => handleChange("fatherOccupation", text)}
+                            hasError={errors.fatherOccupation}
                         />
 
                         <InputField
@@ -78,6 +93,7 @@ const FamilyDetailsStep = ({ navigation }: any) => {
                             placeholder="Enter mother's profession"
                             value={form.motherOccupation}
                             onChangeText={(text) => handleChange("motherOccupation", text)}
+                            hasError={errors.motherOccupation}
                         />
 
                         <InputField
@@ -85,6 +101,7 @@ const FamilyDetailsStep = ({ navigation }: any) => {
                             placeholder="e.g., 1 brother, 1 sister"
                             value={form.siblings}
                             onChangeText={(text) => handleChange("siblings", text)}
+                            hasError={errors.siblings}
                         />
 
                         <View style={styles.inputContainer}>
@@ -100,7 +117,10 @@ const FamilyDetailsStep = ({ navigation }: any) => {
                                 placeholder="Select family type"
                                 value={form.familyType}
                                 onChange={(item) => handleChange("familyType", item.value)}
-                                style={styles.dropdown}
+                                style={[
+                                    styles.dropdown,
+                                    errors.familyType && { borderColor: "#e31717ff", borderWidth: 2 }
+                                ]}
                                 placeholderStyle={styles.placeholderStyle}
                                 selectedTextStyle={styles.selectedTextStyle}
                                 itemTextStyle={{ color: "#333" }}
@@ -135,13 +155,17 @@ type InputFieldProps = {
     placeholder: string;
     value: string;
     onChangeText: (text: string) => void;
+    hasError?: boolean;
 };
 
-const InputField: React.FC<InputFieldProps> = ({ label, placeholder, value, onChangeText }) => (
+const InputField: React.FC<InputFieldProps> = ({ label, placeholder, value, onChangeText, hasError = false }) => (
     <View style={styles.inputContainer}>
         <Text style={styles.label}>{label}</Text>
         <TextInput
-            style={styles.input}
+            style={[
+                styles.input,
+                hasError && { borderColor: "#e31717ff", borderWidth: 2 }
+            ]}
             placeholder={placeholder}
             placeholderTextColor="rgba(255, 255, 255, 0.7)"
             value={value}

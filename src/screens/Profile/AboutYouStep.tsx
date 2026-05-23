@@ -25,10 +25,18 @@ export const AboutYouStep: React.FC = () => {
     const { bio, interests, photos } = useAppSelector(
         (state) => state.profileForm.aboutYou
     );
+    const [errors, setErrors] = React.useState<{
+        bio?: boolean;
+        interests?: boolean;
+        photos?: boolean;
+    }>({});
 
     const handleDeletePhoto = (index: number) => {
         const newPhotos = photos.filter((_, i) => i !== index);
         dispatch(updateAboutYou({ photos: newPhotos }));
+        if (errors.photos && newPhotos.length >= 2) {
+            setErrors((prev) => ({ ...prev, photos: false }));
+        }
     };
 
     React.useEffect(() => {
@@ -41,10 +49,15 @@ export const AboutYouStep: React.FC = () => {
     ];
 
     const toggleInterest = (interest: string) => {
+        let newInterests;
         if (interests.includes(interest)) {
-            dispatch(updateAboutYou({ interests: interests.filter((i) => i !== interest) }));
+            newInterests = interests.filter((i) => i !== interest);
         } else {
-            dispatch(updateAboutYou({ interests: [...interests, interest] }));
+            newInterests = [...interests, interest];
+        }
+        dispatch(updateAboutYou({ interests: newInterests }));
+        if (errors.interests && newInterests.length > 0) {
+            setErrors((prev) => ({ ...prev, interests: false }));
         }
     };
 
@@ -60,23 +73,41 @@ export const AboutYouStep: React.FC = () => {
                 Toast.show({ type: 'error', text1: 'Maximum 6 photos allowed' });
                 return;
             }
-            dispatch(updateAboutYou({ photos: [...photos, ...uris] }));
+            const updatedPhotos = [...photos, ...uris];
+            dispatch(updateAboutYou({ photos: updatedPhotos }));
+            if (errors.photos && updatedPhotos.length >= 2) {
+                setErrors((prev) => ({ ...prev, photos: false }));
+            }
         }
     };
 
     const handleNext = () => {
+        const newErrors: { bio?: boolean; interests?: boolean; photos?: boolean } = {};
         if (!bio || bio.trim().length < 10) {
-            Toast.show({ type: 'error', text1: 'Invalid Bio', text2: 'Please write at least 10 characters.' });
-            return;
+            newErrors.bio = true;
         }
         if (interests.length === 0) {
-            Toast.show({ type: 'error', text1: 'Select Interests', text2: 'Please select at least one interest.' });
-            return;
+            newErrors.interests = true;
         }
         if (photos.length < 2) {
-            Toast.show({ type: 'error', text1: 'Upload Photos', text2: 'Please upload at least 2 photos.' });
+            newErrors.photos = true;
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            Toast.show({
+                type: 'error',
+                text1: 'Validation Error',
+                text2: newErrors.bio && bio.trim().length > 0 && bio.trim().length < 10
+                    ? 'Bio must be at least 10 characters long.'
+                    : newErrors.photos && photos.length > 0 && photos.length < 2
+                    ? 'Please upload at least 2 photos.'
+                    : 'Please fill in all highlighted fields.',
+            });
             return;
         }
+
+        setErrors({});
         navigation.navigate("FamilyDetailsStep" as never);
     };
 
@@ -98,9 +129,9 @@ export const AboutYouStep: React.FC = () => {
                             <View style={[styles.progressBarFill, { width: "50%" }]} />
                         </View>
                     </View>
-
+ 
                     <Text style={styles.title}>About You</Text>
-
+ 
                     {/* Bio Section */}
                     <View style={styles.section}>
                         <Text style={styles.label}>Bio</Text>
@@ -110,16 +141,27 @@ export const AboutYouStep: React.FC = () => {
                             multiline
                             numberOfLines={5}
                             value={bio}
-                            onChangeText={(text) => dispatch(updateAboutYou({ bio: text }))}
-                            style={styles.textArea}
+                            onChangeText={(text) => {
+                                dispatch(updateAboutYou({ bio: text }));
+                                if (errors.bio && text.trim().length >= 10) {
+                                    setErrors((prev) => ({ ...prev, bio: false }));
+                                }
+                            }}
+                            style={[
+                                styles.textArea,
+                                errors.bio && { borderColor: "#e31717ff", borderWidth: 2 }
+                            ]}
                         />
                     </View>
-
+ 
                     {/* Interests Section */}
                     <View style={styles.section}>
                         <Text style={styles.label}>Interests & Hobbies</Text>
                         <Text style={styles.subText}>Select interests that describe you</Text>
-                        <View style={styles.chipContainer}>
+                        <View style={[
+                            styles.chipContainer,
+                            errors.interests && { borderColor: "#e31717ff", borderWidth: 2, borderRadius: 15, padding: 10 }
+                        ]}>
                             {interestOptions.map((interest) => (
                                 <Chip
                                     key={interest}
@@ -140,13 +182,16 @@ export const AboutYouStep: React.FC = () => {
                             ))}
                         </View>
                     </View>
-
+ 
                     {/* Photos Section */}
                     <View style={styles.section}>
                         <Text style={styles.label}>Photos</Text>
                         <Text style={styles.subText}>Add at least 2 photos to get better matches</Text>
                         
-                        <View style={styles.photoGrid}>
+                        <View style={[
+                            styles.photoGrid,
+                            errors.photos && { borderColor: "#e31717ff", borderWidth: 2, borderRadius: 15, padding: 10 }
+                        ]}>
                             {photos.map((uri, index) => (
                                 <View key={index} style={styles.photoWrapper}>
                                     <Image source={{ uri }} style={styles.photoPreview} />
@@ -169,14 +214,14 @@ export const AboutYouStep: React.FC = () => {
                             )}
                         </View>
                     </View>
-
+ 
                     {/* Footer Buttons */}
                     <View style={styles.footer}>
                         <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
                             <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
                             <Text style={styles.previousText}>Back</Text>
                         </TouchableOpacity>
-
+ 
                         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                             <Text style={styles.nextText}>Next Step</Text>
                             <Ionicons name="arrow-forward" size={20} color="#FF3366" />

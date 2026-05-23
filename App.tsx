@@ -1,8 +1,9 @@
 import 'react-native-get-random-values';
 import Toast from 'react-native-toast-message';
+import { premiumToastConfig } from './src/components/common/PremiumToastConfig';
 import { Provider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { ActivityIndicator, View, StatusBar } from "react-native";
+import { ActivityIndicator, StatusBar } from "react-native";
 import { persistor, store } from "./src/redux/store";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import AppNavigator from "./src/navigation/AppNavigator";
@@ -15,14 +16,23 @@ import { requestUserPermission, notificationListener } from './src/utils/notific
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { IapProvider } from './src/context/IapContext';
 
+// Import Rozenite debugging tools
+import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
+import { useNetworkActivityDevTools } from '@rozenite/network-activity-plugin';
+
 function RootNavigator() {
+  const navigationRef = useRef<any>(null);
   const isLoggedIn = useSelector(
     (state: any) => state.auth.isAuthenticated
   );
   console.log("RootNavigator - isLoggedIn:", isLoggedIn);
 
+  // Initialize Rozenite DevTools plugins
+  useReactNavigationDevTools({ ref: navigationRef });
+  useNetworkActivityDevTools();
+
   return (
-    <NavigationContainer key={isLoggedIn ? 'app' : 'auth'}>
+    <NavigationContainer ref={navigationRef} key={isLoggedIn ? 'app' : 'auth'}>
       {isLoggedIn ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
@@ -57,7 +67,7 @@ export default function App() {
                   <RootNavigator />
                 </SocketProvider>
               </IapProvider>
-              <Toast />
+              <Toast config={premiumToastConfig} />
             </PersistGate>
           </Provider>
         </SafeAreaView>

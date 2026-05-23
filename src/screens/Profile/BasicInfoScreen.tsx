@@ -29,6 +29,7 @@ export const BasicInfoScreen: React.FC = () => {
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.basicInfo);
 
+    const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
     const [sheetConfig, setSheetConfig] = useState<{
         visible: boolean;
         title: string;
@@ -54,7 +55,10 @@ export const BasicInfoScreen: React.FC = () => {
             title: "Select State",
             options: indianStatesArray,
             selectedKey: selectedState ? selectedState.key : undefined,
-            onSelect: (item) => handleChange("location", item.name),
+            onSelect: (item) => {
+                handleChange("location", item.name);
+                setErrors(prev => ({ ...prev, location: false }));
+            },
             searchable: true,
             searchPlaceholder: "Search state...",
         });
@@ -66,7 +70,10 @@ export const BasicInfoScreen: React.FC = () => {
             title: "Select Gender",
             options: genderOptions,
             selectedKey: form.gender,
-            onSelect: (item) => handleChange("gender", item.key),
+            onSelect: (item) => {
+                handleChange("gender", item.key);
+                setErrors(prev => ({ ...prev, gender: false }));
+            },
             searchable: false,
         });
     };
@@ -77,7 +84,10 @@ export const BasicInfoScreen: React.FC = () => {
             title: "Select Education Level",
             options: educationOptions,
             selectedKey: form.education,
-            onSelect: (item) => handleChange("education", item.key),
+            onSelect: (item) => {
+                handleChange("education", item.key);
+                setErrors(prev => ({ ...prev, education: false }));
+            },
             searchable: false,
         });
     };
@@ -103,18 +113,40 @@ export const BasicInfoScreen: React.FC = () => {
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updateBasicInfo({ [field]: value }));
+        if (errors[field]) {
+            setErrors(prev => ({ ...prev, [field]: false }));
+        }
     };
 
     const handleNext = () => {
+        const newErrors: { [key: string]: boolean } = {};
         const { fullName, email, age, location, profession, education, region, gender } = form;
-        if (!fullName || !email || !age || !location || !profession || !education || !region || !gender) {
+
+        if (!fullName) newErrors.fullName = true;
+        if (!email) newErrors.email = true;
+        if (!location) newErrors.location = true;
+        if (!profession) newErrors.profession = true;
+        if (!gender) newErrors.gender = true;
+        if (!education) newErrors.education = true;
+
+        const ageNum = parseInt(age, 10);
+        if (!age || isNaN(ageNum) || ageNum < 18) {
+            newErrors.age = true;
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             Toast.show({
                 type: 'error',
-                text1: 'Missing Information',
-                text2: 'Please fill in all required fields to proceed.',
+                text1: 'Validation Error',
+                text2: newErrors.age && ageNum < 18
+                    ? 'You must be 18 years or older to proceed.'
+                    : 'Please fill in all highlighted fields.',
             });
             return;
         }
+
+        setErrors({});
         navigation.navigate("AboutYouStep" as never);
     };
 
@@ -146,6 +178,7 @@ export const BasicInfoScreen: React.FC = () => {
                             value={form.fullName}
                             onChangeText={(text) => handleChange("fullName", text)}
                             editable={!form.fullName}
+                            hasError={errors.fullName}
                         />
 
                         <InputField
@@ -155,6 +188,7 @@ export const BasicInfoScreen: React.FC = () => {
                             onChangeText={(text) => handleChange("email", text)}
                             keyboardType="email-address"
                             editable={!form.email}
+                            hasError={errors.email}
                         />
 
                         <View style={styles.row}>
@@ -165,6 +199,7 @@ export const BasicInfoScreen: React.FC = () => {
                                     value={form.age}
                                     onChangeText={(text) => handleChange("age", text)}
                                     keyboardType="numeric"
+                                    hasError={errors.age}
                                 />
                             </View>
                             <View style={{ flex: 2 }}>
@@ -173,6 +208,7 @@ export const BasicInfoScreen: React.FC = () => {
                                     placeholder="Select State"
                                     value={form.location}
                                     onPress={openLocationSheet}
+                                    hasError={errors.location}
                                 />
                             </View>
                         </View>
@@ -182,6 +218,7 @@ export const BasicInfoScreen: React.FC = () => {
                             placeholder="Your profession"
                             value={form.profession}
                             onChangeText={(text) => handleChange("profession", text)}
+                            hasError={errors.profession}
                         />
 
                         <InputField
@@ -189,6 +226,7 @@ export const BasicInfoScreen: React.FC = () => {
                             placeholder="Select gender"
                             value={form.gender}
                             onPress={openGenderSheet}
+                            hasError={errors.gender}
                         />
 
                         <InputField
@@ -196,6 +234,7 @@ export const BasicInfoScreen: React.FC = () => {
                             placeholder="Select education level"
                             value={form.education}
                             onPress={openEducationSheet}
+                            hasError={errors.education}
                         />
 
                         <InputField
@@ -213,23 +252,10 @@ export const BasicInfoScreen: React.FC = () => {
                             onChangeText={() => { }}
                             editable={false}
                         />
-                        {/* 
-                        <InputField
-                            label="Area Cover (Premium)"
-                            placeholder="Coverage area"
-                            value={form.areaCover}
-                            onChangeText={(text) => handleChange("areaCover", text)}
-                            isPremium
-                        /> */}
                     </View>
 
                     {/* Footer Buttons */}
                     <View style={styles.footer}>
-                        {/* <TouchableOpacity style={styles.previousButton} onPress={() => handleLogout(navigation, dispatch)}>
-                            <Ionicons name="log-out-outline" size={22} color="#FFFFFF" />
-                            <Text style={styles.previousText}>Logout</Text>
-                        </TouchableOpacity> */}
-
                         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                             <Text style={styles.nextText}>Next Step</Text>
                             <Ionicons name="arrow-forward" size={20} color="#FF3366" />
@@ -262,6 +288,7 @@ type InputFieldProps = {
     editable?: boolean;
     isPremium?: boolean;
     onPress?: () => void;
+    hasError?: boolean;
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -273,12 +300,14 @@ const InputField: React.FC<InputFieldProps> = ({
     editable = true,
     isPremium = false,
     onPress,
+    hasError = false,
 }) => {
     const renderInput = () => (
         <TextInput
             style={[
                 styles.input,
-                !editable && styles.inputDisabled
+                !editable && styles.inputDisabled,
+                hasError && { borderColor: "#e31717ff", borderWidth: 2 }
             ]}
             placeholder={placeholder}
             placeholderTextColor="rgba(255, 255, 255, 0.7)"
