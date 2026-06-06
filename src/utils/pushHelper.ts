@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, PermissionsAndroid } from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -44,12 +44,19 @@ export const getPushNotificationContext = async (): Promise<PushNotificationCont
     let fcmToken: string | undefined = undefined;
 
     try {
-        // Request permissions (primarily for iOS, Android 13+ handles this via prompt later usually, 
-        // but messaging().requestPermission() is safe to call on both)
-        const authStatus = await messaging().requestPermission();
-        const enabled =
-            authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-            authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        let enabled = false;
+
+        if (Platform.OS === 'android' && Platform.Version >= 33) {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+            );
+            enabled = granted === PermissionsAndroid.RESULTS.GRANTED;
+        } else {
+            const authStatus = await messaging().requestPermission();
+            enabled =
+                authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        }
 
         if (enabled) {
             fcmToken = await messaging().getToken();

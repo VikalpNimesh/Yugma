@@ -53,6 +53,31 @@ const socialService = {
     const response = await axiosInstance.post('/social/register-graph');
     return response.data.data;
   },
+
+  blockUser: async (targetUserId: string): Promise<ActionResponse> => {
+    const response = await axiosInstance.post('/social/block', { targetUserId });
+    return response.data?.data;
+  },
+
+  unblockUser: async (targetUserId: string): Promise<ActionResponse> => {
+    const response = await axiosInstance.delete(`/social/block/${targetUserId}`);
+    return response.data?.data;
+  },
+
+  getBlockedUsers: async (): Promise<SocialUserItem[]> => {
+    const response = await axiosInstance.get('/social/blocked');
+    return response.data?.data;
+  },
+
+  getMatchesCount: async (): Promise<{ count: number }> => {
+    const response = await axiosInstance.get('/social/matches/count');
+    return response.data?.data;
+  },
+
+  getRelationshipStatus: async (otherUserId: string): Promise<{ status: string }> => {
+    const response = await axiosInstance.get(`/social/relationship/${otherUserId}`);
+    return response.data?.data;
+  },
 };
 
 export default socialService;

@@ -15,8 +15,14 @@ import SettingsScreen from "../screens/Settings/SettingsScreen";
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
-    const unreadCount = useSelector((state: RootState) => state.chat.unreadConversationIds.length);
+    const chatUnreadCount = useSelector((state: RootState) => 
+        state.chat.unreadMessageCount !== undefined && state.chat.unreadMessageCount > 0
+            ? state.chat.unreadMessageCount 
+            : state.chat.unreadConversationIds.length
+    );
+    const matchCount = useSelector((state: RootState) => state.chat.matchCount || 0);
     const unreadNotifications = useSelector((state: RootState) => state.notification.unreadCount);
+    
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
@@ -64,7 +70,9 @@ export default function BottomTabs() {
                                 size={20}
                                 color={focused ? "#fff" : "#666"}
                             />
-                            {route.name === "Messages" && unreadCount > 0 && (
+                            
+                            {/* Messages Badge */}
+                            {route.name === "Messages" && chatUnreadCount > 0 && (
                                 <View style={{
                                     position: 'absolute',
                                     top: 4,
@@ -79,7 +87,28 @@ export default function BottomTabs() {
                                     zIndex: 1
                                 }}>
                                     <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
-                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                        {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
+                                    </Text>
+                                </View>
+                            )}
+
+                            {/* Matches Badge */}
+                            {route.name === "MatchesScreen" && matchCount > 0 && (
+                                <View style={{
+                                    position: 'absolute',
+                                    top: 4,
+                                    right: 18,
+                                    backgroundColor: '#ff3b30',
+                                    borderRadius: 10,
+                                    minWidth: 18,
+                                    height: 18,
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    paddingHorizontal: 4,
+                                    zIndex: 1
+                                }}>
+                                    <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
+                                        {matchCount > 9 ? '9+' : matchCount}
                                     </Text>
                                 </View>
                             )}

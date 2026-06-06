@@ -1,5 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
-import { Alert, Platform, Vibration, DeviceEventEmitter } from 'react-native';
+import { Alert, Platform, Vibration, DeviceEventEmitter, PermissionsAndroid } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store } from '../redux/store';
 import { incrementUnreadCount } from '../redux/slices/notificationSlice';
@@ -11,14 +11,33 @@ import Toast from 'react-native-toast-message';
  * Handles FCM permissions, token management, and listeners
  */
 export const requestUserPermission = async () => {
-    const authStatus = await messaging().requestPermission();
-    const enabled =
-        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
-        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+    let enabled = false;
+
+    if (Platform.OS === 'android' && Platform.Version >= 33) {
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+            );
+            enabled = granted === PermissionsAndroid.RESULTS.GRANTED;
+        } catch (error) {
+            console.error('Error requesting Android post notification permission:', error);
+        }
+    } else {
+        try {
+            const authStatus = await messaging().requestPermission();
+            enabled =
+                authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+                authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+        } catch (error) {
+            console.error('Error requesting FCM notification permission:', error);
+        }
+    }
 
     if (enabled) {
-        console.log('Authorization status:', authStatus);
+        console.log('Notification permission granted');
         getFcmToken();
+    } else {
+        console.log('Notification permission denied');
     }
 };
 

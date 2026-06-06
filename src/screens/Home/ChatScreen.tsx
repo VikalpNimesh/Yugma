@@ -11,6 +11,7 @@ import {
     SafeAreaView,
     ActivityIndicator,
     Keyboard,
+    Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Avatar from '../../components/common/Avatar';
@@ -141,16 +142,28 @@ const ChatScreen = () => {
             }
         };
 
+        const handleMessageDeleted = (data: any) => {
+            if (data.conversationId === conversationId) {
+                setMessages(prev => prev.map(m =>
+                    m.id === data.messageId
+                        ? { ...m, content: '🚫 This message was deleted.' }
+                        : m
+                ));
+            }
+        };
+
         socket.on('new_message', handleNewMessage);
         socket.on('typing', handleTyping);
         socket.on('stop_typing', handleStopTyping);
         socket.on('messages_read', handleMessagesRead);
+        socket.on('message_deleted', handleMessageDeleted);
 
         return () => {
             socket.off('new_message', handleNewMessage);
             socket.off('typing', handleTyping);
             socket.off('stop_typing', handleStopTyping);
             socket.off('messages_read', handleMessagesRead);
+            socket.off('message_deleted', handleMessageDeleted);
         };
     }, [socket, otherUserId, conversationId]);
 
@@ -170,6 +183,41 @@ const ChatScreen = () => {
         typingTimeoutRef.current = setTimeout(() => {
             socket.emit('stop_typing', { conversationId, receiverId: otherUserId });
         }, 2000);
+    };
+
+    const handleLongPressMessage = (message: MessageItem) => {
+        if (message.id.toString().startsWith('temp-') || message.content === '🚫 This message was deleted.') return;
+
+        Alert.alert(
+            'Delete Message',
+            'Are you sure you want to delete this message?',
+            [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: async () => {
+                        try {
+                            if (isConnected && socket && conversationId) {
+                                socket.emit('delete_message', {
+                                    conversationId,
+                                    messageId: message.id,
+                                });
+                            } else if (conversationId) {
+                                await messageService.deleteMessage(conversationId, message.id);
+                                setMessages(prev => prev.map(m =>
+                                    m.id === message.id
+                                        ? { ...m, content: '🚫 This message was deleted.' }
+                                        : m
+                                ));
+                            }
+                        } catch (error) {
+                            console.error('Failed to delete message:', error);
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleSend = async () => {
@@ -229,37 +277,46 @@ const ChatScreen = () => {
         }
 
         const isMine = item.isMine || item.senderId === currentUserId;
+        const isDeleted = item.content === '🚫 This message was deleted.';
 
         if (isMine) {
             return (
                 <View style={[styles.messageBubbleContainer, styles.myMessageContainer]}>
-                    <LinearGradient
-                        colors={["#FF5F6D", "#FF3366"]}
-                        style={[styles.messageBubble, styles.myBubble]}
+                    <TouchableOpacity
+                        activeOpacity={isDeleted ? 1.0 : 0.8}
+                        onLongPress={() => handleLongPressMessage(item)}
+                        disabled={isDeleted}
                     >
-                        <Text style={[styles.messageText, styles.myText]}>
-                            {item.content}
-                        </Text>
-                        <View style={styles.messageFooter}>
-                            <Text style={[styles.timeText, styles.myTime]}>
-                                {dayjs(item.createdAt).format('HH:mm')}
+                        <LinearGradient
+                            colors={isDeleted ? ["#E2E8F0", "#CBD5E1"] : ["#FF5F6D", "#FF3366"]}
+                            style={[styles.messageBubble, styles.myBubble]}
+                        >
+                            <Text style={[styles.messageText, isDeleted ? { color: '#64748B', fontStyle: 'italic' } : styles.myText]}>
+                                {item.content}
                             </Text>
-                            <Ionicons
-                                name="checkmark-done-sharp"
-                                size={15}
-                                color={item.isRead ? "#00F0FF" : "rgba(255, 255, 255, 0.6)"}
-                                style={{ marginLeft: 4 }}
-                            />
-                        </View>
-                    </LinearGradient>
+                            <View style={styles.messageFooter}>
+                                <Text style={[styles.timeText, isDeleted ? { color: '#94A3B8' } : styles.myTime]}>
+                                    {dayjs(item.createdAt).format('HH:mm')}
+                                </Text>
+                                {!isDeleted && (
+                                    <Ionicons
+                                        name="checkmark-done-sharp"
+                                        size={15}
+                                        color={item.isRead ? "#00F0FF" : "rgba(255, 255, 255, 0.6)"}
+                                        style={{ marginLeft: 4 }}
+                                    />
+                                )}
+                            </View>
+                        </LinearGradient>
+                    </TouchableOpacity>
                 </View>
             );
         }
 
         return (
             <View style={[styles.messageBubbleContainer, styles.theirMessageContainer]}>
-                <View style={[styles.messageBubble, styles.theirBubble]}>
-                    <Text style={[styles.messageText, styles.theirText]}>
+                <View style={[styles.messageBubble, styles.theirBubble, isDeleted && { backgroundColor: '#E2E8F0' }]}>
+                    <Text style={[styles.messageText, styles.theirText, isDeleted && { color: '#64748B', fontStyle: 'italic' }]}>
                         {item.content}
                     </Text>
                     <View style={styles.messageFooter}>

@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import * as Keychain from 'react-native-keychain';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../redux/store';
-import { addUnreadConversation, setUnreadConversations, addUserOnline, removeUserOnline } from '../redux/slices/chatSlice';
+import { addUnreadConversation, setUnreadConversations, addUserOnline, removeUserOnline, setUnreadMessageCount, setMatchCount } from '../redux/slices/chatSlice';
 import { incrementUnreadCount as incrementNotificationCount } from '../redux/slices/notificationSlice';
 import messageService from '../api/services/messageService';
 import Toast from 'react-native-toast-message';
@@ -53,6 +53,9 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         socketInstance.on('connect', () => {
           console.log('✅ Socket connected');
           setIsConnected(true);
+          // Emit events to get initial counts
+          socketInstance.emit('get_unread_message_users');
+          socketInstance.emit('get_match_users');
         });
 
         socketInstance.on('disconnect', () => {
@@ -65,6 +68,56 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         });
 
         // ── Global Listeners ──────────────────────────────────────────────
+
+        // Handle unread messages count updates
+        const handleUnreadMessage = (data: any) => {
+          console.log('📩 unread_message_users received:', data);
+          let count = 0;
+          if (data && typeof data.totalUsers === 'number') {
+            count = data.totalUsers;
+          } else if (data && Array.isArray(data.unreadUsers)) {
+            count = data.unreadUsers.reduce((sum: number, u: any) => sum + (u.unreadCount || 0), 0);
+          } else if (typeof data === 'number') {
+            count = data;
+          } else if (data && typeof data.count === 'number') {
+            count = data.count;
+          } else if (data && typeof data.unreadCount === 'number') {
+            count = data.unreadCount;
+          } else if (Array.isArray(data)) {
+            count = data.length;
+          }
+          dispatch(setUnreadMessageCount(count));
+        };
+
+        socketInstance.on('unread_message_users', handleUnreadMessage);
+        // Fallbacks
+        socketInstance.on('get_unread_messaeg_user', handleUnreadMessage);
+        socketInstance.on('get_unread_message_user', handleUnreadMessage);
+
+        // Handle match updates
+        const handleMatchUser = (data: any) => {
+          console.log('🤝 match_users received:', data);
+          let count = 0;
+          if (data && typeof data.totalUsers === 'number') {
+            count = data.totalUsers;
+          } else if (data && Array.isArray(data.matchedUsers)) {
+            count = data.matchedUsers.length;
+          } else if (typeof data === 'number') {
+            count = data;
+          } else if (data && typeof data.count === 'number') {
+            count = data.count;
+          } else if (data && typeof data.matchCount === 'number') {
+            count = data.matchCount;
+          } else if (Array.isArray(data)) {
+            count = data.length;
+          }
+          dispatch(setMatchCount(count));
+        };
+
+        socketInstance.on('match_users', handleMatchUser);
+        // Fallbacks
+        socketInstance.on('get match user', handleMatchUser);
+        socketInstance.on('get_match_user', handleMatchUser);
 
         socketInstance.on('new_message', (data) => {
           console.log('📩 New message received:', data);

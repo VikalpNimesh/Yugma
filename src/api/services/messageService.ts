@@ -70,6 +70,11 @@ class MessageService {
     const response = await axiosInstance.post(`/messages/mark-read/${conversationId}`);
     return response.data.data;
   }
+
+  async deleteMessage(conversationId: string, messageId: string): Promise<any> {
+    const response = await axiosInstance.delete(`/messages/${conversationId}/${messageId}`);
+    return response.data;
+  }
 }
 
 export default new MessageService();
