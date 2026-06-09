@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { Platform } from 'react-native';
 import profileService from '../../api/services/profileService';
 
 type BasicInfoForm = {
@@ -84,6 +85,23 @@ const initialState: ProfileFormState = {
   updateError: undefined,
 };
 
+const getMimeType = (filename: string) => {
+  const extension = filename.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    default:
+      return 'image/jpeg';
+  }
+};
+
 // Async Thunk for completing profile
 export const completeProfile = createAsyncThunk(
   'profileForm/completeProfile',
@@ -92,6 +110,7 @@ export const completeProfile = createAsyncThunk(
       const state: any = getState();
       const profile = state.profileForm;
 
+      // Step 1: Update profile details via JSON
       const payload = {
         userId: profile.basicInfo.fullName, // placeholder, replace with actual user ID
         fullName: profile.basicInfo.fullName,
@@ -105,7 +124,6 @@ export const completeProfile = createAsyncThunk(
         gender: profile.basicInfo.gender || state.user?.gender || 'Male',
         bio: profile.aboutYou.bio,
         interests: profile.aboutYou.interests.map((i: any) => ({ interest: i })),
-        photos: profile.aboutYou.photos.map((url: any, idx: number) => ({ url, order: idx })),
         familyDetails: profile.familyDetails,
         preferences: {
           ageMin: Number(profile.preferences.preferredAgeMin),
@@ -115,7 +133,44 @@ export const completeProfile = createAsyncThunk(
         }
       };
 
+      console.log('completeProfile: JSON update start');
       const response = await profileService.updateProfile(payload);
+      console.log('completeProfile: JSON update finished');
+
+      // Step 2: If photos exist, upload them via multipart/form-data
+      const localPhotos = profile.aboutYou.photos;
+      if (localPhotos && localPhotos.length > 0) {
+        console.log('completeProfile: Multipart update start');
+        const formData = new FormData();
+
+        // profilePhoto (first image)
+        const profilePhotoUri = localPhotos[0];
+        const profilePhotoName = profilePhotoUri.substring(profilePhotoUri.lastIndexOf('/') + 1) || 'profile.jpg';
+        const profilePhotoType = getMimeType(profilePhotoName);
+
+        formData.append('profilePhoto', {
+          uri: profilePhotoUri,
+          name: profilePhotoName,
+          type: profilePhotoType,
+        } as any);
+
+        // gallery photos (remaining images)
+        const galleryPhotos = localPhotos.slice(1);
+        galleryPhotos.forEach((photoUri: string, idx: number) => {
+          const filename = photoUri.substring(photoUri.lastIndexOf('/') + 1) || `photo_${idx}.jpg`;
+          const type = getMimeType(filename);
+          formData.append('photos', {
+            uri: photoUri,
+            name: filename,
+            type: type,
+          } as any);
+        });
+
+        const multipartResponse = await profileService.updateProfileMultipart(formData);
+        console.log('completeProfile: Multipart update finished');
+        return multipartResponse;
+      }
+
       return response;
     } catch (error: any) {
       return rejectWithValue(error.message || 'Profile update failed');

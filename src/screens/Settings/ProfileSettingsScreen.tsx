@@ -7,6 +7,7 @@ import {
     Image,
     StyleSheet,
     ScrollView,
+    Platform,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useSelector, useDispatch } from 'react-redux';
@@ -15,7 +16,9 @@ import { handleLogout } from "../../api/firebase/auth";
 import { useNavigation } from "@react-navigation/native";
 import Toast from 'react-native-toast-message';
 import { updateBasicInfo, updateAboutYou } from "../../redux/slices/profileFormSlice";
-import { updateUserProfile } from "../../redux/slices/authSlice";
+import { updateUserProfile, fetchUserProfile } from "../../redux/slices/authSlice";
+import profileService from "../../api/services/profileService";
+import { launchImageLibrary } from "react-native-image-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../../components/common/BackButton";
 import LinearGradient from "react-native-linear-gradient";
@@ -33,6 +36,23 @@ type InputFieldProps = {
     multiline?: boolean;
     numberOfLines?: number;
     editable?: boolean;
+};
+
+const getMimeType = (filename: string) => {
+  const extension = filename.split('.').pop()?.toLowerCase();
+  switch (extension) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    default:
+      return 'image/jpeg';
+  }
 };
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -125,6 +145,11 @@ export default function ProfileSettingsScreen() {
     const [bio, setBio] = useState("");
     const [email, setEmail] = useState("");
 
+    // Photo states for editing
+    const [profilePhoto, setProfilePhoto] = useState("");
+    const [newProfilePhoto, setNewProfilePhoto] = useState<string | null>(null);
+    const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+
     // Selection bottom sheet configuration
     const [sheetConfig, setSheetConfig] = useState<{
         visible: boolean;
@@ -154,7 +179,50 @@ export default function ProfileSettingsScreen() {
         setAreaCover(displayAreaCover);
         setBio(displayBio);
         setEmail(displayEmail);
+
+        // Initialize photo states
+        setProfilePhoto(authProfile.profilePhoto || (authProfile.photos && authProfile.photos.length > 0 ? authProfile.photos[0].url : ""));
+        setNewProfilePhoto(null);
+        setGalleryPhotos(authProfile.photos || []);
+
         setIsEditing(true);
+    };
+
+    const handlePickProfilePhoto = async () => {
+        const result = await launchImageLibrary({
+            mediaType: "photo",
+            selectionLimit: 1,
+        });
+
+        if (result.assets && result.assets[0]) {
+            const picked = result.assets[0];
+            setNewProfilePhoto(picked.uri || null);
+        }
+    };
+
+    const handlePickGalleryPhoto = async () => {
+        const remainingLimit = 6 - galleryPhotos.length;
+        if (remainingLimit <= 0) {
+            Toast.show({ type: 'error', text1: 'Maximum 6 photos allowed' });
+            return;
+        }
+
+        const result = await launchImageLibrary({
+            mediaType: "photo",
+            selectionLimit: remainingLimit,
+        });
+
+        if (result.assets) {
+            const newPhotos = result.assets.map((a) => ({
+                url: a.uri!,
+                isLocal: true
+            }));
+            setGalleryPhotos(prev => [...prev, ...newPhotos]);
+        }
+    };
+
+    const handleDeleteGalleryPhoto = (index: number) => {
+        setGalleryPhotos(prev => prev.filter((_, i) => i !== index));
     };
 
     const openLocationSheet = () => {
@@ -214,6 +282,14 @@ export default function ProfileSettingsScreen() {
                 position: 'bottom',
             });
 
+            // Filter remaining existing photos (remote URLs)
+            const remainingExistingPhotos = galleryPhotos
+                .filter(p => !p.isLocal)
+                .map((p, idx) => ({
+                    url: p.url || p,
+                    order: idx
+                }));
+
             // Construct profile payload for the backend API
             const payload = {
                 ...authProfile,
@@ -224,12 +300,64 @@ export default function ProfileSettingsScreen() {
                 profession: profession,
                 education: education,
                 bio: bio,
+                // Overwrite remote photos array (deletes any removed photos)
+                photos: remainingExistingPhotos,
             };
 
-            // Call profile API to change in backend
+            // Call profile API to change text/static fields in backend (JSON step)
+            console.log('handleSave: JSON update start');
             const resultAction = await dispatch(updateUserProfile(payload) as any);
 
             if (updateUserProfile.fulfilled.match(resultAction)) {
+                // Step 2: Upload new photos (multipart step)
+                const hasNewProfilePhoto = !!newProfilePhoto;
+                const localGalleryPhotos = galleryPhotos.filter(p => p.isLocal);
+                const hasNewGalleryPhotos = localGalleryPhotos.length > 0;
+
+                if (hasNewProfilePhoto || hasNewGalleryPhotos) {
+                    console.log('handleSave: Multipart update start');
+                    Toast.show({
+                        type: 'info',
+                        text1: 'Uploading new photos...',
+                        position: 'bottom',
+                    });
+
+                    const formData = new FormData();
+
+                    if (hasNewProfilePhoto && newProfilePhoto) {
+                        const filename = newProfilePhoto.substring(newProfilePhoto.lastIndexOf('/') + 1) || 'profile.jpg';
+                        const type = getMimeType(filename);
+                        formData.append('profilePhoto', {
+                          uri: newProfilePhoto,
+                          name: filename,
+                          type: type,
+                        } as any);
+                    }
+
+                    if (hasNewGalleryPhotos) {
+                        localGalleryPhotos.forEach((photoObj: any, idx: number) => {
+                          const uri = photoObj.url;
+                          const filename = uri.substring(uri.lastIndexOf('/') + 1) || `photo_${idx}.jpg`;
+                          const type = getMimeType(filename);
+                          formData.append('photos', {
+                            uri: uri,
+                            name: filename,
+                            type: type,
+                          } as any);
+                        });
+                    }
+
+                    // Append fullName to satisfy DTO validation (some backends require it)
+                    formData.append('fullName', name);
+
+                    const responseMultipart = await profileService.updateProfileMultipart(formData);
+                    console.log('handleSave: Multipart update finished', responseMultipart);
+                }
+
+                // Refresh user profile state from database
+                const refreshAction = await dispatch(fetchUserProfile() as any);
+                console.log('handleSave: Refreshed user profile data:', refreshAction);
+
                 // Update local offline slices upon success
                 dispatch(updateBasicInfo({ fullName: name, email, age, location, profession, education, region, areaCover }));
                 dispatch(updateAboutYou({ bio }));
@@ -264,6 +392,8 @@ export default function ProfileSettingsScreen() {
         }
     };
 
+    const avatarUri = authProfile.profilePhoto || (authProfile.photos && authProfile.photos.length > 0 ? authProfile.photos[0].url : (basicInfo.photo || reduxPhoto));
+
     return (
         <SafeAreaView style={styles.container}>
             <BackButton color="#000" title="Profile Information" absolute={false} style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 10 }} />
@@ -273,10 +403,8 @@ export default function ProfileSettingsScreen() {
                     <View style={styles.profileCard}>
                         <View style={styles.profileHeader}>
                             <View style={styles.profileAvatarContainer}>
-                                {((authProfile.photos && authProfile.photos.length > 0) ? authProfile.photos[0].url : (basicInfo.photo || reduxPhoto)) ? (
-                                    <Image source={{
-                                        uri: (authProfile.photos && authProfile.photos.length > 0) ? authProfile.photos[0].url : (basicInfo.photo || reduxPhoto)
-                                    }} style={styles.profileAvatar} />
+                                {avatarUri ? (
+                                    <Image source={{ uri: avatarUri }} style={styles.profileAvatar} />
                                 ) : (
                                     <LinearGradient
                                         colors={["#FF5F6D", "#FF3366"]}
@@ -341,6 +469,22 @@ export default function ProfileSettingsScreen() {
                             </View>
                         ) : null}
 
+                        {/* Photo Gallery Section */}
+                        {authProfile.photos && authProfile.photos.length > 0 ? (
+                            <View style={styles.galleryViewContainer}>
+                                <Text style={styles.galleryViewLabel}>Photos</Text>
+                                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.galleryViewScroll}>
+                                    {authProfile.photos.map((photo: any, index: number) => (
+                                        <Image 
+                                            key={index} 
+                                            source={{ uri: photo.url }} 
+                                            style={styles.galleryViewImage} 
+                                        />
+                                    ))}
+                                </ScrollView>
+                            </View>
+                        ) : null}
+
                         <View style={styles.actionButtonsRow}>
                             <TouchableOpacity onPress={handleEditPress} activeOpacity={0.8} style={styles.editBtnContainer}>
                                 <LinearGradient
@@ -360,15 +504,62 @@ export default function ProfileSettingsScreen() {
                     </View>
                 ) : (
                     <View style={styles.editCard}>
+                        {/* Profile Photo Editor */}
+                        <View style={styles.avatarEditContainer}>
+                            <TouchableOpacity onPress={handlePickProfilePhoto} activeOpacity={0.8} style={styles.avatarTouch}>
+                                {newProfilePhoto || profilePhoto ? (
+                                    <Image source={{ uri: newProfilePhoto || profilePhoto }} style={styles.editAvatar} />
+                                ) : (
+                                    <LinearGradient
+                                        colors={["#FF5F6D", "#FF3366"]}
+                                        style={[styles.editAvatar, styles.defaultEditAvatarContainer]}
+                                    >
+                                        <Ionicons name="person" size={40} color="#FFFFFF" />
+                                    </LinearGradient>
+                                )}
+                                <View style={styles.cameraIconBadge}>
+                                    <Ionicons name="camera" size={16} color="#FFFFFF" />
+                                </View>
+                            </TouchableOpacity>
+                            <Text style={styles.avatarEditHint}>Tap avatar to change profile photo</Text>
+                        </View>
+
                         <InputField label="Name" icon="person-outline" placeholder="Name" value={name} onChangeText={setName} />
                         <InputField label="Age" icon="calendar-outline" placeholder="Age" keyboardType="numeric" value={age} onChangeText={setAge} editable={false} />
                         <InputField label="Gender" icon="transgender-outline" placeholder="Select Gender" value={gender} onPress={openGenderSheet} editable={false} />
                         <InputField label="Education" icon="school-outline" placeholder="Select Education" value={education} onPress={openEducationSheet} />
                         <InputField label="Profession" icon="briefcase-outline" placeholder="Profession" value={profession} onChangeText={setProfession} />
                         <InputField label="Location" icon="location-outline" placeholder="Select State" value={location} onPress={openLocationSheet} />
-                        {/* <InputField label="Region / Caste" icon="people-outline" placeholder="Region / Caste" value={region} onChangeText={setRegion} /> */}
-                        {/* <InputField label="Address / Area Cover" icon="map-outline" placeholder="Address / Area Cover" value={areaCover} onChangeText={setAreaCover} /> */}
                         <InputField label="Bio" icon="document-text-outline" placeholder="Bio" multiline numberOfLines={3} value={bio} onChangeText={setBio} />
+
+                        {/* Photo Gallery Editor */}
+                        <View style={styles.galleryEditContainer}>
+                            <Text style={styles.galleryEditLabel}>Photo Gallery</Text>
+                            <Text style={styles.galleryEditSubLabel}>Manage your gallery (up to 6 photos)</Text>
+                            <View style={styles.galleryGrid}>
+                                {galleryPhotos.map((photo: any, index: number) => {
+                                    const photoUri = photo.url || photo;
+                                    return (
+                                        <View key={index} style={styles.galleryEditItem}>
+                                            <Image source={{ uri: photoUri }} style={styles.galleryEditImage} />
+                                            <TouchableOpacity 
+                                                style={styles.galleryDeleteBadge} 
+                                                onPress={() => handleDeleteGalleryPhoto(index)}
+                                                activeOpacity={0.7}
+                                            >
+                                                <Ionicons name="close" size={12} color="#FFFFFF" />
+                                            </TouchableOpacity>
+                                        </View>
+                                    );
+                                })}
+                                {galleryPhotos.length < 6 && (
+                                    <TouchableOpacity style={styles.galleryAddButton} onPress={handlePickGalleryPhoto} activeOpacity={0.7}>
+                                        <Ionicons name="add" size={24} color="#8E8E93" />
+                                        <Text style={styles.galleryAddText}>Add Photo</Text>
+                                    </TouchableOpacity>
+                                )}
+                            </View>
+                        </View>
 
                         <View style={styles.buttonRow}>
                             <TouchableOpacity onPress={() => setIsEditing(false)} style={styles.cancelBtn} activeOpacity={0.7}>
@@ -661,5 +852,146 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
         fontSize: 15,
         fontWeight: "700",
+    },
+    galleryViewContainer: {
+        width: "100%",
+        marginBottom: 24,
+        alignItems: "flex-start",
+    },
+    galleryViewLabel: {
+        fontSize: 12,
+        fontWeight: "700",
+        color: "#8E8E93",
+        marginBottom: 8,
+        textTransform: "uppercase",
+        letterSpacing: 0.5,
+        marginLeft: 4,
+    },
+    galleryViewScroll: {
+        gap: 12,
+        paddingHorizontal: 4,
+    },
+    galleryViewImage: {
+        width: 100,
+        height: 100,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: "#E9ECEF",
+    },
+    avatarEditContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        marginBottom: 24,
+        width: "100%",
+    },
+    avatarTouch: {
+        position: "relative",
+    },
+    editAvatar: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 3,
+        borderColor: "#FFFFFF",
+    },
+    defaultEditAvatarContainer: {
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#FF3366",
+    },
+    cameraIconBadge: {
+        position: "absolute",
+        bottom: 0,
+        right: 0,
+        backgroundColor: "#FF3366",
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 2,
+        borderColor: "#FFFFFF",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    avatarEditHint: {
+        fontSize: 12,
+        color: "#8E8E93",
+        fontWeight: "500",
+        marginTop: 8,
+    },
+    galleryEditContainer: {
+        width: "100%",
+        marginBottom: 24,
+        marginTop: 8,
+    },
+    galleryEditLabel: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#4A4A4A",
+        marginBottom: 2,
+        marginLeft: 4,
+    },
+    galleryEditSubLabel: {
+        fontSize: 12,
+        color: "#8E8E93",
+        marginBottom: 12,
+        marginLeft: 4,
+    },
+    galleryGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 12,
+        paddingHorizontal: 4,
+    },
+    galleryEditItem: {
+        position: "relative",
+        width: 80,
+        height: 80,
+    },
+    galleryEditImage: {
+        width: "100%",
+        height: "100%",
+        borderRadius: 12,
+        borderWidth: 1,
+        borderColor: "#E9ECEF",
+    },
+    galleryDeleteBadge: {
+        position: "absolute",
+        top: -6,
+        right: -6,
+        backgroundColor: "#FF3B30",
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        alignItems: "center",
+        justifyContent: "center",
+        borderWidth: 1.5,
+        borderColor: "#FFFFFF",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    galleryAddButton: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        borderWidth: 1.5,
+        borderColor: "#D1D1D6",
+        borderStyle: "dashed",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#F8F9FA",
+    },
+    galleryAddText: {
+        fontSize: 10,
+        color: "#8E8E93",
+        fontWeight: "600",
+        marginTop: 4,
     },
 });
