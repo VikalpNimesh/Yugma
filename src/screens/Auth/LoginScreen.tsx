@@ -129,14 +129,14 @@ export default function LoginScreen() {
                                     autoCapitalize="none"
                                     editable={!isLoading && !googleLoading}
                                 />
-                                <TouchableOpacity 
+                                <TouchableOpacity
                                     style={styles.eyeIconContainer}
                                     onPress={() => setShowPassword(!showPassword)}
                                 >
-                                    <Ionicons 
-                                        name={showPassword ? "eye-outline" : "eye-off-outline"} 
-                                        size={22} 
-                                        color="rgba(255, 255, 255, 0.8)" 
+                                    <Ionicons
+                                        name={showPassword ? "eye-outline" : "eye-off-outline"}
+                                        size={22}
+                                        color="rgba(255, 255, 255, 0.8)"
                                     />
                                 </TouchableOpacity>
                             </View>

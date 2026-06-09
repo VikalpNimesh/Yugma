@@ -25,6 +25,7 @@ const PreferencesStep = ({ navigation }: any) => {
     const dispatch = useAppDispatch();
     const form = useAppSelector((state) => state.profileForm.preferences);
     const { updateStatus } = useAppSelector(state => state.profileForm);
+    const { user, profile } = useAppSelector(state => state.auth);
     const nav = useNavigation();
 
     const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
@@ -52,9 +53,14 @@ const PreferencesStep = ({ navigation }: any) => {
 
     React.useEffect(() => {
         if (updateStatus === 'succeeded') {
-            nav.navigate('BottomTabs' as never);
+            const isApproved = user?.isVerified || profile?.isVerified || profile?.user?.isVerified;
+            if (isApproved) {
+                nav.navigate('BottomTabs' as never);
+            } else {
+                nav.navigate('WaitingScreen' as never);
+            }
         }
-    }, [updateStatus, nav]);
+    }, [updateStatus, nav, user, profile]);
 
     const handleChange = (field: keyof typeof form, value: string) => {
         dispatch(updatePreferences({ [field]: value }));

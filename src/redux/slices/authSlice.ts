@@ -94,7 +94,7 @@ export const loginUser = createAsyncThunk(
       const pushContext = await getPushNotificationContext();
       const payload = {
         ...credentials,
-        // ...pushContext
+        ...pushContext
       };
       console.log('🚀 Login Payload:', JSON.stringify(payload, null, 2));
       const response = await authService.login(payload);
@@ -233,6 +233,14 @@ const authSlice = createSlice({
       state.isLoading = false;
       state.error = null;
     },
+    setVerified: (state, action: PayloadAction<boolean>) => {
+      if (state.user) {
+        state.user.isVerified = action.payload;
+      }
+      if (state.profile) {
+        state.profile.isVerified = action.payload;
+      }
+    },
   },
   extraReducers: builder => {
     // Check Auth State
@@ -332,6 +340,9 @@ const authSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.isLoading = false;
         state.profile = action.payload; // action.payload will be result.data which might be null
+        if (state.profile && state.user) {
+          state.profile.isVerified = state.user.isVerified;
+        }
       })
       .addCase(fetchUserProfile.rejected, (state, action) => {
         state.isLoading = false;
@@ -356,5 +367,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { clearError, setCredentials, resetAuth } = authSlice.actions;
+export const { clearError, setCredentials, resetAuth, setVerified } = authSlice.actions;
 export default authSlice.reducer;

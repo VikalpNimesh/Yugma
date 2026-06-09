@@ -34,6 +34,38 @@ class ProfileService {
     }
 
     /**
+     * Get user verification status
+     */
+    async getVerificationStatus(): Promise<any> {
+        try {
+            const response = await axiosInstance.get('/users/verification-status');
+            return response.data;
+        } catch (error: any) {
+            throw this.handleError(error);
+        }
+    }
+
+    /**
+     * Update user profile with multipart form data (files)
+     */
+    async updateProfileMultipart(formData: any): Promise<any> {
+        try {
+            const response = await axiosInstance.put(
+                API_ENDPOINTS.USER.UPDATE_PROFILE,
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+            return response.data;
+        } catch (error: any) {
+            throw this.handleError(error);
+        }
+    }
+
+    /**
      * Handle API errors and format them consistently
      */
     private handleError(error: any) {

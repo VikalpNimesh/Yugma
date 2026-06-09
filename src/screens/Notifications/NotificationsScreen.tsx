@@ -33,7 +33,7 @@ const NotificationsScreen = () => {
         if (showLoading) setIsLoading(true);
         try {
             const data = await notificationService.getNotifications();
-            console.log('🚀 Notifications Data:', JSON.stringify(data, null, 2));
+            // console.log('🚀 Notifications Data:', JSON.stringify(data, null, 2));
             setNotifications(Array.isArray(data) ? data.filter(n => n && typeof n === 'object') : []);
         } catch (error: any) {
             console.error('Error fetching notifications:', error);

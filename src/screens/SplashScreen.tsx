@@ -16,7 +16,7 @@ const SplashScreen = () => {
     const navigation = useNavigation<SplashNavProp>();
     const dispatch = useAppDispatch();
     const currentScreen = useAppSelector((state) => state.profileForm.currentScreen);
-    const { isAuthenticated, profile, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
+    const { isAuthenticated, profile, user, isLoading: isAuthLoading } = useAppSelector((state) => state.auth);
 
     // Helper functions for navigation logic
     const getNavigationStack = (screen: string) => {
@@ -51,17 +51,22 @@ const SplashScreen = () => {
 
             try {
                 if (isAuthenticated) {
-                    if (profile && (profile.id || Object.keys(profile).length > 0)) {
-                        navigation.replace("BottomTabs");
+                    const isApproved = user?.isVerified || profile?.isVerified || profile?.user?.isVerified;
+                    if (!isApproved) {
+                        navigation.replace("WaitingScreen");
                     } else {
-                        const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
-                        if (currentScreen && validScreens.includes(currentScreen)) {
-                            navigation.reset({
-                                index: getScreenIndex(currentScreen),
-                                routes: getNavigationStack(currentScreen),
-                            });
+                        if (profile && (profile.id || Object.keys(profile).length > 0)) {
+                            navigation.replace("BottomTabs");
                         } else {
-                            navigation.replace("BasicInfo");
+                            const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];
+                            if (currentScreen && validScreens.includes(currentScreen)) {
+                                navigation.reset({
+                                    index: getScreenIndex(currentScreen),
+                                    routes: getNavigationStack(currentScreen),
+                                });
+                            } else {
+                                navigation.replace("BasicInfo");
+                            }
                         }
                     }
                 } else {
@@ -77,7 +82,7 @@ const SplashScreen = () => {
         }, 2000); // Increased delay for a more premium splash feel
 
         return () => clearTimeout(timer);
-    }, [navigation, currentScreen, isAuthenticated, isAuthLoading, profile]);
+    }, [navigation, currentScreen, isAuthenticated, isAuthLoading, profile, user]);
 
     return (
         <View style={styles.container}>
