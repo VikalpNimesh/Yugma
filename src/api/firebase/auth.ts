@@ -276,14 +276,6 @@ export const signInWithApple = async (dispatch?: any) => {
       requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
     });
 
-    // 2. Ensure credentials are valid
-    const credentialState = await appleAuth.getCredentialStateForUser(
-      appleAuthRequestResponse.user,
-    );
-
-    if (credentialState !== appleAuth.State.AUTHORIZED) {
-      throw new Error('Apple Sign-In was not authorized by the user.');
-    }
 
     const { identityToken, nonce, fullName, email, user: appleUserId } = appleAuthRequestResponse;
 
