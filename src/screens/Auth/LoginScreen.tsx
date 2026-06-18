@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signInWithGoogle } from '../../api/firebase/auth';
+import { signInWithGoogle, signInWithApple } from '../../api/firebase/auth';
 import { useAppDispatch, useAppSelector } from '../../redux/hooks';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
 import { initializeBasicInfo } from '../../redux/slices/profileFormSlice';
@@ -36,6 +36,7 @@ export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [localError, setLocalError] = useState('');
     const [googleLoading, setGoogleLoading] = useState(false);
+    const [appleLoading, setAppleLoading] = useState(false);
 
     useEffect(() => {
         if (authError) {
@@ -74,6 +75,18 @@ export default function LoginScreen() {
             setLocalError(err.message || 'Google Sign-In failed. Please try again.');
         } finally {
             setGoogleLoading(false);
+        }
+    };
+
+    const handleAppleLogin = async () => {
+        if (appleLoading) return;
+        setAppleLoading(true);
+        try {
+            await signInWithApple(dispatch);
+        } catch (err: any) {
+            setLocalError(err.message || 'Apple Sign-In failed. Please try again.');
+        } finally {
+            setAppleLoading(false);
         }
     };
 
@@ -170,7 +183,7 @@ export default function LoginScreen() {
                         <TouchableOpacity
                             style={[styles.googleBtn, googleLoading && styles.buttonDisabled]}
                             onPress={handleGoogleLogin}
-                            disabled={googleLoading || isLoading}
+                            disabled={googleLoading || isLoading || appleLoading}
                         >
                             {googleLoading ? (
                                 <ActivityIndicator color="#000" />
@@ -181,6 +194,24 @@ export default function LoginScreen() {
                                 </View>
                             )}
                         </TouchableOpacity>
+
+                        {/* Apple Button */}
+                        {Platform.OS === 'ios' && (
+                            <TouchableOpacity
+                                style={[styles.appleBtn, appleLoading && styles.buttonDisabled]}
+                                onPress={handleAppleLogin}
+                                disabled={appleLoading || isLoading || googleLoading}
+                            >
+                                {appleLoading ? (
+                                    <ActivityIndicator color="#000" />
+                                ) : (
+                                    <View style={styles.row}>
+                                        <AntDesign name="apple1" size={20} color="#000000" />
+                                        <Text style={styles.appleText}>Continue with Apple</Text>
+                                    </View>
+                                )}
+                            </TouchableOpacity>
+                        )}
 
                         {/* Footer */}
                         <View style={styles.footer}>
@@ -316,6 +347,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     googleText: {
+        color: '#1a1a1a',
+        fontWeight: '600',
+        fontSize: 16,
+        marginLeft: 12,
+    },
+    appleBtn: {
+        backgroundColor: '#FFFFFF',
+        borderRadius: 28,
+        height: 56,
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        elevation: 5,
+        marginTop: 15,
+    },
+    appleText: {
         color: '#1a1a1a',
         fontWeight: '600',
         fontSize: 16,

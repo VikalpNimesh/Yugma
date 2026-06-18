@@ -1,5 +1,6 @@
 import { Alert, Platform } from 'react-native';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import * as Keychain from 'react-native-keychain';
@@ -255,6 +256,143 @@ export const signInWithGoogle = async (dispatch?: any) => {
     throw new Error(
       error?.message || 'Google Sign-In failed. Please try again.',
     );
+  }
+};
+
+/**
+ * Sign in with Apple
+ * Handles complete Apple Sign-In flow including Firebase and Redux state update
+ * @param dispatch - Redux dispatch function (optional)
+ * @returns Apple auth request response on success
+ * @throws Error with user-friendly message
+ */
+export const signInWithApple = async (dispatch?: any) => {
+  try {
+    console.log('🔄 Starting Apple Sign-In process...');
+
+    // 1. Start sign in request
+    const appleAuthRequestResponse = await appleAuth.performRequest({
+      requestedOperation: appleAuth.Operation.LOGIN,
+      requestedScopes: [appleAuth.Scope.EMAIL, appleAuth.Scope.FULL_NAME],
+    });
+
+    // 2. Ensure credentials are valid
+    const credentialState = await appleAuth.getCredentialStateForUser(
+      appleAuthRequestResponse.user,
+    );
+
+    if (credentialState !== appleAuth.State.AUTHORIZED) {
+      throw new Error('Apple Sign-In was not authorized by the user.');
+    }
+
+    const { identityToken, nonce, fullName, email, user: appleUserId } = appleAuthRequestResponse;
+
+    if (!identityToken) {
+      throw new Error('Apple Sign-In failed: No identity token returned');
+    }
+
+    // 3. Authenticate with Firebase
+    try {
+      const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce);
+      await auth().signInWithCredential(appleCredential);
+    } catch (firebaseError) {
+      console.warn('Firebase authentication failed, continuing with backend:', firebaseError);
+    }
+
+    // 4. Exchange Apple ID Token for Backend Tokens
+    const pushContext = await getPushNotificationContext();
+    
+    // Format full name
+    let name = '';
+    if (fullName) {
+      name = [fullName.givenName, fullName.familyName].filter(Boolean).join(' ');
+    }
+
+    const backendPayload = {
+      identityToken: identityToken,
+      user: {
+        email: email || '',
+        name: name || '',
+        id: appleUserId,
+      },
+      ...pushContext
+    };
+
+    console.log('🚀 Apple Login Payload:', JSON.stringify(backendPayload, null, 2));
+    const backendResponse = await authService.appleLogin(backendPayload);
+
+    if (!backendResponse.success || !backendResponse.data) {
+      throw new Error(backendResponse.message || 'Backend Apple Sign-In failed');
+    }
+
+    const { tokens: backendTokens, user: backendUser } = backendResponse.data;
+
+    // Update Redux state if dispatch provided
+    if (dispatch) {
+      dispatch(setReduxUser({
+        id: backendUser.id,
+        name: backendUser.fullName,
+        email: backendUser.email,
+        token: backendTokens.access,
+      }));
+
+      dispatch(setCredentials({
+        user: {
+          id: backendUser.id,
+          email: backendUser.email,
+          fullName: backendUser.fullName,
+          accountMode: backendUser.accountMode || 'dating',
+          isPremium: backendUser.isPremium || false,
+          isVerified: backendUser.isVerified || false,
+        },
+        token: backendTokens.access,
+        profile: backendUser,
+      }));
+
+      try {
+        await Keychain.setGenericPassword('auth_tokens', JSON.stringify({
+          access: backendTokens.access,
+          refresh: backendTokens.refresh
+        }));
+        console.log('✅ Backend tokens persisted to Keychain');
+      } catch (error) {
+        console.warn('Failed to persist tokens to Keychain:', error);
+      }
+
+      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${backendTokens.access}`;
+      await dispatch(fetchUserProfile());
+
+      try {
+        console.log('Calling social/register-graph...');
+        const graphRes = await socialService.registerGraph();
+        console.log('Social Graph Reg Success:', graphRes);
+      } catch (err) {
+        console.error('Social Graph Reg Error:', err);
+      }
+
+      const userDataPrefill = {
+        fullName: backendUser.fullName,
+        email: backendUser.email,
+      };
+
+      dispatch(initializeBasicInfo(userDataPrefill));
+
+      try {
+        await AsyncStorage.setItem('userBasicInfo', JSON.stringify(userDataPrefill));
+        console.log('✅ User basic info persisted to AsyncStorage');
+      } catch (e) {
+        console.warn('Failed to persist user info to AsyncStorage:', e);
+      }
+    }
+
+    console.log('✅ Apple Sign-In with Backend successful');
+    return appleAuthRequestResponse;
+  } catch (error: any) {
+    console.error('❌ Apple Sign-In error:', error);
+    if (error?.code === appleAuth.Error.CANCELED) {
+      throw new Error('Sign in was cancelled');
+    }
+    throw new Error(error?.message || 'Apple Sign-In failed. Please try again.');
   }
 };
 

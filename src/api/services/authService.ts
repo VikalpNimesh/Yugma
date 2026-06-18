@@ -38,6 +38,21 @@ class AuthService {
     }
 
     /**
+     * Apple login
+     */
+    async appleLogin(data: any): Promise<LoginResponse> {
+        try {
+            const response = await axiosInstance.post<LoginResponse>(
+                'auth/apple-login',
+                data
+            );
+            return response.data;
+        } catch (error: any) {
+            throw this.handleError(error);
+        }
+    }
+
+    /**
      * Sign up new user
      */
     async signup(userData: SignupRequest): Promise<SignupResponse> {

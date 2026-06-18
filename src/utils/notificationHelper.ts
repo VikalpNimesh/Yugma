@@ -47,6 +47,9 @@ export const getFcmToken = async () => {
 
     if (!fcmToken) {
         try {
+            if (Platform.OS === 'ios') {
+                await messaging().registerDeviceForRemoteMessages();
+            }
             const token = await messaging().getToken();
             if (token) {
                 console.log('New FCM Token:', token);

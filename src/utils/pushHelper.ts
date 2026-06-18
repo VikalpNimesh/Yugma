@@ -59,6 +59,9 @@ export const getPushNotificationContext = async (): Promise<PushNotificationCont
         }
 
         if (enabled) {
+            if (Platform.OS === 'ios') {
+                await messaging().registerDeviceForRemoteMessages();
+            }
             fcmToken = await messaging().getToken();
         } else {
             console.warn('Push notification permissions denied by user');

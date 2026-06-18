@@ -10,6 +10,8 @@ import Toast from 'react-native-toast-message';
 import { Vibration, DeviceEventEmitter } from 'react-native';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
+import { BASE_URL } from '../api/axios/axiosInstance';
+
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
@@ -21,8 +23,10 @@ const SocketContext = createContext<SocketContextType>({
 });
 
 export const useSocket = () => useContext(SocketContext);
-const SOCKET_URL = 'ws://13.204.218.120:3001/chat';
-// const SOCKET_URL = 'ws://192.168.29.27:3001/chat'; // Same IP as BASE_URL in axiosInstance, with /chat namespace
+
+// Dynamically construct the WebSocket URL from the base HTTP API URL
+const SOCKET_URL = BASE_URL.replace(/^http:/, 'ws:').replace(/^https:/, 'wss:') + '/chat';
+
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
