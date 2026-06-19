@@ -6,7 +6,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 export default function VerificationSettingsScreen() {
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <BackButton color="#000" title="Verification" absolute={false} style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 10 }} />
             <ScrollView contentContainerStyle={styles.content}>
 

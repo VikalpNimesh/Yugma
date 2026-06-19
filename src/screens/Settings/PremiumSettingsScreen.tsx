@@ -9,7 +9,7 @@ export default function PremiumSettingsScreen() {
     const navigation = useNavigation<any>();
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <BackButton color="#000" title="Premium Membership" absolute={false} style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 10 }} />
             <ScrollView contentContainerStyle={styles.content}>
 

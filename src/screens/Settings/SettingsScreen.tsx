@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, Platform } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import DeviceInfo from 'react-native-device-info';
@@ -79,13 +79,13 @@ export default function SettingsScreen() {
             </View>
 
             <View style={styles.section}>
-                <SettingItem
+                {Platform.OS == 'android' && <SettingItem
                     icon="star-outline"
                     title="Premium Membership"
                     subtitle="Manage your subscriptions"
                     color="#FFD700"
                     onPress={() => navigation.navigate("PremiumSettings")}
-                />
+                />}
                 <View style={styles.separator} />
                 {/* <SettingItem
                     icon="shield-checkmark-outline"

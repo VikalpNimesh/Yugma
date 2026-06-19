@@ -395,7 +395,7 @@ export default function ProfileSettingsScreen() {
     const avatarUri = authProfile.profilePhoto || (authProfile.photos && authProfile.photos.length > 0 ? authProfile.photos[0].url : (basicInfo.photo || reduxPhoto));
 
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={['bottom', 'left', 'right']}>
             <BackButton color="#000" title="Profile Information" absolute={false} style={{ marginHorizontal: 20, marginTop: 10, marginBottom: 10 }} />
             <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 
