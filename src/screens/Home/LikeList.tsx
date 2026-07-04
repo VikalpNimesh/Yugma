@@ -59,10 +59,11 @@ const LikeList = ({ data, onRefresh }: any) => {
                 >
                     <LinearGradient
                         colors={["#FF5F6D", "#FF3366"]}
-                        style={styles.gradientCircle}
-                    >
+                        style={[StyleSheet.absoluteFill, { borderRadius: 22 }]}
+                    />
+                    <View style={styles.gradientCircleInner}>
                         <Ionicons name="heart" size={20} color="white" />
-                    </LinearGradient>
+                    </View>
                 </TouchableOpacity>
             </View>
         </View>
@@ -204,10 +205,9 @@ const styles = StyleSheet.create({
         shadowRadius: 6,
         elevation: 3,
     },
-    gradientCircle: {
+    gradientCircleInner: {
         width: "100%",
         height: "100%",
-        borderRadius: 22,
         alignItems: "center",
         justifyContent: "center",
     },

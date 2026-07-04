@@ -43,11 +43,12 @@ const MatchList = ({ data }: any) => {
             >
                 <LinearGradient
                     colors={["#FF5F6D", "#FF3366"]}
-                    style={styles.messageBtn}
-                >
+                    style={[StyleSheet.absoluteFill, { borderRadius: 18 }]}
+                />
+                <View style={styles.messageBtnInner}>
                     <Feather name="message-circle" size={16} color="white" />
                     <Text style={styles.messageText}>Chat</Text>
-                </LinearGradient>
+                </View>
             </TouchableOpacity>
         </View>
     );
@@ -68,10 +69,11 @@ const MatchList = ({ data }: any) => {
             >
                 <LinearGradient
                     colors={["#FF5F6D", "#FF3366"]}
-                    style={styles.discoverBtn}
-                >
+                    style={[StyleSheet.absoluteFill, { borderRadius: 25 }]}
+                />
+                <View style={styles.discoverBtnInner}>
                     <Text style={styles.discoverBtnText}>Go to Discover</Text>
-                </LinearGradient>
+                </View>
             </TouchableOpacity>
         </View>
     );
@@ -124,17 +126,18 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         paddingRight: 8,
+        flexShrink: 1,
     },
     nameRow: {
         flexDirection: "row",
         alignItems: "center",
         gap: 6,
-        flexWrap: 'wrap',
     },
     name: {
         fontSize: 17,
         fontWeight: "800",
         color: "#1A1A1A",
+        flexShrink: 1,
     },
     matchedBadge: {
         backgroundColor: "rgba(255, 51, 102, 0.08)",
@@ -162,11 +165,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 6,
         elevation: 3,
+        flexShrink: 0,
     },
-    messageBtn: {
+    messageBtnInner: {
         paddingVertical: 8,
         paddingHorizontal: 16,
-        borderRadius: 18,
         alignItems: "center",
         flexDirection: "row",
         gap: 6,
@@ -213,10 +216,11 @@ const styles = StyleSheet.create({
         shadowRadius: 8,
         elevation: 4,
     },
-    discoverBtn: {
+    discoverBtnInner: {
         paddingVertical: 12,
         paddingHorizontal: 32,
-        borderRadius: 25,
+        alignItems: "center",
+        justifyContent: "center",
     },
     discoverBtnText: {
         color: 'white',

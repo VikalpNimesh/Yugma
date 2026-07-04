@@ -286,11 +286,13 @@ const ChatScreen = () => {
                         activeOpacity={isDeleted ? 1.0 : 0.8}
                         onLongPress={() => handleLongPressMessage(item)}
                         disabled={isDeleted}
+                        style={[styles.messageBubble, styles.myBubble]}
                     >
                         <LinearGradient
                             colors={isDeleted ? ["#E2E8F0", "#CBD5E1"] : ["#FF5F6D", "#FF3366"]}
-                            style={[styles.messageBubble, styles.myBubble]}
-                        >
+                            style={[StyleSheet.absoluteFill, { borderRadius: 18, borderBottomRightRadius: 4 }]}
+                        />
+                        <View style={{ position: 'relative', zIndex: 1 }}>
                             <Text style={[styles.messageText, isDeleted ? { color: '#64748B', fontStyle: 'italic' } : styles.myText]}>
                                 {item.content}
                             </Text>
@@ -307,7 +309,7 @@ const ChatScreen = () => {
                                     />
                                 )}
                             </View>
-                        </LinearGradient>
+                        </View>
                     </TouchableOpacity>
                 </View>
             );
