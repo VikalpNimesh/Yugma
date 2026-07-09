@@ -110,9 +110,9 @@ export const completeProfile = createAsyncThunk(
       const state: any = getState();
       const profile = state.profileForm;
 
-      // Step 1: Update profile details via JSON
+      // Step 1: Update profile details via JSON (so numbers, arrays, and objects are sent with correct types)
       const payload = {
-        userId: profile.basicInfo.fullName, // placeholder, replace with actual user ID
+        userId: profile.basicInfo.fullName,
         fullName: profile.basicInfo.fullName,
         age: Number(profile.basicInfo.age),
         location: profile.basicInfo.location,
@@ -126,10 +126,16 @@ export const completeProfile = createAsyncThunk(
         interests: profile.aboutYou.interests.map((i: any) => ({ interest: i })),
         familyDetails: profile.familyDetails,
         preferences: {
-          ageMin: Number(profile.preferences.preferredAgeMin),
-          ageMax: Number(profile.preferences.preferredAgeMax),
-          preferredLocations: profile.preferences.preferredLocations.split(',').map((l: string) => ({ location: l.trim() })),
-          preferredEducation: profile.preferences.preferredEducation.split(',').map((e: string) => ({ education: e.trim() })),
+          ageMin: Number(profile.preferences.preferredAgeMin) || 18,
+          ageMax: Number(profile.preferences.preferredAgeMax) || 100,
+          preferredLocations: (profile.preferences.preferredLocations || '')
+            .split(',')
+            .map((l: string) => ({ location: l.trim() }))
+            .filter((l: any) => l.location),
+          preferredEducation: (profile.preferences.preferredEducation || '')
+            .split(',')
+            .map((e: string) => ({ education: e.trim() }))
+            .filter((e: any) => e.education),
         }
       };
 
@@ -137,12 +143,22 @@ export const completeProfile = createAsyncThunk(
       const response = await profileService.updateProfile(payload);
       console.log('completeProfile: JSON update finished');
 
-      // Step 2: If photos exist, upload them via multipart/form-data
+      // Step 2: Update photos and basic fields via Multipart (matching backend's expected curl fields)
       const localPhotos = profile.aboutYou.photos;
-      if (localPhotos && localPhotos.length > 0) {
-        console.log('completeProfile: Multipart update start');
-        const formData = new FormData();
+      const formData = new FormData();
 
+      // Split fullName into firstName and lastName
+      const fullName = profile.basicInfo.fullName || '';
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      formData.append('firstName', firstName);
+      formData.append('lastName', lastName);
+      formData.append('bio', profile.aboutYou.bio || '');
+      formData.append('gender', (profile.basicInfo.gender || state.user?.gender || 'Male').toLowerCase());
+
+      if (localPhotos && localPhotos.length > 0) {
         // profilePhoto (first image)
         const profilePhotoUri = localPhotos[0];
         const profilePhotoName = profilePhotoUri.substring(profilePhotoUri.lastIndexOf('/') + 1) || 'profile.jpg';
@@ -154,7 +170,7 @@ export const completeProfile = createAsyncThunk(
           type: profilePhotoType,
         } as any);
 
-        // gallery photos (remaining images)
+        // gallery photos (remaining images) - named 'photos' as per backend expectation
         const galleryPhotos = localPhotos.slice(1);
         galleryPhotos.forEach((photoUri: string, idx: number) => {
           const filename = photoUri.substring(photoUri.lastIndexOf('/') + 1) || `photo_${idx}.jpg`;
@@ -165,14 +181,14 @@ export const completeProfile = createAsyncThunk(
             type: type,
           } as any);
         });
-
-        const multipartResponse = await profileService.updateProfileMultipart(formData);
-        console.log('completeProfile: Multipart update finished');
-        return multipartResponse;
       }
 
-      return response;
+      console.log('completeProfile: Multipart update start');
+      const multipartResponse = await profileService.updateProfileMultipart(formData);
+      console.log('completeProfile: Multipart update finished');
+      return multipartResponse;
     } catch (error: any) {
+      console.error('completeProfile error:', error);
       return rejectWithValue(error.message || 'Profile update failed');
     }
   }

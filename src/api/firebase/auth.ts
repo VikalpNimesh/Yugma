@@ -156,7 +156,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
       serverAuthCode: serverAuthCode || null,
       idToken: idToken,
       user: {
-        photo: userInfo.data.user.photo || null,
+        photo: userInfo.data.user.photo || '',
         givenName: userInfo.data.user.givenName || null,
         familyName: userInfo.data.user.familyName || null,
         email: userInfo.data.user.email,
@@ -260,6 +260,48 @@ export const signInWithGoogle = async (dispatch?: any) => {
 };
 
 /**
+ * Decodes a JWT token (e.g. Google or Apple ID Token) to extract its payload.
+ * This is a generic utility that runs on any Javascript engine.
+ */
+const decodeJwt = (token: string): any => {
+  try {
+    const parts = token.split('.');
+    if (parts.length < 2) return null;
+    const payload = parts[1];
+    
+    let decoded = '';
+    if (typeof atob === 'function') {
+      decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    } else {
+      // Fallback base64 decoding
+      const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      let buffer = '';
+      for (let i = 0; i < base64.length; i++) {
+        const char = base64[i];
+        if (char === '=') break;
+        const idx = chars.indexOf(char);
+        if (idx !== -1) {
+          buffer += idx.toString(2).padStart(6, '0');
+        }
+      }
+      let binary = '';
+      for (let i = 0; i < buffer.length; i += 8) {
+        const byte = buffer.substring(i, i + 8);
+        if (byte.length === 8) {
+          binary += String.fromCharCode(parseInt(byte, 2));
+        }
+      }
+      decoded = binary;
+    }
+    return JSON.parse(decoded);
+  } catch (e) {
+    console.error('⚠️ Failed to decode JWT token:', e);
+    return null;
+  }
+};
+
+/**
  * Sign in with Apple
  * Handles complete Apple Sign-In flow including Firebase and Redux state update
  * @param dispatch - Redux dispatch function (optional)
@@ -284,27 +326,50 @@ export const signInWithApple = async (dispatch?: any) => {
     }
 
     // 3. Authenticate with Firebase
+    let firebaseUser: any = null;
     try {
       const appleCredential = auth.AppleAuthProvider.credential(identityToken, nonce);
-      await auth().signInWithCredential(appleCredential);
+      const userCredential = await auth().signInWithCredential(appleCredential);
+      firebaseUser = userCredential?.user;
     } catch (firebaseError) {
       console.warn('Firebase authentication failed, continuing with backend:', firebaseError);
     }
 
+    // Decode JWT from Apple identityToken to get email
+    const decodedToken = decodeJwt(identityToken);
+    const jwtEmail = decodedToken?.email || '';
+
     // 4. Exchange Apple ID Token for Backend Tokens
     const pushContext = await getPushNotificationContext();
     
-    // Format full name
+    // Resolve email (Apple API only returns it on 1st login, so we use JWT or Firebase as fallbacks)
+    const finalEmail = email || jwtEmail || firebaseUser?.email || '';
+
+    // Format and resolve full name
     let name = '';
     if (fullName) {
       name = [fullName.givenName, fullName.familyName].filter(Boolean).join(' ');
     }
+    const finalName = name || firebaseUser?.displayName || '';
+
+    let finalGivenName = fullName?.givenName || null;
+    let finalFamilyName = fullName?.familyName || null;
+    if (!finalGivenName && finalName) {
+      const nameParts = finalName.trim().split(/\s+/);
+      finalGivenName = nameParts[0] || null;
+      finalFamilyName = nameParts.slice(1).join(' ') || null;
+    }
 
     const backendPayload = {
-      identityToken: identityToken,
+      scopes: [],
+      serverAuthCode: null,
+      idToken: identityToken,
       user: {
-        email: email || '',
-        name: name || '',
+        photo: '',
+        givenName: finalGivenName,
+        familyName: finalFamilyName,
+        email: finalEmail,
+        name: finalName,
         id: appleUserId,
       },
       ...pushContext

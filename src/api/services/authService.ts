@@ -43,7 +43,7 @@ class AuthService {
     async appleLogin(data: any): Promise<LoginResponse> {
         try {
             const response = await axiosInstance.post<LoginResponse>(
-                'auth/apple-login',
+                API_ENDPOINTS.AUTH.GOOGLE_LOGIN,
                 data
             );
             return response.data;
