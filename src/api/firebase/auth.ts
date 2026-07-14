@@ -268,7 +268,6 @@ const decodeJwt = (token: string): any => {
     const parts = token.split('.');
     if (parts.length < 2) return null;
     const payload = parts[1];
-
     let decoded = '';
     if (typeof atob === 'function') {
       decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
@@ -344,7 +343,6 @@ export const signInWithApple = async (dispatch?: any) => {
 
     // 4. Exchange Apple ID Token for Backend Tokens
     const pushContext = await getPushNotificationContext();
-
     // Resolve email (Apple API only returns it on 1st login, so we use JWT or Firebase as fallbacks)
     const finalEmail = email || jwtEmail || firebaseUser?.email || '';
 
@@ -352,6 +350,15 @@ export const signInWithApple = async (dispatch?: any) => {
     let name = '';
     if (fullName && (fullName.givenName || fullName.familyName)) {
       name = [fullName.givenName, fullName.familyName].filter(Boolean).join(' ');
+    }
+    const finalName = name || firebaseUser?.displayName || '';
+
+    let finalGivenName = fullName?.givenName || null;
+    let finalFamilyName = fullName?.familyName || null;
+    if (!finalGivenName && finalName) {
+      const nameParts = finalName.trim().split(/\s+/);
+      finalGivenName = nameParts[0] || null;
+      finalFamilyName = nameParts.slice(1).join(' ') || null;
     }
 
     // Derive name from email if all else fails
