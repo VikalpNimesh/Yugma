@@ -351,15 +351,6 @@ export const signInWithApple = async (dispatch?: any) => {
     if (fullName && (fullName.givenName || fullName.familyName)) {
       name = [fullName.givenName, fullName.familyName].filter(Boolean).join(' ');
     }
-    const finalName = name || firebaseUser?.displayName || '';
-
-    let finalGivenName = fullName?.givenName || null;
-    let finalFamilyName = fullName?.familyName || null;
-    if (!finalGivenName && finalName) {
-      const nameParts = finalName.trim().split(/\s+/);
-      finalGivenName = nameParts[0] || null;
-      finalFamilyName = nameParts.slice(1).join(' ') || null;
-    }
 
     // Derive name from email if all else fails
     const emailName = finalEmail ? finalEmail.split('@')[0] : '';
@@ -367,8 +358,8 @@ export const signInWithApple = async (dispatch?: any) => {
 
     const finalName = name || firebaseUser?.displayName || derivedName;
 
-    let finalGivenName = (fullName && fullName.givenName) || null;
-    let finalFamilyName = (fullName && fullName.familyName) || null;
+    let finalGivenName = fullName?.givenName || null;
+    let finalFamilyName = fullName?.familyName || null;
     if (!finalGivenName && finalName) {
       const nameParts = finalName.trim().split(/\s+/);
       finalGivenName = nameParts[0] || null;
