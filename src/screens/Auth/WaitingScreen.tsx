@@ -32,7 +32,7 @@ export default function WaitingScreen() {
     const [waitingCount, setWaitingCount] = useState<number>(0);
 
     const isApproved = user?.isVerified || profile?.isVerified || profile?.user?.isVerified;
-    const isProfileComplete = profile && (profile.id || Object.keys(profile).length > 0);
+    const isProfileComplete = !!(profile && (profile.userId || profile.id) && profile.gender && profile.location);
 
     // Auto-navigate if verification updates
     useEffect(() => {
@@ -121,7 +121,7 @@ export default function WaitingScreen() {
                 });
 
                 const latestProfile = fetchUserProfile.fulfilled.match(resultAction) ? resultAction.payload : null;
-                const latestProfileComplete = latestProfile && (latestProfile.id || Object.keys(latestProfile).length > 0);
+                const latestProfileComplete = !!(latestProfile && (latestProfile.userId || latestProfile.id) && latestProfile.gender && latestProfile.location);
                 if (latestProfileComplete) {
                     navigation.replace("BottomTabs");
                 } else {

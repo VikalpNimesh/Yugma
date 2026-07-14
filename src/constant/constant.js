@@ -160,3 +160,6 @@ export const educationOptions = [
     { key: "PhD", label: "PhD" },
     { key: "Professional Degree", label: "Professional Degree" },
 ];
+
+export const PRIMARY_GRADIENT = ["#FF5F6D", "#FF3366"];
+export const BACKGROUND_COLOR = "#FF3366";

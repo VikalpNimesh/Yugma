@@ -18,7 +18,7 @@ import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateBasicInfo, setCurrentScreen } from "../../redux/slices/profileFormSlice";
 import { handleLogout } from "../../api/firebase/auth";
-import { educationOptions, genderOptions, indianStatesArray } from "../../constant/constant";
+import { educationOptions, genderOptions, indianStatesArray, BACKGROUND_COLOR, PRIMARY_GRADIENT } from "../../constant/constant";
 import { SelectionBottomSheet } from "../../components/common/SelectionBottomSheet";
 
 
@@ -153,7 +153,7 @@ export const BasicInfoScreen: React.FC = () => {
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={["#FF5F6D", "#FF3366"]}
+                colors={PRIMARY_GRADIENT}
                 style={StyleSheet.absoluteFillObject}
             />
             <KeyboardAvoidingView
@@ -163,10 +163,20 @@ export const BasicInfoScreen: React.FC = () => {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     {/* Header */}
                     <View style={styles.headerRow}>
-                        <Text style={styles.stepText}>Step 1 of 4</Text>
-                        <View style={styles.progressBarContainer}>
-                            <View style={[styles.progressBarFill, { width: "25%" }]} />
+                        <View style={{ flex: 1, marginRight: 15 }}>
+                            <Text style={styles.stepText}>Step 1 of 4</Text>
+                            <View style={styles.progressBarContainer}>
+                                <View style={[styles.progressBarFill, { width: "25%" }]} />
+                            </View>
                         </View>
+                        <TouchableOpacity
+                            onPress={() => handleLogout(navigation, dispatch)}
+                            style={styles.logoutButton}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="log-out-outline" size={18} color="#FFF" />
+                            <Text style={styles.logoutText}>Logout</Text>
+                        </TouchableOpacity>
                     </View>
 
                     <Text style={styles.title}>Basic Information</Text>
@@ -345,6 +355,7 @@ const InputField: React.FC<InputFieldProps> = ({
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: BACKGROUND_COLOR,
     },
     scrollContent: {
         paddingHorizontal: 30,
@@ -465,5 +476,19 @@ const styles = StyleSheet.create({
         color: "#FF3366",
         fontSize: 16,
         fontWeight: "700",
+    },
+    logoutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 15,
+        gap: 4,
+    },
+    logoutText: {
+        color: "#FFF",
+        fontSize: 12,
+        fontWeight: "600",
     },
 });

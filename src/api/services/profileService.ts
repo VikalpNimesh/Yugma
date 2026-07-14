@@ -55,7 +55,7 @@ class ProfileService {
                 formData,
                 {
                     headers: {
-                        'Content-Type': 'multipart/form-data',
+                        'Content-Type': null as any,
                     },
                 }
             );

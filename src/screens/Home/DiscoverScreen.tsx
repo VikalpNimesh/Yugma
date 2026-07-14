@@ -122,6 +122,7 @@ const DiscoverScreen = () => {
                                 backgroundColor="transparent"
                                 cardVerticalMargin={0}
                                 cardHorizontalMargin={16}
+                                cardHeight={500}
                                 animateCardOpacity
                                 horizontalSwipe
                                 verticalSwipe={false}
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
     filterText: { marginLeft: 4, color: "#000", fontWeight: "500" },
 
     swiperWrapper: {
-        height: 540,
+        height: 560,
         marginTop: 10,
         paddingHorizontal: 0
     },

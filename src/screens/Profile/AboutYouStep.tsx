@@ -18,6 +18,8 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateAboutYou, setCurrentScreen } from "../../redux/slices/profileFormSlice";
+import { BACKGROUND_COLOR, PRIMARY_GRADIENT } from "../../constant/constant";
+import { handleLogout } from "../../api/firebase/auth";
 
 export const AboutYouStep: React.FC = () => {
     const navigation = useNavigation();
@@ -44,7 +46,7 @@ export const AboutYouStep: React.FC = () => {
     }, [dispatch]);
 
     const interestOptions = [
-        "Travel", "Music", "Reading", "Cooking", "Movies", "Sports", "Art", 
+        "Travel", "Music", "Reading", "Cooking", "Movies", "Sports", "Art",
         "Dancing", "Yoga", "Photography", "Technology", "Fitness", "Nature", "Spirituality",
     ];
 
@@ -101,8 +103,8 @@ export const AboutYouStep: React.FC = () => {
                 text2: newErrors.bio && bio.trim().length > 0 && bio.trim().length < 10
                     ? 'Bio must be at least 10 characters long.'
                     : newErrors.photos && photos.length > 0 && photos.length < 2
-                    ? 'Please upload at least 2 photos.'
-                    : 'Please fill in all highlighted fields.',
+                        ? 'Please upload at least 2 photos.'
+                        : 'Please fill in all highlighted fields.',
             });
             return;
         }
@@ -114,7 +116,7 @@ export const AboutYouStep: React.FC = () => {
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={["#FF5F6D", "#FF3366"]}
+                colors={PRIMARY_GRADIENT}
                 style={StyleSheet.absoluteFillObject}
             />
             <KeyboardAvoidingView
@@ -124,14 +126,24 @@ export const AboutYouStep: React.FC = () => {
                 <ScrollView contentContainerStyle={styles.scrollContent}>
                     {/* Header */}
                     <View style={styles.headerRow}>
-                        <Text style={styles.stepText}>Step 2 of 4</Text>
-                        <View style={styles.progressBarContainer}>
-                            <View style={[styles.progressBarFill, { width: "50%" }]} />
+                        <View style={{ flex: 1, marginRight: 15 }}>
+                            <Text style={styles.stepText}>Step 2 of 4</Text>
+                            <View style={styles.progressBarContainer}>
+                                <View style={[styles.progressBarFill, { width: "50%" }]} />
+                            </View>
                         </View>
+                        <TouchableOpacity
+                            onPress={() => handleLogout(navigation, dispatch)}
+                            style={styles.logoutButton}
+                            activeOpacity={0.7}
+                        >
+                            <Ionicons name="log-out-outline" size={18} color="#FFF" />
+                            <Text style={styles.logoutText}>Logout</Text>
+                        </TouchableOpacity>
                     </View>
- 
+
                     <Text style={styles.title}>About You</Text>
- 
+
                     {/* Bio Section */}
                     <View style={styles.section}>
                         <Text style={styles.label}>Bio</Text>
@@ -153,7 +165,7 @@ export const AboutYouStep: React.FC = () => {
                             ]}
                         />
                     </View>
- 
+
                     {/* Interests Section */}
                     <View style={styles.section}>
                         <Text style={styles.label}>Interests & Hobbies</Text>
@@ -182,12 +194,12 @@ export const AboutYouStep: React.FC = () => {
                             ))}
                         </View>
                     </View>
- 
+
                     {/* Photos Section */}
                     <View style={styles.section}>
                         <Text style={styles.label}>Photos</Text>
                         <Text style={styles.subText}>Add at least 2 photos to get better matches</Text>
-                        
+
                         <View style={[
                             styles.photoGrid,
                             errors.photos && { borderColor: "#e31717ff", borderWidth: 2, borderRadius: 15, padding: 10 }
@@ -214,14 +226,14 @@ export const AboutYouStep: React.FC = () => {
                             )}
                         </View>
                     </View>
- 
+
                     {/* Footer Buttons */}
                     <View style={styles.footer}>
                         <TouchableOpacity style={styles.previousButton} onPress={() => navigation.goBack()}>
                             <Ionicons name="arrow-back" size={20} color="#FFFFFF" />
                             <Text style={styles.previousText}>Back</Text>
                         </TouchableOpacity>
- 
+
                         <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                             <Text style={styles.nextText}>Next Step</Text>
                             <Ionicons name="arrow-forward" size={20} color="#FF3366" />
@@ -236,6 +248,7 @@ export const AboutYouStep: React.FC = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        backgroundColor: BACKGROUND_COLOR,
     },
     scrollContent: {
         paddingHorizontal: 30,
@@ -391,5 +404,19 @@ const styles = StyleSheet.create({
         color: "#FF3366",
         fontSize: 16,
         fontWeight: "700",
+    },
+    logoutButton: {
+        flexDirection: "row",
+        alignItems: "center",
+        backgroundColor: "rgba(255, 255, 255, 0.2)",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 15,
+        gap: 4,
+    },
+    logoutText: {
+        color: "#FFF",
+        fontSize: 12,
+        fontWeight: "600",
     },
 });

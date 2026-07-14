@@ -55,7 +55,8 @@ const SplashScreen = () => {
                     if (!isApproved) {
                         navigation.replace("WaitingScreen");
                     } else {
-                        if (profile && (profile.id || Object.keys(profile).length > 0)) {
+                        const isProfileComplete = !!(profile && (profile.userId || profile.id) && profile.gender && profile.location);
+                        if (isProfileComplete) {
                             navigation.replace("BottomTabs");
                         } else {
                             const validScreens = ['BasicInfo', 'AboutYouStep', 'FamilyDetailsStep', 'PreferencesStep'];

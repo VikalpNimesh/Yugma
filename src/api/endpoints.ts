@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
         LOGIN: `auth/login`,
         SIGNUP: `auth/register`,
         GOOGLE_LOGIN: `auth/google-login`,
+        APPLE_LOGIN: `auth/apple-login`,
         LOGOUT: `auth/logout`,
         REFRESH_TOKEN: `auth/refresh-token`,
         FORGOT_PASSWORD: `auth/forgot-password`,

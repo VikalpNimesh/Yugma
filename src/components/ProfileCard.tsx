@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     card: {
         backgroundColor: "#000",
         borderRadius: 20,
-        height: 520, // Taller card for Tinder look
+        height: 500, // Matches swiper cardHeight
         overflow: "hidden",
         elevation: 8,
         shadowColor: "#000",
@@ -80,18 +80,20 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        height: '40%', // Cover bottom part
+        width: '100%',
+        height: 130,
         justifyContent: 'flex-end',
-        padding: 20,
+        paddingHorizontal: 16,
+        paddingBottom: 16,
     },
     infoContent: {
-        marginBottom: 10,
+        width: '100%',
     },
     name: {
-        fontSize: 28,
+        fontSize: 24,
         fontWeight: "800",
         color: "#FFF",
-        marginBottom: 8,
+        marginBottom: 6,
         textShadowColor: 'rgba(0, 0, 0, 0.5)',
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 3,
@@ -100,8 +102,8 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         flexWrap: "wrap",
-        gap: 15,
-        marginBottom: 12,
+        gap: 12,
+        marginBottom: 8,
     },
     tagLine: {
         flexDirection: "row",
@@ -109,7 +111,7 @@ const styles = StyleSheet.create({
         gap: 4,
     },
     tagText: {
-        fontSize: 15,
+        fontSize: 14,
         color: "#FFF",
         fontWeight: '500',
     },
@@ -117,17 +119,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         flexWrap: "wrap",
         gap: 8,
+        width: '100%',
     },
     interestTag: {
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderRadius: 20,
         paddingHorizontal: 12,
-        paddingVertical: 5,
+        paddingVertical: 4,
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     interestText: {
-        fontSize: 13,
+        fontSize: 12,
         color: "#FFF",
         fontWeight: '600',
     },
