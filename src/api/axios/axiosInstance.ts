@@ -3,6 +3,7 @@ import * as Keychain from 'react-native-keychain';
 
 // Base URL - Update this with your API base URL
 export const BASE_URL = 'https://api.yugma.co/api';
+export const BASE_URL_WS = 'https://api.yugma.co';
 // export const BASE_URL = 'http://localhost:8000';
 // export const BASE_URL = 'http://192.168.29.27:8000';
 // export const BASE_URL = 'http://192.168.29.4:8000';
