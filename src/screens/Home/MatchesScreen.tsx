@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
     View,
     Text,
-    FlatList,
-    Image,
     Pressable,
     StyleSheet,
     ActivityIndicator,
@@ -14,7 +12,6 @@ import MatchList from "./MatchList";
 import LikeList from "./LikeList";
 import Icon from "react-native-vector-icons/Ionicons";
 import socialService, { SocialUserItem } from "../../api/services/socialService";
-import Toast from "react-native-toast-message";
 import dayjs from "dayjs";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
 import { useSocket } from "../../context/SocketContext";
@@ -175,7 +172,7 @@ const MatchesScreen = () => {
                     <ActivityIndicator size="large" color="#FF5F6D" />
                 </View>
             ) : selectedTab === "Matches" ? (
-                <MatchList data={transformedMatches} />
+                <MatchList data={transformedMatches} onRefresh={loadData} />
             ) : (
                 <LikeList data={transformedLikes} onRefresh={loadData} />
             )}

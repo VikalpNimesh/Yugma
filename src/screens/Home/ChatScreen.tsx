@@ -44,6 +44,8 @@ const ChatScreen = () => {
     const flatListRef = useRef<FlatList>(null);
     const { socket, isConnected } = useSocket();
     const currentUserId = useSelector((state: RootState) => state.auth.user?.id);
+    const onlineUserIds = useSelector((state: RootState) => state.chat.onlineUserIds);
+    const isOnline = onlineUserIds.includes(otherUserId);
 
     useEffect(() => {
         let isMounted = true;
@@ -345,11 +347,13 @@ const ChatScreen = () => {
                     </TouchableOpacity>
                     <View style={styles.headerAvatarContainer}>
                         <Avatar uri={avatar} name={name} size={40} style={styles.headerAvatar} />
-                        <View style={styles.onlineBadge} />
+                        {isOnline && <View style={styles.onlineBadge} />}
                     </View>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerName}>{name}</Text>
-                        <Text style={styles.onlineStatus}>Online</Text>
+                        <Text style={[styles.onlineStatus, !isOnline && { color: '#8E8E93' }]}>
+                            {isOnline ? 'Online' : 'Offline'}
+                        </Text>
                     </View>
                 </View>
 

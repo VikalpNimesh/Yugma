@@ -11,6 +11,7 @@ interface MessageCardProps {
     unreadCount?: number;
     online?: boolean;
     onPress?: () => void;
+    onLongPress?: () => void;
 }
 
 const MessageCard: React.FC<MessageCardProps> = ({
@@ -21,9 +22,16 @@ const MessageCard: React.FC<MessageCardProps> = ({
     unreadCount,
     online,
     onPress,
+    onLongPress,
 }) => {
     return (
-        <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8} disabled={!onPress}>
+        <TouchableOpacity
+            style={styles.container}
+            onPress={onPress}
+            onLongPress={onLongPress}
+            activeOpacity={0.8}
+            disabled={!onPress}
+        >
             {/* Avatar */}
             <View style={styles.avatarContainer}>
                 <Avatar uri={avatar} name={name} size={55} />

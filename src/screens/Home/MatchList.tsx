@@ -1,12 +1,19 @@
-import { FlatList, Pressable, StyleSheet, Text, View, TouchableOpacity } from 'react-native'
+import { FlatList, StyleSheet, Text, View, TouchableOpacity, Alert } from 'react-native'
 import Avatar from '../../components/common/Avatar';
 import React from 'react'
 import Ionicons from "react-native-vector-icons/Ionicons";
 import Feather from "react-native-vector-icons/Feather";
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import socialService from '../../api/services/socialService';
+import Toast from 'react-native-toast-message';
 
-const MatchList = ({ data }: any) => {
+interface MatchListProps {
+    data: any[];
+    onRefresh?: () => void;
+}
+
+const MatchList = ({ data, onRefresh }: MatchListProps) => {
     const navigation = useNavigation<any>();
 
     const handleMessagePress = (item: any) => {
@@ -17,8 +24,50 @@ const MatchList = ({ data }: any) => {
         });
     };
 
+    const handleLongPress = (item: any) => {
+        Alert.alert(
+            "Delete Connection",
+            `Are you sure you want to delete your match and chat with ${item.name}?`,
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await socialService.unmatch(item.id);
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Connection Deleted',
+                                text2: `Your connection and chat with ${item.name} has been deleted.`,
+                            });
+                            if (onRefresh) {
+                                onRefresh();
+                            }
+                        } catch (error) {
+                            console.error("Error deleting connection:", error);
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Error',
+                                text2: 'Failed to delete connection. Please try again.',
+                            });
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const renderItem = ({ item }: any) => (
-        <View style={styles.card}>
+        <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.9}
+            onPress={() => handleMessagePress(item)}
+            onLongPress={() => handleLongPress(item)}
+        >
             <View style={styles.avatarWrapper}>
                 <Avatar uri={item.image} name={item.name} size={64} style={styles.avatar} />
             </View>
@@ -50,7 +99,7 @@ const MatchList = ({ data }: any) => {
                     <Text style={styles.messageText}>Chat</Text>
                 </View>
             </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
     );
 
     const renderEmpty = () => (

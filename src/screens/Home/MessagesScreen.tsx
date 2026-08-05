@@ -1,10 +1,12 @@
 // screens/MessagesScreen.tsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { StyleSheet, Text, View, FlatList, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import MessageCard from '../../components/MessageCard';
 import messageService, { ConversationItem } from '../../api/services/messageService';
+import socialService from '../../api/services/socialService';
+import Toast from 'react-native-toast-message';
 import { useSocket } from '../../context/SocketContext';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../redux/store';
@@ -123,6 +125,41 @@ const MessagesScreen = () => {
         });
     };
 
+    const handleLongPress = (item: ConversationItem) => {
+        Alert.alert(
+            "Delete Chat",
+            `Are you sure you want to delete your chat and match with ${item.user.fullName || 'this user'}?`,
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            await socialService.unmatch(item.user.id);
+                            Toast.show({
+                                type: 'success',
+                                text1: 'Chat Deleted',
+                                text2: `Your connection and chat with ${item.user.fullName || 'this user'} has been deleted.`,
+                            });
+                            fetchConversations(false);
+                        } catch (error) {
+                            console.error("Error deleting chat:", error);
+                            Toast.show({
+                                type: 'error',
+                                text1: 'Error',
+                                text2: 'Failed to delete chat. Please try again.',
+                            });
+                        }
+                    }
+                }
+            ]
+        );
+    };
+
     const renderHeader = () => (
         <View style={styles.headerContainer}>
             <Text style={styles.title}>Messages</Text>
@@ -166,6 +203,7 @@ const MessagesScreen = () => {
                                 unreadCount={item.unreadCount}
                                 online={onlineUserIds.includes(item.user.id)}
                                 onPress={() => navigateToChat(item)}
+                                onLongPress={() => handleLongPress(item)}
                             />
                         )}
                     />
