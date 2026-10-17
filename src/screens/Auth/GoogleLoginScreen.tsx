@@ -41,7 +41,7 @@ const GoogleLoginScreen = ({ navigation }: any) => {
                         <View style={styles.textSection}>
                             <Text style={styles.title}>Find your perfect match</Text>
                             <Text style={styles.subtitle}>
-                                Dating or Marriage, Yugma helps you connect with the right person
+                                Social Connections or Matrimonial Unions, Yugma helps you connect with the right person
                             </Text>
                         </View>
                     </View>

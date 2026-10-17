@@ -6,7 +6,7 @@ const initialState = {
     name: null,
     email: null,
     token: null,
-    appType: null,
+    appType: "matrimonial",
     gender: null,
 };
 

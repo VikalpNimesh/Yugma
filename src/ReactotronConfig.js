@@ -7,7 +7,7 @@ if (__DEV__) {
     reactotron = Reactotron
         .setAsyncStorageHandler(AsyncStorage) // for Reactotron state sync
         .configure({
-            name: 'Yugma Dating App',
+            name: 'Yugma App',
             host: 'localhost'
 
         })

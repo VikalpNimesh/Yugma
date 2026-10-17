@@ -59,8 +59,8 @@ const DiscoverScreen = () => {
             await socialService.likeUser(userId);
             Toast.show({
                 type: 'success',
-                text1: 'Profile Liked!',
-                text2: 'They will be notified.',
+                text1: 'Interest Expressed!',
+                text2: 'They will be notified of your request.',
             });
         } catch (error: any) {
             Toast.show({
@@ -88,7 +88,7 @@ const DiscoverScreen = () => {
             >
                 {/* Header */}
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Discover Partners</Text>
+                    <Text style={styles.title}>Discover Connections</Text>
                     {/* <TouchableOpacity
                         style={styles.filterButton}
                         onPress={() => setShowFilter(true)}
@@ -130,7 +130,7 @@ const DiscoverScreen = () => {
                                 onSwipedRight={(index) => handleLike(profiles[index].userId)}
                                 overlayLabels={{
                                     left: {
-                                        title: "NOPE",
+                                        title: "SKIP",
                                         style: {
                                             label: {
                                                 backgroundColor: "transparent",
@@ -158,7 +158,7 @@ const DiscoverScreen = () => {
                                         },
                                     },
                                     right: {
-                                        title: "LIKE",
+                                        title: "CONNECT",
                                         style: {
                                             label: {
                                                 backgroundColor: "transparent",
@@ -319,10 +319,10 @@ const DiscoverScreen = () => {
                     <View style={styles.tutorialContent}>
                         <View style={styles.handRow}>
                             <Ionicons name="hand-left-outline" size={50} color="#fff" />
-                            <Text style={styles.tutorialText}>Swipe Left to Pass</Text>
+                            <Text style={styles.tutorialText}>Swipe Left to Skip</Text>
                         </View>
                         <View style={styles.handRow}>
-                            <Text style={styles.tutorialText}>Swipe Right to Like</Text>
+                            <Text style={styles.tutorialText}>Swipe Right to Connect</Text>
                             <Ionicons name="hand-right-outline" size={50} color="#fff" />
                         </View>
                         <Text style={styles.tapText}>Tap to start</Text>

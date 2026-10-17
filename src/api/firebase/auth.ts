@@ -404,7 +404,7 @@ export const signInWithApple = async (dispatch?: any) => {
           id: backendUser.id,
           email: backendUser.email,
           fullName: backendUser.fullName,
-          accountMode: backendUser.accountMode || 'dating',
+          accountMode: backendUser.accountMode || 'matrimonial',
           isPremium: backendUser.isPremium || false,
           isVerified: backendUser.isVerified || false,
         },

@@ -34,7 +34,7 @@ export default function NotificationSettingsScreen() {
                     <View style={styles.separator} />
                     <NotificationItem label="Messages" value={messages} onValueChange={setMessages} />
                     <View style={styles.separator} />
-                    <NotificationItem label="Likes & Comments" value={likes} onValueChange={setLikes} />
+                    <NotificationItem label="Connection Requests" value={likes} onValueChange={setLikes} />
                     <View style={styles.separator} />
                     <NotificationItem label="App Updates & Tips" value={appUpdates} onValueChange={setAppUpdates} />
                 </View>

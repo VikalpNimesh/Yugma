@@ -48,11 +48,11 @@ const AppTypeSelectionScreen = () => {
                     >
                         <View style={styles.cardContent}>
                             <View style={styles.iconCircle}>
-                                <Text style={styles.cardIcon}>💘</Text>
+                                <Text style={styles.cardIcon}>🤝</Text>
                             </View>
                             <View style={styles.cardTextContainer}>
-                                <Text style={styles.cardTitle}>Dating</Text>
-                                <Text style={styles.cardDesc}>Find love and meaningful connections</Text>
+                                <Text style={styles.cardTitle}>Connect</Text>
+                                <Text style={styles.cardDesc}>Build friendships and social connections</Text>
                             </View>
                         </View>
                     </TouchableOpacity>

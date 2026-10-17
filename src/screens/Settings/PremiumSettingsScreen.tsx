@@ -19,7 +19,7 @@ export default function PremiumSettingsScreen() {
                     </View>
                     <Text style={styles.premiumStatusTitle}>Unlock All Features</Text>
                     <Text style={styles.premiumStatusSubtext}>
-                        Send unlimited likes, see who likes you, and get verified with our premium plans.
+                        Send unlimited connection requests, see who wants to connect with you, and get verified with our premium plans.
                     </Text>
 
                     <TouchableOpacity

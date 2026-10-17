@@ -161,7 +161,7 @@ const MatchesScreen = () => {
                                 selectedTab === tab && styles.activeTabText,
                             ]}
                         >
-                            {tab} {tab === "Matches" ? `(${matches.length})` : `(${likes.length})`}
+                            {tab === "Likes" ? "Interests" : tab} {tab === "Matches" ? `(${matches.length})` : `(${likes.length})`}
                         </Text>
                     </Pressable>
                 ))}

@@ -16,8 +16,8 @@ const LikeList = ({ data, onRefresh }: any) => {
             }
             Toast.show({
                 type: 'success',
-                text1: action === 'accepted' ? 'Matched! 🎉' : 'Passed Successfully',
-                text2: action === 'accepted' ? 'You created a new connection!' : 'User was successfully skipped.',
+                text1: action === 'accepted' ? 'Connected! 🎉' : 'Passed Successfully',
+                text2: action === 'accepted' ? 'You accepted their connection request!' : 'User request was successfully skipped.',
             });
             if (onRefresh) onRefresh();
         } catch (error: any) {
@@ -25,7 +25,7 @@ const LikeList = ({ data, onRefresh }: any) => {
             Toast.show({
                 type: 'error',
                 text1: 'Response Failed',
-                text2: `Failed to ${action === 'accepted' ? 'accept match' : 'pass user'}.`,
+                text2: `Failed to ${action === 'accepted' ? 'accept request' : 'pass user'}.`,
             });
         }
     };
@@ -41,7 +41,7 @@ const LikeList = ({ data, onRefresh }: any) => {
                 </Text>
                 <View style={styles.percentPill}>
                     <Ionicons name="heart" size={12} color="#FF3366" />
-                    <Text style={styles.matchText}>{item.matchPercent || '90%'} match</Text>
+                    <Text style={styles.matchText}>{item.matchPercent || '90%'} compatibility</Text>
                 </View>
             </View>
             <View style={styles.actionRow}>
@@ -74,9 +74,9 @@ const LikeList = ({ data, onRefresh }: any) => {
             <View style={styles.iconCircle}>
                 <Ionicons name="heart-outline" size={44} color="#FF3366" />
             </View>
-            <Text style={styles.emptyTitle}>No Likes Yet</Text>
+            <Text style={styles.emptyTitle}>No Interests Received</Text>
             <Text style={styles.emptySubText}>
-                When people like your profile, they will appear here. Keep swiping and matching to discover new partners!
+                When other users send you connection requests or show interest, they will appear here.
             </Text>
         </View>
     );
@@ -86,9 +86,9 @@ const LikeList = ({ data, onRefresh }: any) => {
             <FlatList
                 ListHeaderComponent={data.length > 0 ? () => (
                     <View style={styles.headerCon}>
-                        <Text style={styles.header}>People who liked you</Text>
+                        <Text style={styles.header}>Connection Requests</Text>
                         <Text style={styles.subHeader}>
-                            These matches have shown interest in your profile. Match back to start chatting instantly!
+                            These profiles have shown interest in connecting with you. Connect back to start chatting instantly!
                         </Text>
                     </View>
                 ) : null}

@@ -36,15 +36,15 @@ export default function BottomTabs() {
                     paddingTop: 8,
                 },
                 tabBarIcon: ({ focused, color, size }) => {
-                    let iconName = "heart-outline";
+                    let iconName = "compass-outline";
                     let label = "Discover";
 
                     if (route.name === "Discover") {
-                        iconName = "heart-outline";
+                        iconName = focused ? "compass" : "compass-outline";
                         label = "Discover";
                     } else if (route.name === "MatchesScreen") {
-                        iconName = "people-outline";
-                        label = "Matches";
+                        iconName = focused ? "people" : "people-outline";
+                        label = "Connections";
                     } else if (route.name === "Messages") {
                         iconName = "chatbubble-outline";
                         label = "Messages";

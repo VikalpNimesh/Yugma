@@ -22,7 +22,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                         <Text style={{ color: "hsla(333, 73%, 50%, 1.00)" }}>♥ </Text>Yugma
                     </Text>
                     <Text style={styles.subHeading}>
-                        Where Tradition Meets Modern Love
+                        Where Tradition Meets Modern Connections
                     </Text>
                     <Text style={styles.desc}>
                         Bridging generations and hearts by blending timeless tradition with
@@ -49,7 +49,7 @@ export const HomeScreen: React.FC = ({ navigation }: any) => {
                     <View style={styles.featuresRow}>
                         <FeatureCard
                             title="Dual Profiles"
-                            desc="Switch between matrimonial and dating modes"
+                            desc="Switch between matrimonial and social connect modes"
                             id="1"
                         />
                         <FeatureCard

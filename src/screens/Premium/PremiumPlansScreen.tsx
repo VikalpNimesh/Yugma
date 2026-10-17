@@ -25,9 +25,9 @@ interface Feature {
 }
 
 const PREMIUM_FEATURES: Feature[] = [
-    { text: "Unlimited Likes & Swipes", icon: "heart" },
-    { text: "See Who Liked You", icon: "eye" },
-    { text: "5 Free Super Likes Weekly", icon: "star" },
+    { text: "Unlimited Connections & Recommendations", icon: "heart" },
+    { text: "See Who Wants to Connect", icon: "eye" },
+    { text: "5 Free Priority Connects Weekly", icon: "star" },
     { text: "1 Monthly Profile Boost", icon: "flash" },
     { text: "Travel Mode to any location", icon: "planet" },
     { text: "Advanced Filtering & No Ads", icon: "options" },
@@ -38,7 +38,7 @@ const PLAN_SUBTEXTS: Record<string, string> = {
     monthly: "Great to get started",
     quarterly: "Perfect for a season",
     halfyearly: "Best for finding 'The One'",
-    yearly: "Ultimate dating experience",
+    yearly: "Ultimate matchmaking experience",
 };
 
 const PremiumPlansScreen = () => {
@@ -329,7 +329,7 @@ const PremiumPlansScreen = () => {
                     <Text style={styles.mainTitle}>{activePlan ? "Upgrade your plan" : "Go Premium."}</Text>
                     <Text style={styles.subTitle}>
                         {activePlan
-                            ? "Level up your dating experience with our high-value plans."
+                            ? "Level up your matchmaking experience with our high-value plans."
                             : "Unlock the best of Yugma and find your perfect match today."
                         }
                     </Text>

@@ -20,9 +20,9 @@ export const DatingScreen: React.FC = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Dating Mode</Text>
+            <Text style={styles.title}>Connect Mode</Text>
             <Text style={styles.desc}>
-                Discover and connect with people who share your vibe.
+                Discover and build meaningful social connections and friendships.
             </Text>
 
             <TouchableOpacity onPress={handleLogoutPress} style={{

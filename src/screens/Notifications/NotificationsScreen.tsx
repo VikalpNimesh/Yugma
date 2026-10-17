@@ -122,10 +122,10 @@ const NotificationsScreen = () => {
         if (!requesterId) return;
         try {
             await socialService.likeUser(requesterId);
-            Toast.show({ type: 'success', text1: 'Match Created', text2: 'You can now chat with them!' });
+            Toast.show({ type: 'success', text1: 'Connection Created', text2: 'You can now chat with them!' });
             await handleMarkAsRead(notificationId);
         } catch (error: any) {
-            Toast.show({ type: 'error', text1: 'Failed to accept like', text2: error?.response?.data?.message || 'Something went wrong' });
+            Toast.show({ type: 'error', text1: 'Failed to accept connection request', text2: error?.response?.data?.message || 'Something went wrong' });
         }
     };
 
@@ -227,7 +227,7 @@ const NotificationsScreen = () => {
                                 <Ionicons name="notifications-outline" size={64} color="#FF5F6D" />
                             </View>
                             <Text style={styles.emptyTitle}>You're all caught up!</Text>
-                            <Text style={styles.emptySubtitle}>When you get new matches, messages, or likes, they'll show up right here.</Text>
+                            <Text style={styles.emptySubtitle}>When you get new matches, messages, or connection requests, they'll show up right here.</Text>
                         </View>
                     }
                 />
