@@ -2,6 +2,6 @@
   "name": "Yugma",
   "displayName": "Yugma",
   "android": {
-    "package": "com.yugma.dating"
+    "package": "com.yugma.connect"
   }
 }

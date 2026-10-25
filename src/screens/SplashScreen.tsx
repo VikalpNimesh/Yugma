@@ -71,13 +71,12 @@ const SplashScreen = () => {
                         }
                     }
                 } else {
-                    const hasLaunched = await AsyncStorage.getItem('hasLaunched');
-                    navigation.replace("AppTypeSelection");
+                    navigation.replace("AppTypeSelection" as any);
                 }
             } catch (error) {
                 console.error('Error in splash navigation:', error);
                 if (!isAuthenticated) {
-                    navigation.replace("LoginScreen");
+                    navigation.replace("AppTypeSelection" as any);
                 }
             }
         }, 2000); // Increased delay for a more premium splash feel
@@ -88,7 +87,7 @@ const SplashScreen = () => {
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={["#FF5F6D", "#FF3366"]}
+                colors={["#22020B", "#4A0718", "#780E2B"]}
                 style={StyleSheet.absoluteFillObject}
             />
             <View style={styles.logoWrapper}>
@@ -101,7 +100,7 @@ const SplashScreen = () => {
                     <Text style={styles.brandName}>yugma</Text>
                     <View style={styles.separatorContainer}>
                         <View style={styles.line} />
-                        <Text style={styles.brandSubtitle}>FOR BRAHMINS</Text>
+                        <Text style={styles.brandSubtitle}>CONNECT & MATCH</Text>
                         <View style={styles.line} />
                     </View>
                 </View>

@@ -1,12 +1,19 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
 import * as Keychain from 'react-native-keychain';
 
-// Base URL - Update this with your API base URL
-export const BASE_URL = 'https://api.yugma.co/api';
-export const BASE_URL_WS = 'https://api.yugma.co';
-// export const BASE_URL = 'http://localhost:8000';
-// export const BASE_URL = 'http://192.168.29.27:8000';
-// export const BASE_URL = 'http://192.168.29.4:8000';
+import { Platform } from 'react-native';
+
+// Local development host (localhost for iOS Simulator, 10.0.2.2 for Android Emulator, 192.168.29.26 for physical device)
+const DEV_HOST = Platform.select({
+    ios: 'localhost',
+    android: '10.0.2.2',
+    default: '192.168.29.26',
+});
+
+export const BASE_URL = `http://${DEV_HOST}:8000/api`;
+export const BASE_URL_WS = `http://${DEV_HOST}:8000`;
+// export const BASE_URL = 'https://api.yugma.co/api';
+// export const BASE_URL_WS = 'https://api.yugma.co';
 
 // Create axios instance
 const axiosInstance: AxiosInstance = axios.create({

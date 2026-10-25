@@ -58,8 +58,8 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
           console.log('✅ Socket connected');
           setIsConnected(true);
           // Emit events to get initial counts
-          socketInstance.emit('get_unread_message_users');
-          socketInstance.emit('get_match_users');
+          socketInstance?.emit('get_unread_message_users');
+          socketInstance?.emit('get_match_users');
         });
 
         socketInstance.on('disconnect', () => {

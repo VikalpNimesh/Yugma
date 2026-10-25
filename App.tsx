@@ -19,13 +19,20 @@ import { IapProvider } from './src/context/IapContext';
 // Import Rozenite debugging tools
 import { useReactNavigationDevTools } from '@rozenite/react-navigation-plugin';
 import { useNetworkActivityDevTools } from '@rozenite/network-activity-plugin';
+import { useAppDispatch } from './src/redux/hooks';
+import { checkAuthState } from './src/redux/slices/authSlice';
 
 function RootNavigator() {
   const navigationRef = useRef<any>(null);
+  const dispatch = useAppDispatch();
   const isLoggedIn = useSelector(
     (state: any) => state.auth.isAuthenticated
   );
   console.log("RootNavigator - isLoggedIn:", isLoggedIn);
+
+  useEffect(() => {
+    dispatch(checkAuthState());
+  }, [dispatch]);
 
   // Initialize Rozenite DevTools plugins
   useReactNavigationDevTools({ ref: navigationRef });
@@ -56,21 +63,18 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <StatusBar barStyle="light-content" backgroundColor="#FF5F6D" />
-        <SafeAreaView edges={['top']} style={{ backgroundColor: '#FF5F6D' }} />
-        <SafeAreaView edges={['left', 'right', 'bottom']} style={{ flex: 1, backgroundColor: '#ffffff' }}>
-          <Provider store={store}>
-            <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
-              <IapProvider>
-                <SocketProvider>
-                  <RootNavigator />
-                </SocketProvider>
-              </IapProvider>
-              <Toast config={premiumToastConfig} />
-            </PersistGate>
-          </Provider>
-        </SafeAreaView>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: '#1F020B' }}>
+        <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+        <Provider store={store}>
+          <PersistGate loading={<ActivityIndicator />} persistor={persistor}>
+            <IapProvider>
+              <SocketProvider>
+                <RootNavigator />
+              </SocketProvider>
+            </IapProvider>
+            <Toast config={premiumToastConfig} />
+          </PersistGate>
+        </Provider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );

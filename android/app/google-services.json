@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:719942063573:android:e475e06a6400d472fb995c",
         "android_client_info": {
-          "package_name": "com.yugma.dating"
+            "package_name": "com.yugma.connect"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "719942063573-c4b68hljqhj6h5mfr90hd9mis1djubgv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.yugma.dating",
+              "package_name": "com.yugma.connect",
             "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },

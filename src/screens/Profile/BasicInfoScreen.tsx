@@ -1,494 +1,678 @@
 import React, { useState } from "react";
 import {
-    View,
-    Text,
-    StyleSheet,
-    TouchableOpacity,
-    ScrollView,
-    KeyboardAvoidingView,
-    Platform,
-    Dimensions,
-    TextInput,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  TextInput,
+  StatusBar,
 } from "react-native";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import Toast from "react-native-toast-message";
 import { useNavigation } from "@react-navigation/native";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import Icon from "react-native-vector-icons/Ionicons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import LinearGradient from "react-native-linear-gradient";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
 import { updateBasicInfo, setCurrentScreen } from "../../redux/slices/profileFormSlice";
-import { handleLogout } from "../../api/firebase/auth";
-import { educationOptions, genderOptions, indianStatesArray, BACKGROUND_COLOR, PRIMARY_GRADIENT } from "../../constant/constant";
+import { indianStatesArray, educationOptions } from "../../constant/constant";
 import { SelectionBottomSheet } from "../../components/common/SelectionBottomSheet";
-
 
 const { width } = Dimensions.get("window");
 
 export const BasicInfoScreen: React.FC = () => {
-    const navigation = useNavigation();
-    const dispatch = useAppDispatch();
-    const form = useAppSelector((state) => state.profileForm.basicInfo);
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation<any>();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+  const profile = useAppSelector((state) => state.auth.profile);
+  const form = useAppSelector((state) => state.profileForm.basicInfo);
 
-    const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
-    const [sheetConfig, setSheetConfig] = useState<{
-        visible: boolean;
-        title: string;
-        options: any[];
-        selectedKey?: string;
-        onSelect: (option: any) => void;
-        searchable?: boolean;
-        searchPlaceholder?: string;
-    }>({
-        visible: false,
-        title: "",
-        options: [],
-        selectedKey: undefined,
-        onSelect: () => { },
-        searchable: false,
+  const [dob, setDob] = useState(
+    form.dob || (form.age ? `01/01/${new Date().getFullYear() - parseInt(form.age, 10)}` : "")
+  );
+  const [selectedGender, setSelectedGender] = useState<string>(
+    form.gender || profile?.gender || ""
+  );
+  const [currentCity, setCurrentCity] = useState<string>(
+    form.location || profile?.location || ""
+  );
+  const [fullName, setFullName] = useState<string>(
+    form.fullName || profile?.fullName || user?.fullName || ""
+  );
+  const [education, setEducation] = useState<string>(
+    form.education || profile?.education || ""
+  );
+  const [profession, setProfession] = useState<string>(
+    form.profession || profile?.profession || ""
+  );
+
+  const handleDobChange = (text: string) => {
+    const numbers = text.replace(/[^0-9]/g, "");
+    if (numbers.length <= 2) {
+      setDob(numbers);
+    } else if (numbers.length <= 4) {
+      setDob(`${numbers.slice(0, 2)}/${numbers.slice(2)}`);
+    } else {
+      setDob(`${numbers.slice(0, 2)}/${numbers.slice(2, 4)}/${numbers.slice(4, 8)}`);
+    }
+  };
+
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+  const [sheetConfig, setSheetConfig] = useState<{
+    visible: boolean;
+    title: string;
+    options: any[];
+    selectedKey?: string;
+    onSelect: (option: any) => void;
+    searchable?: boolean;
+    searchPlaceholder?: string;
+  }>({
+    visible: false,
+    title: "",
+    options: [],
+    selectedKey: undefined,
+    onSelect: () => { },
+    searchable: false,
+  });
+
+  const openLocationSheet = () => {
+    const selectedState = indianStatesArray.find((s) => s.name === currentCity);
+    setSheetConfig({
+      visible: true,
+      title: "Select Location",
+      options: indianStatesArray,
+      selectedKey: selectedState ? selectedState.key : undefined,
+      onSelect: (item) => {
+        setCurrentCity(item.name);
+        dispatch(updateBasicInfo({ location: item.name }));
+        setErrors((prev) => ({ ...prev, location: false }));
+      },
+      searchable: true,
+      searchPlaceholder: "Search city or state...",
     });
+  };
 
+  const openEducationSheet = () => {
+    const options = educationOptions.map((e) => ({ key: e, name: e }));
+    setSheetConfig({
+      visible: true,
+      title: "Select Education",
+      options,
+      selectedKey: education,
+      onSelect: (item) => {
+        setEducation(item.name);
+        dispatch(updateBasicInfo({ education: item.name }));
+      },
+    });
+  };
 
-    const openLocationSheet = () => {
-        const selectedState = indianStatesArray.find(s => s.name === form.location);
-        setSheetConfig({
-            visible: true,
-            title: "Select State",
-            options: indianStatesArray,
-            selectedKey: selectedState ? selectedState.key : undefined,
-            onSelect: (item) => {
-                handleChange("location", item.name);
-                setErrors(prev => ({ ...prev, location: false }));
-            },
-            searchable: true,
-            searchPlaceholder: "Search state...",
-        });
-    };
-
-    const openGenderSheet = () => {
-        setSheetConfig({
-            visible: true,
-            title: "Select Gender",
-            options: genderOptions,
-            selectedKey: form.gender,
-            onSelect: (item) => {
-                handleChange("gender", item.key);
-                setErrors(prev => ({ ...prev, gender: false }));
-            },
-            searchable: false,
-        });
-    };
-
-    const openEducationSheet = () => {
-        setSheetConfig({
-            visible: true,
-            title: "Select Education Level",
-            options: educationOptions,
-            selectedKey: form.education,
-            onSelect: (item) => {
-                handleChange("education", item.key);
-                setErrors(prev => ({ ...prev, education: false }));
-            },
-            searchable: false,
-        });
-    };
-
-    React.useEffect(() => {
-        dispatch(setCurrentScreen('BasicInfo'));
-        const loadUserData = async () => {
-            try {
-                const storedData = await AsyncStorage.getItem('userBasicInfo');
-                if (storedData) {
-                    const userData = JSON.parse(storedData);
-                    dispatch(updateBasicInfo({ ...userData, region: 'Brahmin' }));
-                } else {
-                    dispatch(updateBasicInfo({ region: 'Brahmin' }));
-                }
-            } catch (error) {
-                console.error('Failed to load user data from AsyncStorage:', error);
-                dispatch(updateBasicInfo({ region: 'Brahmin' }));
-            }
-        };
-        loadUserData();
-    }, [dispatch]);
-
-    const handleChange = (field: keyof typeof form, value: string) => {
-        dispatch(updateBasicInfo({ [field]: value }));
-        if (errors[field]) {
-            setErrors(prev => ({ ...prev, [field]: false }));
+  React.useEffect(() => {
+    dispatch(setCurrentScreen("BasicInfo"));
+    const loadUserData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem("userBasicInfo");
+        if (storedData) {
+          const parsed = JSON.parse(storedData);
+          if (parsed.fullName && !fullName) {
+            setFullName(parsed.fullName);
+            dispatch(updateBasicInfo({ fullName: parsed.fullName }));
+          }
         }
+      } catch (e) {
+        console.error("Error loading user basic info", e);
+      }
     };
+    loadUserData();
 
-    const handleNext = () => {
-        const newErrors: { [key: string]: boolean } = {};
-        const { fullName, email, age, location, profession, education, region, gender } = form;
+    // Dynamically sync profile and user data if state fields are empty
+    if (!fullName && (profile?.fullName || user?.fullName)) {
+      const name = profile?.fullName || user?.fullName || "";
+      setFullName(name);
+      dispatch(updateBasicInfo({ fullName: name }));
+    }
+    if (!selectedGender && (profile?.gender || form.gender)) {
+      const g = profile?.gender || form.gender || "";
+      setSelectedGender(g);
+      dispatch(updateBasicInfo({ gender: g }));
+    }
+    if (!currentCity && (profile?.location || form.location)) {
+      const loc = profile?.location || form.location || "";
+      setCurrentCity(loc);
+      dispatch(updateBasicInfo({ location: loc }));
+    }
+    if (!education && (profile?.education || form.education)) {
+      const edu = profile?.education || form.education || "";
+      setEducation(edu);
+      dispatch(updateBasicInfo({ education: edu }));
+    }
+    if (!profession && (profile?.profession || form.profession)) {
+      const prof = profile?.profession || form.profession || "";
+      setProfession(prof);
+      dispatch(updateBasicInfo({ profession: prof }));
+    }
+  }, [dispatch, profile, user]);
 
-        if (!fullName) newErrors.fullName = true;
-        if (!email) newErrors.email = true;
-        if (!location) newErrors.location = true;
-        if (!profession) newErrors.profession = true;
-        if (!gender) newErrors.gender = true;
-        if (!education) newErrors.education = true;
+  const handleGenderSelect = (gender: "male" | "female") => {
+    setSelectedGender(gender);
+    dispatch(updateBasicInfo({ gender }));
+    setErrors((prev) => ({ ...prev, gender: false }));
+  };
 
-        const ageNum = parseInt(age, 10);
-        if (!age || isNaN(ageNum) || ageNum < 18) {
-            newErrors.age = true;
+  const handleNext = () => {
+    const newErrors: { [key: string]: boolean } = {};
+    if (!selectedGender) newErrors.gender = true;
+    if (!currentCity) newErrors.location = true;
+
+    // Estimate age dynamically from DOB or keep existing age
+    let calculatedAge = form.age || "";
+    if (dob) {
+      const parts = dob.split("/");
+      if (parts.length === 3) {
+        const year = parseInt(parts[2], 10);
+        const currentYear = new Date().getFullYear();
+        if (!isNaN(year) && year > 1920 && year <= currentYear) {
+          calculatedAge = String(currentYear - year);
         }
+      }
+    }
 
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
-            Toast.show({
-                type: 'error',
-                text1: 'Validation Error',
-                text2: newErrors.age && ageNum < 18
-                    ? 'You must be 18 years or older to proceed.'
-                    : 'Please fill in all highlighted fields.',
-            });
-            return;
-        }
-
-        setErrors({});
-        navigation.navigate("AboutYouStep" as never);
-    };
-
-    return (
-        <View style={styles.container}>
-            <LinearGradient
-                colors={PRIMARY_GRADIENT}
-                style={StyleSheet.absoluteFillObject}
-            />
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={{ flex: 1 }}
-            >
-                <ScrollView contentContainerStyle={styles.scrollContent}>
-                    {/* Header */}
-                    <View style={styles.headerRow}>
-                        <View style={{ flex: 1, marginRight: 15 }}>
-                            <Text style={styles.stepText}>Step 1 of 4</Text>
-                            <View style={styles.progressBarContainer}>
-                                <View style={[styles.progressBarFill, { width: "25%" }]} />
-                            </View>
-                        </View>
-                        <TouchableOpacity
-                            onPress={() => handleLogout(navigation, dispatch)}
-                            style={styles.logoutButton}
-                            activeOpacity={0.7}
-                        >
-                            <Ionicons name="log-out-outline" size={18} color="#FFF" />
-                            <Text style={styles.logoutText}>Logout</Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    <Text style={styles.title}>Basic Information</Text>
-
-                    <View style={styles.inputSection}>
-                        <InputField
-                            label="Full Name"
-                            placeholder="Enter your full name"
-                            value={form.fullName}
-                            onChangeText={(text) => handleChange("fullName", text)}
-                            editable={!form.fullName}
-                            hasError={errors.fullName}
-                        />
-
-                        <InputField
-                            label="Email"
-                            placeholder="Your email"
-                            value={form.email}
-                            onChangeText={(text) => handleChange("email", text)}
-                            keyboardType="email-address"
-                            editable={!form.email}
-                            hasError={errors.email}
-                        />
-
-                        <View style={styles.row}>
-                            <View style={{ flex: 1, marginRight: 10 }}>
-                                <InputField
-                                    label="Age"
-                                    placeholder="Age"
-                                    value={form.age}
-                                    onChangeText={(text) => handleChange("age", text)}
-                                    keyboardType="numeric"
-                                    hasError={errors.age}
-                                />
-                            </View>
-                            <View style={{ flex: 2 }}>
-                                <InputField
-                                    label="Location"
-                                    placeholder="Select State"
-                                    value={form.location}
-                                    onPress={openLocationSheet}
-                                    hasError={errors.location}
-                                />
-                            </View>
-                        </View>
-
-                        <InputField
-                            label="Profession"
-                            placeholder="Your profession"
-                            value={form.profession}
-                            onChangeText={(text) => handleChange("profession", text)}
-                            hasError={errors.profession}
-                        />
-
-                        <InputField
-                            label="Gender"
-                            placeholder="Select gender"
-                            value={form.gender}
-                            onPress={openGenderSheet}
-                            hasError={errors.gender}
-                        />
-
-                        <InputField
-                            label="Education"
-                            placeholder="Select education level"
-                            value={form.education}
-                            onPress={openEducationSheet}
-                            hasError={errors.education}
-                        />
-
-                        <InputField
-                            label="Religion"
-                            placeholder="Religion"
-                            value="Hindu"
-                            onChangeText={() => { }}
-                            editable={false}
-                        />
-
-                        <InputField
-                            label="Caste"
-                            placeholder="Caste"
-                            value="Brahmin"
-                            onChangeText={() => { }}
-                            editable={false}
-                        />
-                    </View>
-
-                    {/* Footer Buttons */}
-                    <View style={styles.footer}>
-                        <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-                            <Text style={styles.nextText}>Next Step</Text>
-                            <Ionicons name="arrow-forward" size={20} color="#FF3366" />
-                        </TouchableOpacity>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-
-            {/* Unified Selection Bottom Sheet */}
-            <SelectionBottomSheet
-                visible={sheetConfig.visible}
-                onClose={() => setSheetConfig(prev => ({ ...prev, visible: false }))}
-                title={sheetConfig.title}
-                options={sheetConfig.options}
-                selectedKey={sheetConfig.selectedKey}
-                onSelect={sheetConfig.onSelect}
-                searchable={sheetConfig.searchable}
-                searchPlaceholder={sheetConfig.searchPlaceholder}
-            />
-        </View>
-    );
-};
-
-type InputFieldProps = {
-    label: string;
-    placeholder: string;
-    value: string;
-    onChangeText?: (text: string) => void;
-    keyboardType?: "default" | "numeric" | "email-address" | "phone-pad";
-    editable?: boolean;
-    isPremium?: boolean;
-    onPress?: () => void;
-    hasError?: boolean;
-};
-
-const InputField: React.FC<InputFieldProps> = ({
-    label,
-    placeholder,
-    value,
-    onChangeText,
-    keyboardType = "default",
-    editable = true,
-    isPremium = false,
-    onPress,
-    hasError = false,
-}) => {
-    const renderInput = () => (
-        <TextInput
-            style={[
-                styles.input,
-                !editable && styles.inputDisabled,
-                hasError && { borderColor: "#e31717ff", borderWidth: 2 }
-            ]}
-            placeholder={placeholder}
-            placeholderTextColor="rgba(255, 255, 255, 0.7)"
-            value={value}
-            onChangeText={onChangeText}
-            keyboardType={keyboardType}
-            editable={onPress ? false : editable}
-            pointerEvents={onPress ? "none" : undefined}
-        />
+    dispatch(
+      updateBasicInfo({
+        fullName: fullName.trim() || undefined,
+        gender: selectedGender,
+        location: currentCity,
+        age: calculatedAge,
+        dob: dob || undefined,
+        education: education.trim() || undefined,
+        profession: profession.trim() || undefined,
+      })
     );
 
-    return (
-        <View style={styles.inputContainer}>
-            <View style={styles.labelRow}>
-                <Text style={styles.label}>{label}</Text>
-                {isPremium && (
-                    <View style={styles.premiumBadge}>
-                        <Ionicons name="star" size={12} color="#FFD700" />
-                        <Text style={styles.premiumText}>PREMIUM</Text>
-                    </View>
-                )}
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      Toast.show({
+        type: "error",
+        text1: "Missing Information",
+        text2: "Please select your gender and location to proceed.",
+      });
+      return;
+    }
+
+    setErrors({});
+    navigation.navigate("AboutYouStep" as never);
+  };
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
+
+      {/* Royal Wine Background Gradient */}
+      <LinearGradient
+        colors={["#2A020F", "#380415", "#1F020B", "#140106"]}
+        style={StyleSheet.absoluteFillObject}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      />
+
+      <View
+        style={[
+          styles.innerContainer,
+          { paddingTop: Math.max(insets.top, 24) + 6, paddingBottom: Math.max(insets.bottom, 16) + 4 },
+        ]}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Step Progress Tracker (Step 1 of 4) */}
+            <View style={styles.stepHeader}>
+              <View style={styles.progressTracker}>
+                {/* Step 1 Node (Active Glowing Heart) */}
+                <View style={styles.nodeActive}>
+                  <MaterialCommunityIcons name="heart" size={14} color="#FFFFFF" />
+                </View>
+
+                {/* Connecting Line 1-2 */}
+                <View style={styles.progressLineActive} />
+
+                {/* Step 2 Node */}
+                <View style={styles.nodeTarget}>
+                  <View style={styles.nodeTargetInner} />
+                </View>
+
+                {/* Connecting Line 2-3 */}
+                <View style={styles.progressLineInactive} />
+
+                {/* Step 3 Node */}
+                <View style={styles.nodeInactive} />
+
+                {/* Connecting Line 3-4 */}
+                <View style={styles.progressLineInactive} />
+
+                {/* Step 4 Node */}
+                <View style={styles.nodeInactive} />
+              </View>
+
+              <Text style={styles.stepText}>Step 1 of 4</Text>
             </View>
-            {onPress ? (
-                <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-                    {renderInput()}
-                </TouchableOpacity>
-            ) : (
-                renderInput()
-            )}
-        </View>
-    );
-};
 
+            {/* Title Section */}
+            <View style={styles.titleSection}>
+              <Text style={styles.title}>Basic Information</Text>
+              <Text style={styles.subtitle}>Tell us about yourself</Text>
+            </View>
+
+            {/* Form Fields */}
+            <View style={styles.formContainer}>
+              {/* Date of Birth */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Date of Birth</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="DD / MM / YYYY"
+                    placeholderTextColor="rgba(255, 255, 255, 0.45)"
+                    value={dob}
+                    onChangeText={handleDobChange}
+                    keyboardType="numeric"
+                    maxLength={10}
+                  />
+                  <MaterialCommunityIcons
+                    name="calendar-month-outline"
+                    size={22}
+                    color="rgba(255, 255, 255, 0.55)"
+                  />
+                </View>
+              </View>
+
+              {/* Gender Pill Selectors */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Gender</Text>
+                <View style={styles.genderRow}>
+                  {/* Male Card */}
+                  <TouchableOpacity
+                    style={[
+                      styles.genderCard,
+                      selectedGender.toLowerCase() === "male"
+                        ? styles.genderCardActive
+                        : styles.genderCardInactive,
+                    ]}
+                    onPress={() => handleGenderSelect("male")}
+                    activeOpacity={0.85}
+                  >
+                    <View
+                      style={
+                        selectedGender.toLowerCase() === "male"
+                          ? styles.genderIconActive
+                          : styles.genderIconInactive
+                      }
+                    >
+                      <Icon
+                        name="person"
+                        size={18}
+                        color={selectedGender.toLowerCase() === "male" ? "#FFFFFF" : "rgba(255, 255, 255, 0.6)"}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.genderText,
+                        selectedGender.toLowerCase() === "male" && styles.genderTextActive,
+                      ]}
+                    >
+                      Male
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Female Card */}
+                  <TouchableOpacity
+                    style={[
+                      styles.genderCard,
+                      selectedGender.toLowerCase() === "female"
+                        ? styles.genderCardActive
+                        : styles.genderCardInactive,
+                    ]}
+                    onPress={() => handleGenderSelect("female")}
+                    activeOpacity={0.85}
+                  >
+                    <View
+                      style={
+                        selectedGender.toLowerCase() === "female"
+                          ? styles.genderIconActive
+                          : styles.genderIconInactive
+                      }
+                    >
+                      <Icon
+                        name="person"
+                        size={18}
+                        color={selectedGender.toLowerCase() === "female" ? "#FFFFFF" : "rgba(255, 255, 255, 0.6)"}
+                      />
+                    </View>
+                    <Text
+                      style={[
+                        styles.genderText,
+                        selectedGender.toLowerCase() === "female" && styles.genderTextActive,
+                      ]}
+                    >
+                      Female
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+
+              {/* Location */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Location</Text>
+                <TouchableOpacity
+                  style={[
+                    styles.inputWrapper,
+                    errors.location && { borderColor: "#FF6B6B" },
+                  ]}
+                  onPress={openLocationSheet}
+                  activeOpacity={0.85}
+                >
+                  <Text
+                    style={[
+                      styles.locationText,
+                      !currentCity && { color: "rgba(255, 255, 255, 0.45)" },
+                    ]}
+                  >
+                    {currentCity || "Current City"}
+                  </Text>
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={22}
+                    color="rgba(255, 255, 255, 0.55)"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Extra Field: Education (Preserved with beautiful matching UI) */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Education</Text>
+                <TouchableOpacity
+                  style={styles.inputWrapper}
+                  onPress={openEducationSheet}
+                  activeOpacity={0.85}
+                >
+                  <Text
+                    style={[
+                      styles.locationText,
+                      !education && { color: "rgba(255, 255, 255, 0.45)" },
+                    ]}
+                  >
+                    {education || "Select Highest Education"}
+                  </Text>
+                  <Icon
+                    name="school-outline"
+                    size={20}
+                    color="rgba(255, 255, 255, 0.55)"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              {/* Extra Field: Profession (Preserved with beautiful matching UI) */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.fieldLabel}>Profession</Text>
+                <View style={styles.inputWrapper}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="e.g. Software Engineer, Doctor"
+                    placeholderTextColor="rgba(255, 255, 255, 0.45)"
+                    value={profession}
+                    onChangeText={setProfession}
+                  />
+                  <Icon
+                    name="briefcase-outline"
+                    size={20}
+                    color="rgba(255, 255, 255, 0.55)"
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* Next Button */}
+            <TouchableOpacity
+              style={styles.nextBtnWrapper}
+              onPress={handleNext}
+              activeOpacity={0.88}
+            >
+              <LinearGradient
+                colors={["#E82E5D", "#D91C50", "#BF1342"]}
+                style={styles.nextBtn}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.nextBtnText}>Next</Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </View>
+
+      <SelectionBottomSheet
+        visible={sheetConfig.visible}
+        title={sheetConfig.title}
+        options={sheetConfig.options}
+        selectedKey={sheetConfig.selectedKey}
+        onSelect={sheetConfig.onSelect}
+        onClose={() => setSheetConfig((prev) => ({ ...prev, visible: false }))}
+        searchable={sheetConfig.searchable}
+        searchPlaceholder={sheetConfig.searchPlaceholder}
+      />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: BACKGROUND_COLOR,
-    },
-    scrollContent: {
-        paddingHorizontal: 30,
-        paddingTop: 50,
-        paddingBottom: 30,
-    },
-    headerRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 30,
-    },
-    stepText: {
-        color: "rgba(255, 255, 255, 0.8)",
-        fontSize: 14,
-        fontWeight: "600",
-    },
-    progressBarContainer: {
-        height: 6,
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-        borderRadius: 3,
-        width: 100,
-        overflow: "hidden",
-    },
-    progressBarFill: {
-        height: "100%",
-        backgroundColor: "#FFFFFF",
-    },
-    title: {
-        fontSize: 32,
-        fontWeight: "800",
-        color: "#FFFFFF",
-        marginBottom: 30,
-    },
-    inputSection: {
-        gap: 20,
-    },
-    inputContainer: {
-        width: "100%",
-    },
-    labelRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 8,
-        marginLeft: 5,
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "rgba(255, 255, 255, 0.9)",
-    },
-    input: {
-        height: 56,
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-        borderRadius: 28,
-        paddingHorizontal: 25,
-        color: "#FFFFFF",
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: "rgba(255, 255, 255, 0.3)",
-    },
-    inputDisabled: {
-        backgroundColor: "rgba(255, 255, 255, 0.1)",
-        opacity: 0.7,
-    },
-    row: {
-        flexDirection: "row",
-    },
-    premiumBadge: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "rgba(255, 215, 0, 0.2)",
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 10,
-        marginLeft: 10,
-    },
-    premiumText: {
-        fontSize: 10,
-        fontWeight: "800",
-        color: "#FFD700",
-        marginLeft: 4,
-    },
-    footer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginTop: 50,
-        width: "100%"
-    },
-    previousButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 8,
-    },
-    previousText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "#FFFFFF",
-    },
-    nextButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "#FFFFFF",
-        paddingHorizontal: 25,
-        paddingVertical: 15,
-        borderRadius: 30,
-        gap: 10,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        elevation: 5,
-        width: "100%",
-        justifyContent: "center"
-    },
-    nextText: {
-        color: "#FF3366",
-        fontSize: 16,
-        fontWeight: "700",
-    },
-    logoutButton: {
-        flexDirection: "row",
-        alignItems: "center",
-        backgroundColor: "rgba(255, 255, 255, 0.2)",
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 15,
-        gap: 4,
-    },
-    logoutText: {
-        color: "#FFF",
-        fontSize: 12,
-        fontWeight: "600",
-    },
+  container: {
+    flex: 1,
+    backgroundColor: "#1F020B",
+  },
+  innerContainer: {
+    flex: 1,
+    paddingHorizontal: 22,
+  },
+  scrollContent: {
+    paddingBottom: 36,
+    paddingTop: 10,
+  },
+  stepHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  progressTracker: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  nodeActive: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: "#E82E5D",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#E82E5D",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  nodeTarget: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 2,
+    borderColor: "#F4BA78",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(244, 186, 120, 0.15)",
+  },
+  nodeTargetInner: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#F4BA78",
+  },
+  nodeInactive: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+  },
+  progressLineActive: {
+    width: 32,
+    height: 2,
+    backgroundColor: "#F4BA78",
+    opacity: 0.7,
+  },
+  progressLineInactive: {
+    width: 32,
+    height: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+  },
+  stepText: {
+    color: "rgba(255, 255, 255, 0.65)",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  titleSection: {
+    marginBottom: 24,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: "800",
+    color: "#F4BA78",
+    letterSpacing: -0.3,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.75)",
+    marginTop: 4,
+    fontWeight: "500",
+  },
+  formContainer: {
+    gap: 18,
+  },
+  fieldGroup: {
+    gap: 8,
+  },
+  fieldLabel: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(255, 255, 255, 0.07)",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.13)",
+    paddingHorizontal: 18,
+    height: 56,
+  },
+  input: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  locationText: {
+    color: "#FFFFFF",
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  genderRow: {
+    flexDirection: "row",
+    gap: 14,
+  },
+  genderCard: {
+    flex: 1,
+    height: 56,
+    borderRadius: 18,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 14,
+    gap: 10,
+  },
+  genderCardActive: {
+    backgroundColor: "rgba(255, 255, 255, 0.09)",
+    borderWidth: 1.5,
+    borderColor: "#E82E5D",
+    shadowColor: "#E82E5D",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  genderCardInactive: {
+    backgroundColor: "rgba(255, 255, 255, 0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+  },
+  genderIconActive: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#E82E5D",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  genderIconInactive: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  genderText: {
+    color: "rgba(255, 255, 255, 0.65)",
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  genderTextActive: {
+    color: "#FFFFFF",
+    fontWeight: "800",
+  },
+  nextBtnWrapper: {
+    height: 56,
+    borderRadius: 18,
+    overflow: "hidden",
+    marginTop: 28,
+    shadowColor: "#E82E5D",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  nextBtn: {
+    width: "100%",
+    height: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  nextBtnText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "800",
+    letterSpacing: 0.3,
+  },
 });

@@ -1,138 +1,158 @@
 import React from "react";
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet, Platform } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useSelector } from 'react-redux';
-import { RootState } from '../redux/store';
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { useSelector } from "react-redux";
+import { RootState } from "../redux/store";
 import DiscoverScreen from "../screens/Home/DiscoverScreen";
-import { DatingScreen } from "../screens/Home/DatingScreen";
-import { HomeScreen } from "../screens/Home/HomeScreen";
-import { BasicInfoScreen } from "../screens/Profile/BasicInfoScreen";
 import MatchesScreen from "../screens/Home/MatchesScreen";
 import MessagesScreen from "../screens/Home/MessagesScreen";
 import SettingsScreen from "../screens/Settings/SettingsScreen";
+import THEME from "../constant/theme";
 
 const Tab = createBottomTabNavigator();
 
 export default function BottomTabs() {
-    const chatUnreadCount = useSelector((state: RootState) => 
-        state.chat.unreadMessageCount !== undefined && state.chat.unreadMessageCount > 0
-            ? state.chat.unreadMessageCount 
-            : state.chat.unreadConversationIds.length
-    );
-    const matchCount = useSelector((state: RootState) => state.chat.matchCount || 0);
-    const unreadNotifications = useSelector((state: RootState) => state.notification.unreadCount);
-    
-    return (
-        <Tab.Navigator
-            screenOptions={({ route }) => ({
-                headerShown: false,
-                tabBarShowLabel: false,
-                tabBarHideOnKeyboard: true,
-                tabBarActiveTintColor: "#fff",
-                tabBarInactiveTintColor: "#FF5F6D",
-                tabBarStyle: {
-                    height: 58,
-                    paddingTop: 8,
-                },
-                tabBarIcon: ({ focused, color, size }) => {
-                    let iconName = "compass-outline";
-                    let label = "Discover";
+  const chatUnreadCount = useSelector((state: RootState) =>
+    state.chat.unreadMessageCount !== undefined && state.chat.unreadMessageCount > 0
+      ? state.chat.unreadMessageCount
+      : state.chat.unreadConversationIds.length
+  );
+  const matchCount = useSelector((state: RootState) => state.chat.matchCount || 0);
 
-                    if (route.name === "Discover") {
-                        iconName = focused ? "compass" : "compass-outline";
-                        label = "Discover";
-                    } else if (route.name === "MatchesScreen") {
-                        iconName = focused ? "people" : "people-outline";
-                        label = "Connections";
-                    } else if (route.name === "Messages") {
-                        iconName = "chatbubble-outline";
-                        label = "Messages";
-                    } else if (route.name === "Settings") {
-                        iconName = "settings-outline";
-                        label = "Settings";
-                    }
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarShowLabel: false,
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: {
+          backgroundColor: "#1B0208",
+          borderTopColor: "rgba(255, 255, 255, 0.1)",
+          borderTopWidth: 1,
+          height: Platform.OS === "ios" ? 84 : 64,
+          paddingTop: 8,
+          paddingBottom: Platform.OS === "ios" ? 24 : 8,
+        },
+        tabBarIcon: ({ focused }) => {
+          let iconName = "compass-outline";
+          let label = "Discover";
+          let isHeart = false;
+          let isChat = false;
+          let isProfile = false;
 
-                    return (
-                        <View
-                            style={{
-                                backgroundColor: focused ? "#FF5F6D" : "transparent",
-                                borderRadius: 8,
-                                alignItems: "center",
-                                justifyContent: "center",
-                                minWidth: 70,
-                                height: 48,
-                                marginTop: 2
-                            }}
-                        >
-                            <Icon
-                                name={iconName}
-                                size={20}
-                                color={focused ? "#fff" : "#666"}
-                            />
-                            
-                            {/* Messages Badge */}
-                            {route.name === "Messages" && chatUnreadCount > 0 && (
-                                <View style={{
-                                    position: 'absolute',
-                                    top: 4,
-                                    right: 18,
-                                    backgroundColor: '#ff3b30',
-                                    borderRadius: 10,
-                                    minWidth: 18,
-                                    height: 18,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    paddingHorizontal: 4,
-                                    zIndex: 1
-                                }}>
-                                    <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
-                                        {chatUnreadCount > 9 ? '9+' : chatUnreadCount}
-                                    </Text>
-                                </View>
-                            )}
+          if (route.name === "Discover") {
+            iconName = focused ? "compass" : "compass-outline";
+            label = "Discover";
+          } else if (route.name === "MatchesScreen") {
+            iconName = focused ? "heart" : "heart-outline";
+            label = "Matches";
+            isHeart = true;
+          } else if (route.name === "Messages") {
+            iconName = focused ? "chatbubble-ellipses" : "chatbubble-outline";
+            label = "Messages";
+            isChat = true;
+          } else if (route.name === "Settings") {
+            iconName = focused ? "person" : "person-outline";
+            label = "Profile";
+            isProfile = true;
+          }
 
-                            {/* Matches Badge */}
-                            {route.name === "MatchesScreen" && matchCount > 0 && (
-                                <View style={{
-                                    position: 'absolute',
-                                    top: 4,
-                                    right: 18,
-                                    backgroundColor: '#ff3b30',
-                                    borderRadius: 10,
-                                    minWidth: 18,
-                                    height: 18,
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    paddingHorizontal: 4,
-                                    zIndex: 1
-                                }}>
-                                    <Text style={{ color: 'white', fontSize: 10, fontWeight: '700' }}>
-                                        {matchCount > 9 ? '9+' : matchCount}
-                                    </Text>
-                                </View>
-                            )}
+          const activeColor = "#FF3366";
+          const inactiveColor = "#8C6070";
 
-                            <Text
-                                style={{
-                                    color: focused ? "#fff" : "#666",
-                                    fontSize: 11,
-                                    fontWeight: focused ? "600" : "500",
-                                    marginTop: 2,
-                                }}
-                            >
-                                {label}
-                            </Text>
-                        </View>
-                    );
-                },
-            })}
-        >
-            <Tab.Screen name="Discover" component={DiscoverScreen} />
-            {/* <Tab.Screen name="Dating" component={BasicInfoScreen} /> */}
-            <Tab.Screen name="MatchesScreen" component={MatchesScreen} />
-            <Tab.Screen name="Messages" component={MessagesScreen} />
-            <Tab.Screen name="Settings" component={SettingsScreen} />
-        </Tab.Navigator>
-    );
+          return (
+            <View style={styles.tabItem}>
+              <View style={[styles.iconWrapper, focused && styles.iconWrapperActive]}>
+                <Icon
+                  name={iconName}
+                  size={22}
+                  color={focused ? activeColor : inactiveColor}
+                />
+              </View>
+
+              {/* Messages Badge */}
+              {isChat && chatUnreadCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {chatUnreadCount > 9 ? "9+" : chatUnreadCount}
+                  </Text>
+                </View>
+              )}
+
+              {/* Matches Badge */}
+              {isHeart && matchCount > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>
+                    {matchCount > 9 ? "9+" : matchCount}
+                  </Text>
+                </View>
+              )}
+
+              <Text
+                style={[
+                  styles.tabLabel,
+                  { color: focused ? activeColor : inactiveColor },
+                  focused && styles.tabLabelActive,
+                ]}
+              >
+                {label}
+              </Text>
+            </View>
+          );
+        },
+      })}
+    >
+      <Tab.Screen name="Discover" component={DiscoverScreen} />
+      <Tab.Screen name="MatchesScreen" component={MatchesScreen} />
+      <Tab.Screen name="Messages" component={MessagesScreen} />
+      <Tab.Screen name="Settings" component={SettingsScreen} />
+    </Tab.Navigator>
+  );
 }
+
+const styles = StyleSheet.create({
+  tabItem: {
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 65,
+    position: "relative",
+  },
+  iconWrapper: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  iconWrapperActive: {
+    transform: [{ scale: 1.1 }],
+  },
+  tabLabel: {
+    fontSize: 10,
+    fontWeight: "500",
+    marginTop: 2,
+    letterSpacing: 0.2,
+  },
+  tabLabelActive: {
+    fontWeight: "700",
+  },
+  badge: {
+    position: "absolute",
+    top: -2,
+    right: 12,
+    backgroundColor: "#FF3366",
+    borderRadius: 9,
+    minWidth: 18,
+    height: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+    borderWidth: 1.5,
+    borderColor: "#1B0208",
+  },
+  badgeText: {
+    color: "#FFF",
+    fontSize: 9,
+    fontWeight: "800",
+  },
+});

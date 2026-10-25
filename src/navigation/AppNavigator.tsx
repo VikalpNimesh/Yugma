@@ -26,8 +26,13 @@ import AppTypeSelectionScreen from "../screens/Auth/AppTypeSelectionScreen";
 import ChatScreen from "../screens/Home/ChatScreen";
 import WaitingScreen from "../screens/Auth/WaitingScreen";
 
+import WelcomeHeroScreen from "../screens/Auth/WelcomeHeroScreen";
+import ProfileCompleteScreen from "../screens/Profile/ProfileCompleteScreen";
+
 export type RootStackParamList = {
     Splash: undefined;
+    WelcomeHero: undefined;
+    ProfileCompleteScreen: undefined;
     GoogleLogin: undefined;
     BottomTabs: undefined;
     MultiStepForm: undefined;
@@ -66,6 +71,8 @@ const AppNavigator = () => {
                 headerShown: false,
             }}>
             <Stack.Screen name="Splash" component={SplashScreen} />
+            <Stack.Screen name="WelcomeHero" component={WelcomeHeroScreen} />
+            <Stack.Screen name="ProfileCompleteScreen" component={ProfileCompleteScreen} />
             <Stack.Screen name="BottomTabs" component={BottomTabs} options={{ header: () => <Header />, headerShown: true }} />
             <Stack.Screen name="MultiStepForm" component={MultiStepForm} options={{ headerShown: false }} />
             <Stack.Screen name="FamilyDetailsStep" component={FamilyDetailsStep} options={{ headerShown: false }} />

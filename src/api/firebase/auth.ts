@@ -125,7 +125,7 @@ export const signInWithGoogle = async (dispatch?: any) => {
     // 3. Robust delay for Android to ensure activity is attached
     if (Platform.OS === 'android') {
       console.log('⏳ Android detected, waiting for activity...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(() => resolve(undefined), 1000));
     }
 
     // 4. Sign in
@@ -269,8 +269,8 @@ const decodeJwt = (token: string): any => {
     if (parts.length < 2) return null;
     const payload = parts[1];
     let decoded = '';
-    if (typeof atob === 'function') {
-      decoded = atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
+    if (typeof (globalThis as any).atob === 'function') {
+      decoded = (globalThis as any).atob(payload.replace(/-/g, '+').replace(/_/g, '/'));
     } else {
       // Fallback base64 decoding
       const base64 = payload.replace(/-/g, '+').replace(/_/g, '/');
@@ -513,7 +513,7 @@ export const handleLogout = async (
     // 4. Sign out from Google
     try {
       if (Platform.OS === 'android') {
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(() => resolve(undefined), 200));
       }
       await GoogleSignin.signOut();
       console.log('✅ Google signed out');

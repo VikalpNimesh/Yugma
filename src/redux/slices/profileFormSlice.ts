@@ -6,6 +6,7 @@ type BasicInfoForm = {
   fullName: string;
   email: string;
   age: string;
+  dob?: string;
   location: string;
   profession: string;
   education: string;
@@ -31,6 +32,7 @@ type FamilyDetailsForm = {
 };
 
 type PreferencesForm = {
+  preferredGender?: string;
   preferredAgeMin: string;
   preferredAgeMax: string;
   preferredLocations: string;
@@ -53,6 +55,7 @@ const initialState: ProfileFormState = {
     fullName: '',
     email: '',
     age: '',
+    dob: '',
     location: '',
     profession: '',
     education: '',
@@ -109,21 +112,20 @@ export const completeProfile = createAsyncThunk(
     try {
       const state: any = getState();
       const profile = state.profileForm;
+      const authUser = state.auth?.user;
 
       // Step 1: Update profile details via JSON (so numbers, arrays, and objects are sent with correct types)
-      const payload = {
-        userId: profile.basicInfo.fullName,
-        fullName: profile.basicInfo.fullName,
-        age: Number(profile.basicInfo.age),
+      const payload: any = {
+        userId: authUser?.id || profile.basicInfo.fullName,
+        fullName: profile.basicInfo.fullName || authUser?.fullName,
+        age: profile.basicInfo.age ? Number(profile.basicInfo.age) : undefined,
         location: profile.basicInfo.location,
         profession: profile.basicInfo.profession,
         education: profile.basicInfo.education,
-        religion: 'Hindu',
-        caste: 'Brahmin',
         community: profile.basicInfo.areaCover,
-        gender: profile.basicInfo.gender || state.user?.gender || 'Male',
+        gender: profile.basicInfo.gender || authUser?.gender || state.user?.gender,
         bio: profile.aboutYou.bio,
-        interests: profile.aboutYou.interests.map((i: any) => ({ interest: i })),
+        interests: (profile.aboutYou.interests || []).map((i: any) => ({ interest: typeof i === 'string' ? i : i.interest })),
         familyDetails: profile.familyDetails,
         preferences: {
           ageMin: Number(profile.preferences.preferredAgeMin) || 18,

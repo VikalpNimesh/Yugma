@@ -1,10 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../../components/common/BackButton";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
+import { useDispatch } from "react-redux";
+import { handleLogout } from "../../api/firebase/auth";
 
 export default function PrivacySettingsScreen() {
+    const navigation = useNavigation<any>();
+    const dispatch = useDispatch();
     const [showProfile, setShowProfile] = useState(true);
     const [showAge, setShowAge] = useState(true);
     const [showDistance, setShowDistance] = useState(true);
@@ -59,8 +64,26 @@ export default function PrivacySettingsScreen() {
                         <Ionicons name="chevron-forward" size={20} color="#ccc" />
                     </TouchableOpacity>
                     <View style={styles.separator} />
-                    <TouchableOpacity style={styles.menuRow}>
-                        <Text style={[styles.menuText, { color: 'red' }]}>Delete Account</Text>
+                    <TouchableOpacity 
+                        style={styles.menuRow}
+                        onPress={() => {
+                            Alert.alert(
+                                "Delete Account",
+                                "Are you sure you want to delete your account? All data will be permanently wiped.",
+                                [
+                                    { text: "Cancel", style: "cancel" },
+                                    { 
+                                        text: "Delete", 
+                                        style: "destructive",
+                                        onPress: () => {
+                                            handleLogout(navigation, dispatch);
+                                        }
+                                    }
+                                ]
+                            );
+                        }}
+                    >
+                        <Text style={[styles.menuText, { color: 'red', fontWeight: '600' }]}>Delete Account</Text>
                     </TouchableOpacity>
                 </View>
             </ScrollView>

@@ -16,6 +16,10 @@ export const useIAP = () => {
     const [lastError, setLastError] = useState<string | null>(null);
 
     const initIAP = useCallback(async () => {
+        if (Platform.OS !== 'android') {
+            setIsLoading(false);
+            return;
+        }
         try {
             setIsLoading(true);
             await IAP.initConnection();
@@ -37,6 +41,11 @@ export const useIAP = () => {
     }, []);
 
     useEffect(() => {
+        if (Platform.OS !== 'android') {
+            setIsLoading(false);
+            return;
+        }
+
         initIAP();
 
         const handleAppStateChange = async (nextAppState: AppStateStatus) => {
@@ -55,7 +64,7 @@ export const useIAP = () => {
 
         const purchaseUpdateSubscription = IAP.purchaseUpdatedListener(async (purchase) => {
             console.log('purchaseUpdateSubscription', purchase);
-            const receipt = purchase.transactionReceipt || purchase.purchaseToken;
+            const receipt = (purchase as any).transactionReceipt || purchase.purchaseToken;
             if (receipt) {
                 try {
                     await IAP.finishTransaction({ purchase, isConsumable: false });
@@ -69,7 +78,7 @@ export const useIAP = () => {
 
         const purchaseErrorSubscription = IAP.purchaseErrorListener((error) => {
             console.warn('purchaseErrorListener', error);
-            if (error.code !== 'E_USER_CANCELLED') {
+            if ((error.code as any) !== 'E_USER_CANCELLED') {
                 setLastError(error.message || 'Payment failed');
             } else {
                 setLastError('CANCELLED');
@@ -77,10 +86,14 @@ export const useIAP = () => {
         });
 
         return () => {
-            appStateSubscription.remove();
-            purchaseUpdateSubscription.remove();
-            purchaseErrorSubscription.remove();
-            IAP.endConnection();
+            appStateSubscription?.remove();
+            purchaseUpdateSubscription?.remove();
+            purchaseErrorSubscription?.remove();
+            try {
+                IAP.endConnection();
+            } catch (e) {
+                // Ignore cleanup error if connection wasn't established
+            }
         };
     }, [initIAP]);
 
@@ -100,12 +113,7 @@ export const useIAP = () => {
                     type: 'subs'
                 });
             } else {
-                await IAP.requestPurchase({
-                    request: {
-                        ios: { sku }
-                    },
-                    type: 'subs'
-                });
+                console.log('In-app purchases are only enabled on Android currently');
             }
         } catch (err: any) {
             console.warn('requestSubscription error', err);

@@ -145,28 +145,23 @@ export default MatchList
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
         borderRadius: 20,
         padding: 16,
-        marginBottom: 16,
+        marginBottom: 14,
         flexDirection: "row",
         alignItems: "center",
-        shadowColor: "#FF3366",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        elevation: 3,
         borderWidth: 1,
-        borderColor: "rgba(0, 0, 0, 0.04)",
-        marginHorizontal: 4,
+        borderColor: "rgba(255, 255, 255, 0.12)",
+        marginHorizontal: 2,
     },
     avatarWrapper: {
         position: 'relative',
     },
     avatar: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
         marginRight: 14,
         borderWidth: 2,
         borderColor: "#FF3366",
@@ -185,7 +180,7 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 17,
         fontWeight: "800",
-        color: "#1A1A1A",
+        color: "#FFFFFF",
         flexShrink: 1,
     },
     matchedBadge: {

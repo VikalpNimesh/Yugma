@@ -20,6 +20,7 @@ import { AppDispatch, RootState } from "../../redux/store";
 import { fetchDiscoveryFeed, passDiscoveryProfile, likeDiscoveryProfile } from "../../redux/slices/discoverySlice";
 import socialService from "../../api/services/socialService";
 import Toast from "react-native-toast-message";
+import THEME from "../../constant/theme";
 
 const { width, height } = Dimensions.get("window");
 
@@ -82,20 +83,28 @@ const DiscoverScreen = () => {
 
     return (
         <View style={styles.container}>
+            <LinearGradient
+                colors={THEME.colors.bgGradient}
+                style={StyleSheet.absoluteFillObject}
+            />
             <ScrollView
-                contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
+                contentContainerStyle={{ flexGrow: 1, paddingBottom: 130 }}
                 showsVerticalScrollIndicator={false}
             >
                 {/* Header */}
                 <View style={styles.titleContainer}>
-                    <Text style={styles.title}>Discover Connections</Text>
-                    {/* <TouchableOpacity
-                        style={styles.filterButton}
-                        onPress={() => setShowFilter(true)}
-                    >
-                        <Ionicons name="filter-outline" size={18} color="#000" />
-                        <Text style={styles.filterText}>Filters</Text>
-                    </TouchableOpacity> */}
+                    <Text style={styles.title}>Discover</Text>
+                    <View style={styles.headerIconsRow}>
+                        <TouchableOpacity style={styles.headerIconButton}>
+                            <Ionicons name="search" size={20} color="#FFF" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={styles.headerIconButton}
+                            onPress={() => setShowFilter(true)}
+                        >
+                            <Ionicons name="options-outline" size={20} color="#FFF" />
+                        </TouchableOpacity>
+                    </View>
                 </View>
 
                 {/* Content */}
@@ -122,7 +131,6 @@ const DiscoverScreen = () => {
                                 backgroundColor="transparent"
                                 cardVerticalMargin={0}
                                 cardHorizontalMargin={16}
-                                cardHeight={500}
                                 animateCardOpacity
                                 horizontalSwipe
                                 verticalSwipe={false}
@@ -207,26 +215,44 @@ const DiscoverScreen = () => {
             {/* Absolute Buttons - Outside ScrollView */}
             {profiles.length > 0 && (
                 <View style={styles.likeDislikebtn}>
+                    {/* Dislike */}
                     <TouchableOpacity
                         style={styles.passButton}
                         onPress={() => {
                             if (profiles.length > 0) swiperRef.current?.swipeLeft();
                         }}
+                        activeOpacity={0.8}
                     >
-                        <Ionicons name="close" size={28} color="#E64A8B" />
+                        <Ionicons name="close" size={26} color="#FF4D6D" />
                     </TouchableOpacity>
 
+                    {/* Center Heart Like Button */}
                     <TouchableOpacity
                         onPress={() => {
                             if (profiles.length > 0) swiperRef.current?.swipeRight();
                         }}
+                        activeOpacity={0.85}
                     >
                         <LinearGradient
-                            colors={["#FF512F", "#FF5F6D"]}
+                            colors={["#FF2A6D", "#B30B38"]}
                             style={styles.likeButton}
                         >
-                            <Ionicons name="heart" size={28} color="#fff" />
+                            <Ionicons name="heart" size={32} color="#FFF" />
                         </LinearGradient>
+                    </TouchableOpacity>
+
+                    {/* Superlike / Star Button */}
+                    <TouchableOpacity
+                        style={styles.starButton}
+                        onPress={() => {
+                            if (profiles.length > 0) {
+                                handleLike(profiles[0].userId);
+                                swiperRef.current?.swipeRight();
+                            }
+                        }}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons name="star" size={24} color={THEME.colors.gold} />
                     </TouchableOpacity>
                 </View>
             )}
@@ -336,7 +362,7 @@ const DiscoverScreen = () => {
 export default DiscoverScreen;
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff" },
+    container: { flex: 1, backgroundColor: "#1D0208" },
     centered: {
         flex: 1,
         justifyContent: "center",
@@ -348,20 +374,33 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center",
         marginTop: 16,
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
     },
-    title: { fontSize: 24, fontWeight: "700", color: "#000" },
+    title: { fontSize: 28, fontWeight: "800", color: "#FFF", letterSpacing: -0.4 },
+    headerIconsRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    headerIconButton: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
+        justifyContent: "center",
+        alignItems: "center",
+        borderWidth: 1,
+        borderColor: "rgba(255, 255, 255, 0.15)",
+    },
     filterButton: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#fff",
+        backgroundColor: "rgba(255, 255, 255, 0.1)",
         borderRadius: 8,
         paddingVertical: 6,
         paddingHorizontal: 10,
-        borderWidth: 1,
-        borderColor: "#E6E6E6",
     },
-    filterText: { marginLeft: 4, color: "#000", fontWeight: "500" },
+    filterText: { marginLeft: 4, color: "#FFF", fontWeight: "500" },
 
     swiperWrapper: {
         height: 560,
@@ -372,39 +411,57 @@ const styles = StyleSheet.create({
     swipeText: {
         textAlign: "center",
         marginTop: 12,
-        color: "#555",
+        color: "#DDD",
         fontSize: 13,
     },
 
     passButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        borderWidth: 2,
-        borderColor: "#E64A8B",
+        width: 54,
+        height: 54,
+        borderRadius: 27,
         alignItems: "center",
         justifyContent: "center",
-        backgroundColor: "#fff",
-        elevation: 3,
+        backgroundColor: "#FFF",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 4,
     },
     likeButton: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: 66,
+        height: 66,
+        borderRadius: 33,
         alignItems: "center",
         justifyContent: "center",
-        elevation: 3,
+        shadowColor: "#FF2A6D",
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.5,
+        shadowRadius: 10,
+        elevation: 8,
+    },
+    starButton: {
+        width: 54,
+        height: 54,
+        borderRadius: 27,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#FFF",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 6,
+        elevation: 4,
     },
     likeDislikebtn: {
         position: "absolute",
-        bottom: 0,
+        bottom: 12,
         left: 0,
         right: 0,
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        gap: 30,
-        paddingBottom: 20, // Add some safe space
+        gap: 24,
     },
     errorText: {
         fontSize: 16,

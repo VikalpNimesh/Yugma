@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import { useGlobalIAP as useIAP } from "../../context/IapContext";
 import { RootState } from "../../redux/store";
 import axiosInstance from "../../api/axios/axiosInstance";
+import * as IAP from "react-native-iap";
 
 interface Feature {
     text: string;
@@ -65,10 +66,10 @@ const PremiumPlansScreen = () => {
                     const payload = {
                         userId: user.id,
                         productId: currentPurchase.productId || "premium",
-                        purchaseToken: currentPurchase.purchaseToken || currentPurchase.transactionReceipt,
+                        purchaseToken: currentPurchase.purchaseToken || (currentPurchase as any).transactionReceipt,
                         transactionId: currentPurchase.transactionId || (currentPurchase as any).id,
                         transactionDate: currentPurchase.transactionDate,
-                        packageName: (currentPurchase as any).packageNameAndroid || "com.yugma.dating",
+                        packageName: (currentPurchase as any).packageNameAndroid || "com.yugma.connect",
                         basePlan: selectedPlanId || "monthly"
                     };
 
@@ -253,6 +254,10 @@ const PremiumPlansScreen = () => {
     };
 
     const handleRestore = async () => {
+        if (Platform.OS !== 'android') {
+            console.log('Restore is only available on Android currently');
+            return;
+        }
         try {
             await IAP.restorePurchases();
             // Handle success (e.g. show toast)

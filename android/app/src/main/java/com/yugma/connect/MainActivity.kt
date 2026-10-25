@@ -1,4 +1,4 @@
-package com.yugma.dating
+package com.yugma.connect
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

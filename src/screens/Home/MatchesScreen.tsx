@@ -11,6 +11,7 @@ import {
 import MatchList from "./MatchList";
 import LikeList from "./LikeList";
 import Icon from "react-native-vector-icons/Ionicons";
+import LinearGradient from "react-native-linear-gradient";
 import socialService, { SocialUserItem } from "../../api/services/socialService";
 import dayjs from "dayjs";
 import { useFocusEffect, useRoute } from "@react-navigation/native";
@@ -130,46 +131,43 @@ const MatchesScreen = () => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.header}>Your Connections</Text>
+            <LinearGradient
+                colors={["#22020B", "#3E0616", "#630D25", "#801231"]}
+                style={StyleSheet.absoluteFillObject}
+            />
+            <Text style={styles.header}>Matches</Text>
             <Text style={styles.subHeader}>
-                Connect with your matches and start chatting
+                People who matched with your profile
             </Text>
 
             <View style={styles.tabContainer}>
-                {["Matches", "Likes"]?.map((tab) => (
-                    <Pressable
-                        key={tab}
-                        style={[
-                            styles.tab,
-                            selectedTab === tab && styles.activeTab,
-                        ]}
-                        onPress={() => setSelectedTab(tab)}
-                    >
-                        {tab === "Matches" ? <Icon
-                            name={"people-outline"}
-                            size={20}
-                            color={selectedTab === tab ? "#FF3366" : "#8E8E93"}
-                        /> : <Icon
-                            name={"star-outline"}
-                            size={20}
-                            color={selectedTab === tab ? "#FF3366" : "#8E8E93"}
-                        />}
-
-                        <Text
+                {["All Matches", "Liked You"]?.map((tab) => {
+                    const isTabSelected = (tab === "All Matches" && selectedTab === "Matches") || (tab === "Liked You" && selectedTab === "Likes");
+                    return (
+                        <Pressable
+                            key={tab}
                             style={[
-                                styles.tabText,
-                                selectedTab === tab && styles.activeTabText,
+                                styles.tab,
+                                isTabSelected && styles.activeTab,
                             ]}
+                            onPress={() => setSelectedTab(tab === "All Matches" ? "Matches" : "Likes")}
                         >
-                            {tab === "Likes" ? "Interests" : tab} {tab === "Matches" ? `(${matches.length})` : `(${likes.length})`}
-                        </Text>
-                    </Pressable>
-                ))}
+                            <Text
+                                style={[
+                                    styles.tabText,
+                                    isTabSelected && styles.activeTabText,
+                                ]}
+                            >
+                                {tab} {tab === "All Matches" ? `(${matches.length})` : `(${likes.length})`}
+                            </Text>
+                        </Pressable>
+                    );
+                })}
             </View>
 
             {isLoading ? (
                 <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                    <ActivityIndicator size="large" color="#FF5F6D" />
+                    <ActivityIndicator size="large" color="#FF3366" />
                 </View>
             ) : selectedTab === "Matches" ? (
                 <MatchList data={transformedMatches} onRefresh={loadData} />
@@ -185,55 +183,53 @@ export default MatchesScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
-        paddingHorizontal: 16,
+        backgroundColor: "#200208",
+        paddingHorizontal: 18,
         paddingTop: 20,
     },
     header: {
-        fontSize: 24,
-        fontWeight: "700",
-        color: "#1a1a1a",
+        fontSize: 28,
+        fontWeight: "800",
+        color: "#FFFFFF",
+        letterSpacing: -0.4,
     },
     subHeader: {
-        fontSize: 16,
-        color: "#666",
-        marginVertical: 10,
+        fontSize: 14,
+        color: "#F3D7E0",
+        marginTop: 4,
+        marginBottom: 18,
     },
     tabContainer: {
         flexDirection: "row",
-        backgroundColor: "#FFF5F6",
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
         borderRadius: 24,
-        marginBottom: 24,
-        padding: 5,
+        marginBottom: 20,
+        padding: 4,
         borderWidth: 1,
-        borderColor: "rgba(255, 95, 109, 0.12)",
+        borderColor: "rgba(255, 255, 255, 0.14)",
     },
     tab: {
         flex: 1,
         alignItems: "center",
         paddingVertical: 10,
         borderRadius: 20,
-        flexDirection: "row",
         justifyContent: "center",
-        gap: 8,
     },
     activeTab: {
-        backgroundColor: "#ffffff",
+        backgroundColor: "#FF3366",
         shadowColor: "#FF3366",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.12,
-        shadowRadius: 8,
+        shadowOpacity: 0.35,
+        shadowRadius: 6,
         elevation: 4,
     },
     tabText: {
-        color: "#8E8E93",
+        color: "#B08092",
         fontWeight: "600",
         fontSize: 14,
     },
     activeTabText: {
-        color: "#FF3366",
+        color: "#FFFFFF",
         fontWeight: "700",
-        fontSize: 14,
     },
-
 });
